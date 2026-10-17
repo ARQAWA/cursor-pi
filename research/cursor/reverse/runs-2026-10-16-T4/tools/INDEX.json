@@ -1,0 +1,31 @@
+[
+  {
+    "file": "tools/tools-1-4b2bc1b7.json",
+    "first_session": "S1",
+    "names": [
+      "Shell",
+      "Glob",
+      "rg",
+      "ReadFile",
+      "ApplyPatch",
+      "AskQuestion",
+      "GetDynamicTools",
+      "CallDynamicTool"
+    ]
+  },
+  {
+    "file": "tools/tools-2-13103e63.json",
+    "first_session": "S4",
+    "names": [
+      "Shell",
+      "Glob",
+      "rg",
+      "ReadFile",
+      "ApplyPatch",
+      "AskQuestion",
+      "CreatePlan",
+      "GetDynamicTools",
+      "CallDynamicTool"
+    ]
+  }
+]

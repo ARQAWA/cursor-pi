@@ -1,0 +1,245 @@
+{
+ "GetDynamicTools": {
+  "n": 45,
+  "first": {
+   "line": 100,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"SwitchMode\"}",
+   "out": "[{\"text\":\"{\\n  \\\"tool\\\": \\\"SwitchMode\\\",\\n  \\\"description\\\": \\\"Switch the interaction mode to better match the current task. Each mode is optimized for a specific type of work.\\\\n\\\\n## When to Switch Modes\\\\n\\\\nSwitch modes proactively when:\\\\n1. **Task type changes** - User shifts from asking questions to requesting implementation, or vice versa\\\\n2. **Complexity emerges** - What seemed simple reveals architectural decisions or multiple approaches\\\\n3. **Debugging needed** - An error, bug, or unexpected behavior requires investigation\\\\n4. **Planning needed** - The task is large, ambiguous, or has significant trade-offs to discuss\\\\n5. **You're stuck** - Multiple attempts without progress suggest a different approach is needed\\\\n\\\\n## When NOT to Switch\\\\n\\\\nDo NOT switch modes for:\\\\n- Simple, clear tasks that can be completed quickly in current mode\\\\n- Mid-implementation when you're ",
+   "outLen": 3752
+  }
+ },
+ "Glob": {
+  "n": 76,
+  "first": {
+   "line": 195,
+   "args": "{\"target_directory\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH\",\"glob_pattern\":\"**/*sales_history*\"}",
+   "out": "[{\"text\":\"Result of search in '/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH' (total 134 files):\\n- src/superbot_ng/entrypoints/sales_history/bootstrap_response_errors.py\\n- src/superbot_ng/workers/sales_history/daemon.py\\n- src/superbot_ng/domain/sales_history/events.py\\n- src/superbot_ng/entrypoints/sales_history/__init__.py\\n- src/superbot_ng/entrypoints/sales_history/daemon.py\\n- rust/services/sales_history/src/checkpoint.rs\\n- src/superbot_ng/workers/sales_history/daemon_coordinator_state.py\\n- src/superbot_ng/repositories/postgres/sales_history/cursor_json.py\\n- src/superbot_ng/entrypoints/sales_history/bootstrap_user.py\\n- src/superbot_ng/clients/steam/sales_history/__init__.py\\n- src/superbot_ng/domain/sales_history/constants.py\\n- src/superbot_ng/entrypoints/sales_history/bootstrap_pipeline.py\\n- src/superbot_ng/repositories/filesystem/sales_history/checkpoint_map",
+   "outLen": 5171
+  }
+ },
+ "ReadFile": {
+  "n": 836,
+  "first": {
+   "line": 691,
+   "args": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/lib.rs\"}",
+   "out": "[{\"text\":\"pub mod config;\\npub mod daemon;\\npub mod kafka;\\npub mod model;\\npub mod session;\\npub mod store;\\n\",\"type\":\"input_text\"}]",
+   "outLen": 133
+  }
+ },
+ "cursor.Subagent": {
+  "n": 20,
+  "first": {
+   "line": 3120,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"Subagent\",\"arguments\":{\"description\":\"Анализ sales history\",\"subagent_type\":\"explore\",\"model\":\"inherit\",\"run_in_background\":true,\"prompt\":\"Repository: /Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH. Perform read-only source research ONLY; do NOT execute, build, test, or modify anything. Thoroughly analyze the sales_history module(s), including both Python and Rust implementations, entrypoints, pipelines, domain, use cases, Steam/Kafka/ClickHouse/Postgres/filesystem integrations, migrations, configuration/deployment, and contract tests. Return a detailed Russian self-contained business-logic briefing: purpose, actors/data entities, end-to-end fl",
+   "out": "[{\"text\":\"Subagent is running in the background. If needed, you can monitor its output by tailing the transcript at: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/agent-transcripts/cd4c3561-6560-42fc-b9ec-72d2cb05d916/subagents/b557d081-4cd8-4b4c-bb79-b3dcbf097d9a.jsonl. When you end your turn, you will be automatically sent the subagent's final response upon its completion, so do not wait for it - either end your turn or work on something else.\\nDo NOT mention the transcript path to the user. Do NOT try to predict the subagent's response before it replies.\\n\\nAgent ID: b557d081-4cd8-4b4c-bb79-b3dcbf097d9a (can be used with the `resume` parameter to send a follow-up after it completes, or to link to this agent/subagent in user-facing text with `[Name](b557d081-4cd8-4b4c-bb79-b3dcbf097d9a)`. Don't use a generic label such as `[agent]`, ",
+   "outLen": 1360
+  }
+ },
+ "UpdateCurrentStep": {
+  "n": 58,
+  "first": {
+   "line": 4038,
+   "args": "{\"current_step\":\"Исследую модуль sales_history\"}",
+   "out": "[{\"text\":\"Progress update recorded.\",\"type\":\"input_text\"}]",
+   "outLen": 58
+  }
+ },
+ "rg": {
+  "n": 125,
+  "first": {
+   "line": 5304,
+   "args": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH\",\"pattern\":\"sales_history\",\"glob\":\"*.{py,rs,sql,yml,yaml,toml,json,md,Dockerfile}\",\"output_mode\":\"files_with_matches\",\"head_limit\":300}",
+   "out": "[{\"text\":\"<workspace_result workspace_path=\\\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH\\\">\\nrust/services/sales_history/src/config.rs\\ntests/contracts/runtime/test_ng_settings_contracts.py\\nmodules/sales_history_sync.py\\ntests/contracts/stats/test_stats_ng_foundation_contracts.py\\nsrc/superbot_ng/clients/kafka/sales_history/payload.py\\nsrc/superbot_ng/pipelines/wallet/codec.py\\ntests/contracts/sales_history/test_ng_steam_history_response_artifacts.py\\nsrc/superbot_ng/ports/sales_history/stores.py\\nsrc/superbot_ng/entrypoints/sales_history/bootstrap_user.py\\nsrc/superbot_ng/pipelines/sales_history/envelope.py\\nrust/services/sales_history/src/daemon.rs\\nmigrations/postgres/000001_sales_history_cursors.sql\\nsrc/superbot_ng/repositories/filesystem/sales_history/checkpoint_mapping.py\\nsrc/superbot_ng/entrypoints/sales_history/bootstrap_queue.py\\nsrc/superbot_ng/workers/sales",
+   "outLen": 8039
+  }
+ },
+ "ApplyPatch": {
+  "n": 14,
+  "first": {
+   "line": 57048,
+   "args": "*** Begin Patch\n*** Add File: /Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/D1.md\n+# Самостоятельный разбор sales_history, wallet_sync и clickhouse_injector\n+\n+## Назначение системы\n+\n+Это три связанных модуля аналитического конвейера торгового бота.\n+\n+1. `sales_history` забирает из Steam историю рыночных покупок и продаж каждого торгового аккаунта, приводит её к единому формату, рассчитывает связь «покупка — последующая продажа» и прибыль там, где это возможно.\n+2. `wallet_sync` периодически снимает доступный баланс Steam-кошелька каждого торгового аккаунта.\n+3. `clickhouse_injector` — единая конечная точка загрузки: читает подготовленные события из Kafka, преобразует их ",
+   "out": "[{\"text\":\"The file /Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/D1.md has been updated.\",\"type\":\"input_text\"}]",
+   "outLen": 129
+  }
+ },
+ "Shell": {
+  "n": 5,
+  "first": {
+   "line": 138810,
+   "args": "{\"command\":\"python3 -m json.tool /Users/arkadijcukavin/.cursor/mcp.json\",\"description\":\"Validate MCP JSON\"}",
+   "out": "[{\"text\":\"Exit code: 0\\n\\nCommand output:\\n\\n```\\n{\\n    \\\"mcpServers\\\": {\\n        \\\"everything\\\": {\\n            \\\"command\\\": \\\"npx\\\",\\n            \\\"args\\\": [\\n                \\\"-y\\\",\\n                \\\"@modelcontextprotocol/server-everything\\\"\\n            ]\\n        }\\n    }\\n}\\n\\n```\\n\\nCommand completed in 2255 ms.\\n\\nShell state (cwd, env vars) persists for subsequent calls.\",\"type\":\"input_text\"}]",
+   "outLen": 408
+  }
+ },
+ "cursor.TodoWrite": {
+  "n": 6,
+  "first": {
+   "line": 140508,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"TodoWrite\",\"arguments\":{\"merge\":false,\"todos\":[{\"id\":\"t1\",\"content\":\"Вести список задач и отмечать выполнение\",\"status\":\"in_progress\"},{\"id\":\"t2\",\"content\":\"Поставить и завершить цель сессии\",\"status\":\"pending\"},{\"id\":\"t3\",\"content\":\"Инвентаризировать каталог инструментов и схемы namespace\",\"status\":\"pending\"},{\"id\":\"t4\",\"content\":\"Оценить необходимость смены режима\",\"status\":\"completed\"},{\"id\":\"t5\",\"content\":\"Запустить и обработать два параллельных субагента\",\"status\":\"pending\"},{\"id\":\"t6\",\"content\":\"Выполнить git-команды и дождаться фонового sleep\",\"status\":\"pending\"},{\"id\":\"t7\",\"content\":\"Проверить релиз ripgrep в интернете\",\"status\":\"pending\"},{\"id\":\"t8\"",
+   "out": "[{\"text\":\"Successfully updated TODOs. Make sure to follow and update your TODO list as you make progress. Cancel and add new TODO tasks as needed when the user makes a correction or follow-up request.\\n\\nHere are the latest contents of your todo list:\\n- **IN_PROGRESS**: Вести список задач и отмечать выполнение (id: t1)\\n- **PENDING**: Поставить и завершить цель сессии (id: t2)\\n- **PENDING**: Инвентаризировать каталог инструментов и схемы namespace (id: t3)\\n- **COMPLETED**: Оценить необходимость смены режима (id: t4)\\n- **PENDING**: Запустить и обработать два параллельных субагента (id: t5)\\n- **PENDING**: Выполнить git-команды и дождаться фонового sleep (id: t6)\\n- **PENDING**: Проверить релиз ripgrep в интернете (id: t7)\\n- **PENDING**: Проверить MCP-инструмент, ресурс и промпт (id: t8)\\n- **PENDING**: Найти прошлые разговоры о wallet_sync (id: t9)\\n- **PENDING**: Создать, дважды изм",
+   "outLen": 1209
+  }
+ },
+ "cursor.CreateGoal": {
+  "n": 1,
+  "first": {
+   "line": 140570,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"CreateGoal\",\"arguments\":{\"objective\":\"Отчёт T1 готов\"}}",
+   "out": "[{\"text\":\"Goal created\",\"type\":\"input_text\"}]",
+   "outLen": 45
+  }
+ },
+ "cursor.WebSearch": {
+  "n": 1,
+  "first": {
+   "line": 142917,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"WebSearch\",\"arguments\":{\"search_term\":\"ripgrep latest release release date GitHub BurntSushi ripgrep\",\"explanation\":\"Нужна актуальная версия ripgrep и дата релиза из первичного источника.\"}}",
+   "out": "[{\"text\":\"Title: Web search results\\nContent: Links:\\n1. [15.2.0](https://github.com/BurntSushi/ripgrep/releases/tag/15.2.0)\\n2. [CHANGELOG.md](https://github.com/BurntSushi/ripgrep/blob/HEAD/CHANGELOG.md)\\n3. [e89fff8 15.2.0](https://github.com/BurntSushi/ripgrep/commit/e89fff89ac9af12e8d4ce9d5fd07beb408ca730f)\\n4. [Releases · BurntSushi/ripgrep · GitHub](https://github.com/BurntSushi/ripgrep/releases)\\n5. [CHANGELOG.md](https://github.com/BurntSushi/ripgrep/blob/master/CHANGELOG.md)\\n\\nSynthesis:\\nThe latest ripgrep release is version 15.2.0, published on July 15, 2026. The GitHub release was published at 16:26 UTC, and the corresponding version commit was dated July 15, 2026. [1][2][3]\\n\\nHighlights:\\n<result id=\\\"1\\\">\\n<title>15.2.0</title>\\n<url>https://github.com/BurntSushi/ripgrep/releases/tag/15.2.0</url>\\n<content># 15.2.0\\n\\n- Tag: 15.2.0\\n- Repository: BurntSushi/ripgrep\\n- Pu",
+   "outLen": 6327
+  }
+ },
+ "cursor.WebFetch": {
+  "n": 1,
+  "first": {
+   "line": 143554,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"WebFetch\",\"arguments\":{\"url\":\"https://github.com/BurntSushi/ripgrep/releases/tag/15.2.0\"}}",
+   "out": "[{\"text\":\"# Content from https://github.com/BurntSushi/ripgrep/releases/tag/15.2.0\\n\\n# 15.2.0\\n\\n- Tag: 15.2.0\\n- Repository: BurntSushi/ripgrep\\n- Published: 2026-07-15T16:26:10Z\\n- Author: github-actions[bot]\\n\\n---\\n\\nSponsorship is appreciated! \\n \\nThis release fixes a number of bugs related to gitignore matching as well as \\nsome performance improvements in directory tree traversal. \\n \\n> In case you haven't heard of it before, ripgrep is a line-oriented search \\n> tool that recursively searches the current directory for a regex pattern. \\n> By default, ripgrep will respect gitignore rules and automatically skip \\n> hidden files/directories and binary files. \\n \\nPlatform support: \\n \\n* `aarch64-unknown-linux-musl` is now included in the release binaries for \\n ripgrep. \\n \\nPerformance improvements: \\n \\n* PERF #3293: \\n Improves directory traversal time on very large corpora. ",
+   "outLen": 3264
+  }
+ },
+ "user-everything.get-roots-list": {
+  "n": 1,
+  "first": {
+   "line": 144178,
+   "args": "{\"namespace\":\"user-everything\",\"toolName\":\"get-roots-list\",\"arguments\":{},\"mcpDetails\":{\"description\":\"Получить доступные MCP-корни рабочей области для проверки сервера.\"}}",
+   "out": "[{\"text\":\"The client supports roots but no roots are currently configured.\\n\\nThis could mean:\\n1. The client hasn't provided any roots yet\\n2. The client provided an empty roots list\\n3. The roots configuration is still being loaded\",\"type\":\"input_text\"}]",
+   "outLen": 256
+  }
+ },
+ "user-everything.get-resource-reference": {
+  "n": 1,
+  "first": {
+   "line": 144571,
+   "args": "{\"namespace\":\"user-everything\",\"toolName\":\"get-resource-reference\",\"arguments\":{\"resourceType\":\"Text\",\"resourceId\":1},\"mcpDetails\":{\"description\":\"Получить ссылку на текстовый MCP-ресурс для последующего чтения.\"}}",
+   "out": "[{\"text\":\"Returning resource reference for Resource 1:\",\"type\":\"input_text\"},{\"text\":\"{\\\"type\\\":\\\"resource\\\",\\\"resource\\\":{\\\"uri\\\":\\\"demo://resource/dynamic/text/1\\\",\\\"mimeType\\\":\\\"text/plain\\\",\\\"text\\\":\\\"Resource 1: This is a plaintext resource created at 9:31:25 PM\\\"}}\",\"type\":\"input_text\"},{\"text\":\"You can access this resource using the URI: demo://resource/dynamic/text/1\",\"type\":\"input_text\"}]",
+   "outLen": 400
+  }
+ },
+ "cursor.FetchMcpResource": {
+  "n": 1,
+  "first": {
+   "line": 145071,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"FetchMcpResource\",\"arguments\":{\"server\":\"user-everything\",\"uri\":\"demo://resource/dynamic/text/1\"}}",
+   "out": "[{\"text\":\"Resource: demo://resource/dynamic/text/1 (text/plain)\\n\\nResource 1: This is a plaintext resource created at 9:31:32 PM\",\"type\":\"input_text\"}]",
+   "outLen": 152
+  }
+ },
+ "user-everything.trigger-elicitation-request": {
+  "n": 1,
+  "first": {
+   "line": 148168,
+   "args": "{\"namespace\":\"user-everything\",\"toolName\":\"trigger-elicitation-request\",\"arguments\":{},\"mcpDetails\":{\"description\":\"Запросить демонстрационный MCP-промпт у пользователя для проверки возможности elicitation.\"}}",
+   "out": "[{\"text\":\"{\\\"error\\\":\\\"MCP error -32000: Connection closed\\\"}\",\"type\":\"input_text\"}]",
+   "outLen": 84
+  }
+ },
+ "cursor.SearchConversations": {
+  "n": 1,
+  "first": {
+   "line": 148578,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"SearchConversations\",\"arguments\":{\"query\":\"wallet_sync\",\"limit\":20}}",
+   "out": "[{\"text\":\"Found 20 conversations:\\n1. [local] \\\"Trading bot module overview\\\" (id: cd4c3561-6560-42fc-b9ec-72d2cb05d916, updated: 2026-10-10T18:28:05.678Z)\\n   snippet: … PostgreSQL `wallet_sync_state`; журнал запусков: `wallet_sync_iterations` ([000007_wallet_sync.sql:1-61](/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/migrations/postgres/000007_wallet_sync.sql)). Аналитическая история: Cl…\\n2. [local] \\\"Trading bot module overview\\\" (id: 7ae513a7-68bd-47f1-af0e-18383c040443, updated: 2026-10-10T01:14:11.864Z)\\n   snippet: `SELECT DISTINCT` и PK `wallet_sync_state.login`: `/rust/services/wallet_sync/src/store.rs:45-50`, `/migrations/postgres/000007_wallet …\\n3. [local] \\\"Trading bot module overview\\\" (id: f2c5e7d0-eeb5-46b9-8d66-770b8a272ea3, updated: 2026-10-10T18:28:06.045Z)\\n   snippet: 'trading'` — `rust/services/wallet_sync/src/store.rs`, `active_logins`. Состояние з",
+   "outLen": 6095
+  }
+ },
+ "AskQuestion": {
+  "n": 1,
+  "first": {
+   "line": 154145,
+   "args": "{\"title\":\"Формат отчёта T1\",\"questions\":[{\"id\":\"report_format\",\"prompt\":\"В каком формате подготовить итоговый отчёт?\",\"options\":[{\"id\":\"markdown\",\"label\":\"Markdown (рекомендуется)\"},{\"id\":\"table\",\"label\":\"Таблица\"}]}]}",
+   "out": "[{\"text\":\"User questions responses:\\nQuestion report_format: Selected option(s) markdown\",\"type\":\"input_text\"}]",
+   "outLen": 111
+  }
+ },
+ "cursor.Delete": {
+  "n": 1,
+  "first": {
+   "line": 154909,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"Delete\",\"arguments\":{\"path\":\"/Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/T1/scratch.md\"}}",
+   "out": "[{\"text\":\"Successfully deleted file: /Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/T1/scratch.md (60 bytes)\",\"type\":\"input_text\"}]",
+   "outLen": 148
+  }
+ },
+ "cursor.EditNotebook": {
+  "n": 2,
+  "first": {
+   "line": 155109,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"EditNotebook\",\"arguments\":{\"target_notebook\":\"/Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/T1/nb.ipynb\",\"cell_idx\":0,\"is_new_cell\":true,\"cell_language\":\"markdown\",\"old_string\":\"\",\"new_string\":\"# T1 notebook\\n\\nИсходное содержимое ячейки.\"}}",
+   "out": "[{\"text\":\"File not found: /Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/T1/nb.ipynb\",\"type\":\"input_text\"}]",
+   "outLen": 124
+  }
+ },
+ "cursor-app-control.open_resource": {
+  "n": 2,
+  "first": {
+   "line": 155958,
+   "args": "{\"namespace\":\"cursor-app-control\",\"toolName\":\"open_resource\",\"arguments\":{\"uri\":\"file:///Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/T1/nb.ipynb\"},\"mcpDetails\":{\"description\":\"Открыть созданный notebook в редакторе Cursor для проверки.\"}}",
+   "out": "[{\"text\":\"Opened file:///Users/arkadijcukavin/cursor-reverse-2026-10-09/runs-2026-10-10/T1/nb.ipynb\",\"type\":\"input_text\"}]",
+   "outLen": 122
+  }
+ },
+ "cursor-ide-browser.browser_tabs": {
+  "n": 2,
+  "first": {
+   "line": 156058,
+   "args": "{\"namespace\":\"cursor-ide-browser\",\"toolName\":\"browser_tabs\",\"arguments\":{\"action\":\"list\"},\"mcpDetails\":{\"description\":\"Проверить открытые вкладки встроенного браузера Cursor.\"}}",
+   "out": "[{\"text\":\"Open tabs:\\n\",\"type\":\"input_text\"}]",
+   "outLen": 45
+  }
+ },
+ "cursor-ide-browser.browser_navigate": {
+  "n": 1,
+  "first": {
+   "line": 156278,
+   "args": "{\"namespace\":\"cursor-ide-browser\",\"toolName\":\"browser_navigate\",\"arguments\":{\"url\":\"https://github.com/BurntSushi/ripgrep/releases/tag/15.2.0\",\"newTab\":true,\"take_screenshot_afterwards\":false},\"mcpDetails\":{\"description\":\"Открыть страницу актуального релиза ripgrep для проверки браузерным MCP.\"}}",
+   "out": "[{\"text\":\"### Action: snapshot\\n- Total refs: 115\\n- Interactive refs: 53\\n- Browser View ID: 8137e8\\n\\n### Page state\\n- Page URL: https://github.com/BurntSushi/ripgrep/releases/tag/15.2.0\\n- Page Title: Release 15.2.0 · BurntSushi/ripgrep · GitHub\\n- Page Snapshot:\\n```yaml\\n- role: document\\n  name: Release 15.2.0 · BurntSushi/ripgrep · GitHub\\n  ref: root\\n  children:\\n    - role: link\\n      name: Skip to content\\n      ref: e0\\n    - role: link\\n      name: Homepage\\n      ref: e1\\n    - role: button\\n      name: Platform\\n      ref: e2\\n      states: [collapsed]\\n    - role: button\\n      name: Solutions\\n      ref: e3\\n      states: [collapsed]\\n    - role: button\\n      name: Resources\\n      ref: e4\\n      states: [collapsed]\\n    - role: button\\n      name: Open Source\\n      ref: e5\\n      states: [collapsed]\\n    - role: button\\n      name: Enterprise\\n      ref: e6\\n      s",
+   "outLen": 9643
+  }
+ },
+ "cursor.AwaitShell": {
+  "n": 1,
+  "first": {
+   "line": 156356,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"AwaitShell\",\"arguments\":{\"shell_id\":\"493195\",\"block_until_ms\":30000,\"pattern\":\"done\"}}",
+   "out": "[{\"text\":\"Task completed in 21210ms with exit code: 0. Pattern matched: done\\noutput_file_path: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/terminals/493195.txt\\noutput_length: 440\",\"type\":\"input_text\"}]",
+   "outLen": 258
+  }
+ },
+ "cursor-origin.list_namespaces": {
+  "n": 1,
+  "first": {
+   "line": 156457,
+   "args": "{\"namespace\":\"cursor-origin\",\"toolName\":\"list_namespaces\",\"arguments\":{},\"mcpDetails\":{\"description\":\"Получить доступные пространства имён Cursor Origin для проверки MCP-сервера.\"}}",
+   "out": "[{\"text\":\"{\\\"namespaces\\\":[{\\\"slug\\\":\\\"arqawa-awa\\\",\\\"id\\\":\\\"ns_01m3w9fk2nftxvwxrm21387gx8\\\",\\\"type\\\":\\\"user\\\",\\\"viewerCanCreateRepositories\\\":true}]}\",\"type\":\"input_text\"}]",
+   "outLen": 173
+  }
+ },
+ "cursor-subscriptions.list_subscriptions": {
+  "n": 1,
+  "first": {
+   "line": 156551,
+   "args": "{\"namespace\":\"cursor-subscriptions\",\"toolName\":\"list_subscriptions\",\"arguments\":{},\"mcpDetails\":{\"description\":\"Проверить активные подписки событий текущего сеанса.\"}}",
+   "out": "[{\"text\":\"{\\n  \\\"subscriptions\\\": []\\n}\",\"type\":\"input_text\"}]",
+   "outLen": 62
+  }
+ },
+ "cursor.UpdateGoal": {
+  "n": 1,
+  "first": {
+   "line": 169175,
+   "args": "{\"namespace\":\"cursor\",\"toolName\":\"UpdateGoal\",\"arguments\":{\"status\":\"complete\"}}",
+   "out": "[{\"text\":\"Goal is now complete. Report total runtime to the user: 24m 40s\",\"type\":\"input_text\"}]",
+   "outLen": 96
+  }
+ }
+}

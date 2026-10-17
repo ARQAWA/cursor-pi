@@ -1,0 +1,62 @@
+<timestamp>Friday, Oct 16, 2026, 10:04 AM (UTC+3)</timestamp>
+<user_query>
+You are reviewing local code changes for bugs.
+
+Carefully examine these changes and identify any bugs that may have been introduced. Your primary goal is to catch every potential bug before it reaches production. A missed bug is far more costly than a false positive.
+
+Consider the following:
+1. Look carefully for any bugs that may have been introduced - do not assume the code is correct.
+2. When in doubt, report the bug. It's better to flag a potential issue for human review than to miss a real bug.
+3. Investigate every suspicious pattern thoroughly. Do not dismiss potential issues without fully verifying the code is correct.
+4. You should only report bugs that are introduced by the changes in the provided diff, not ones that existed before.
+
+A bug is behavior that is incorrect, unsafe, or likely to break users in production. Do not report style issues, nits, speculative problems, or intentional behavior. Use tools as needed to inspect surrounding code, but do not modify files.
+
+The user has provided the following additional remarks about your task, which you should take into account:
+<user_instructions>
+This is a review probe. Do not modify any repository files. Include untracked T3_probe.py in the review.
+</user_instructions>
+
+Your answer must be in this XML format:
+<answer>
+<bug>
+<title>[short title of 8 words or fewer]</title>
+<file>[file path as given in the diff]</file>
+<start_line>[start line number as given in the diff]</start_line>
+<end_line>[end line number as given in the diff]</end_line>
+<category>[one of: LOGIC_BUG, SECURITY_ISSUE, ACCIDENTALLY_COMMITTED_CODE, CODE_QUALITY_STYLE, DOCUMENTATION_ISSUE, POTENTIAL_EDGE_CASE, PERFORMANCE_ISSUE, COMPILATION_ERROR, BUGBOT_RULES]</category>
+<severity>[one of: high, medium, low]</severity>
+<description>[Concise GitHub PR review comment. Focus on the root cause and production impact. Avoid examples, code blocks, line numbers, and prescriptive language. Wrap code identifiers in backticks.]</description>
+<rationale>[Explain why this is a bug in 1-2 paragraphs.]</rationale>
+</bug>
+</answer>
+
+If no bugs are found, output exactly:
+<answer></answer>
+
+Do not output anything outside the <answer> XML.
+If multiple locations are relevant to the same bug, choose the single best primary location.
+
+Bug categories:
+- LOGIC_BUG: Errors in the program's core reasoning or calculations that cause incorrect behavior even with valid inputs
+- SECURITY_ISSUE: Vulnerabilities that could allow unauthorized access, data breaches, or other security compromises
+- ACCIDENTALLY_COMMITTED_CODE: Temporary code, debugging statements, or personal notes mistakenly included in the codebase
+- CODE_QUALITY_STYLE: Correct code that introduces unnecessary complexity, redundant logic, or non-idiomatic patterns that reduce readability or maintainability
+- DOCUMENTATION_ISSUE: Missing, outdated, or incorrect documentation that makes code harder to understand or use properly
+- POTENTIAL_EDGE_CASE: Issues that only occur under unusual or extreme conditions that weren't sufficiently tested
+- PERFORMANCE_ISSUE: Code that could cause significant performance degradation
+- COMPILATION_ERROR: Code that prevents successful compilation or contains syntax errors, including typechecking errors in statically typed languages (e.g., missing TypeScript null checks)
+- BUGBOT_RULES: Violations of rules that the user has specified for Bugbot to follow, from the user instructions. The bug description must explicitly mention which rule is being violated.
+
+Diff to review:
+<diff>
++++ T3_probe.py
+@@ -0,0 +1,6 @@
+     1 +def evaluate_input():
+     2 +    return eval(input())
+     3 +
+     4 +
+     5 +def average(values):
+     6 +    return sum(values) / len(values)
+</diff>
+</user_query>

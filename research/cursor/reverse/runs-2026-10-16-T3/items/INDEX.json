@@ -1,0 +1,210 @@
+[
+  {
+    "file": "items/001-S1-developer-260171f2.txt",
+    "session": "S1",
+    "role": "developer",
+    "chars": 19362,
+    "first_seen_request": 0,
+    "head": "You are GPT-5.5. You operate in Cursor. You are a coding agent in the Cursor IDE that helps the USER with soft"
+  },
+  {
+    "file": "items/002-S1-user-f2fc311e.txt",
+    "session": "S1",
+    "role": "user",
+    "chars": 24393,
+    "first_seen_request": 0,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/003-S1-user-355ecf32.txt",
+    "session": "S1",
+    "role": "user",
+    "chars": 670,
+    "first_seen_request": 0,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:04 AM (UTC+3)</timestamp> <user_query> Это проверка твоих субагентов ревью"
+  },
+  {
+    "file": "items/004-S2-user-1c176142.txt",
+    "session": "S2",
+    "role": "user",
+    "chars": 24393,
+    "first_seen_request": 3,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/005-S2-user-4f5620ac.txt",
+    "session": "S2",
+    "role": "user",
+    "chars": 294,
+    "first_seen_request": 3,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:04 AM (UTC+3)</timestamp> <user_query> Составь план добавления в модуль wo"
+  },
+  {
+    "file": "items/006-S1-assistant-83663304.txt",
+    "session": "S1",
+    "role": "assistant",
+    "chars": 149,
+    "first_seen_request": 4,
+    "head": "Проверю исходный `git status`, создам временный файл и запущу оба ревью в фоне. После их завершения удалю файл"
+  },
+  {
+    "file": "items/007-S3-user-2d98d8d3.txt",
+    "session": "S3",
+    "role": "user",
+    "chars": 24393,
+    "first_seen_request": 6,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/008-S3-user-657ca67e.txt",
+    "session": "S3",
+    "role": "user",
+    "chars": 219,
+    "first_seen_request": 6,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:04 AM (UTC+3)</timestamp> <user_query> Разберись, почему wallet_sync может"
+  },
+  {
+    "file": "items/009-S3-assistant-1ffdc34f.txt",
+    "session": "S3",
+    "role": "assistant",
+    "chars": 150,
+    "first_seen_request": 9,
+    "head": "Прослежу, как `wallet_sync` выбирает кошельки и сохраняет прогресс, а затем проверю, что происходит при сбое и"
+  },
+  {
+    "file": "items/010-S2-assistant-5caf3c6f.txt",
+    "session": "S2",
+    "role": "assistant",
+    "chars": 195,
+    "first_seen_request": 10,
+    "head": "Изучу `workers/wallet` и существующие механизмы повторных попыток, не меняя код. Переход в режим Plan отклонён"
+  },
+  {
+    "file": "items/011-S1-assistant-6d1808e0.txt",
+    "session": "S1",
+    "role": "assistant",
+    "chars": 136,
+    "first_seen_request": 11,
+    "head": "Рабочая директория чистая. Создаю `T3_probe.py` с двумя намеренными дефектами: `eval(input())` и делением на д"
+  },
+  {
+    "file": "items/012-S4-developer-746d96b2.txt",
+    "session": "S4",
+    "role": "developer",
+    "chars": 2680,
+    "first_seen_request": 15,
+    "head": "You are a bug-finding expert helping developers catch critical issues before they reach production. Your analy"
+  },
+  {
+    "file": "items/013-S4-user-15426a6c.txt",
+    "session": "S4",
+    "role": "user",
+    "chars": 8039,
+    "first_seen_request": 15,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/014-S4-user-278220d3.txt",
+    "session": "S4",
+    "role": "user",
+    "chars": 1733,
+    "first_seen_request": 15,
+    "head": "<system_reminder> Ask mode is active. The user wants you to answer questions about their codebase or coding in"
+  },
+  {
+    "file": "items/015-S4-user-8bf7fd44.txt",
+    "session": "S4",
+    "role": "user",
+    "chars": 266,
+    "first_seen_request": 15,
+    "head": "<system_reminder> You are running as a subagent under a parent agent. Do not spawn additional subagents unless"
+  },
+  {
+    "file": "items/016-S4-user-14cbd058.txt",
+    "session": "S4",
+    "role": "user",
+    "chars": 3816,
+    "first_seen_request": 15,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:04 AM (UTC+3)</timestamp> <user_query> You are reviewing local code change"
+  },
+  {
+    "file": "items/017-S5-developer-5152ed0d.txt",
+    "session": "S5",
+    "role": "developer",
+    "chars": 1801,
+    "first_seen_request": 20,
+    "head": "You are a security expert performing a thorough security review of local code changes. Your analysis will be u"
+  },
+  {
+    "file": "items/018-S5-user-047dd592.txt",
+    "session": "S5",
+    "role": "user",
+    "chars": 1361,
+    "first_seen_request": 20,
+    "head": "<system_reminder> You are running as a subagent under a parent agent. Do not spawn additional subagents unless"
+  },
+  {
+    "file": "items/019-S5-user-ee74266c.txt",
+    "session": "S5",
+    "role": "user",
+    "chars": 9511,
+    "first_seen_request": 20,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:04 AM (UTC+3)</timestamp> <user_query> Perform a security review of these "
+  },
+  {
+    "file": "items/020-S1-assistant-3754f0eb.txt",
+    "session": "S1",
+    "role": "assistant",
+    "chars": 242,
+    "first_seen_request": 40,
+    "head": "Оба ревью запущены в фоне с `Diff: uncommitted changes`: [Bugbot](7087e541-3e95-4669-ae79-4bf5b68baccb) и [Sec"
+  },
+  {
+    "file": "items/021-S1-user-3a4dbc8a.txt",
+    "session": "S1",
+    "role": "user",
+    "chars": 1801,
+    "first_seen_request": 40,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:05 AM (UTC+3)</timestamp> <system_notification> The following task has fin"
+  },
+  {
+    "file": "items/022-S1-assistant-061be65b.txt",
+    "session": "S1",
+    "role": "assistant",
+    "chars": 214,
+    "first_seen_request": 46,
+    "head": "[Bugbot](7087e541-3e95-4669-ae79-4bf5b68baccb) нашёл оба дефекта: выполнение произвольного кода через `eval()`"
+  },
+  {
+    "file": "items/023-S1-user-6498e8d1.txt",
+    "session": "S1",
+    "role": "user",
+    "chars": 1875,
+    "first_seen_request": 46,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:05 AM (UTC+3)</timestamp> <system_notification> The following task has fin"
+  },
+  {
+    "file": "items/024-S1-assistant-9b1b7246.txt",
+    "session": "S1",
+    "role": "assistant",
+    "chars": 172,
+    "first_seen_request": 47,
+    "head": "Оба результата получены. Security Review отметил опасный `eval()`, но не подтвердил уязвимость без доступного "
+  },
+  {
+    "file": "items/025-S2-assistant-7e459d74.txt",
+    "session": "S2",
+    "role": "assistant",
+    "chars": 254,
+    "first_seen_request": 49,
+    "head": "Повторы уже запланированы через PostgreSQL: сейчас задержка фиксированная, 30 секунд, а лимита нет. Полная ите"
+  },
+  {
+    "file": "items/026-S3-assistant-0a2906b6.txt",
+    "session": "S3",
+    "role": "assistant",
+    "chars": 296,
+    "first_seen_request": 52,
+    "head": "В Docker `wallet_sync` запускает Rust-реализацию; Python-вариант тоже есть, но это отдельный путь. В Rust повт"
+  }
+]

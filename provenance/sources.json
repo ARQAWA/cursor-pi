@@ -1,0 +1,24 @@
+{
+  "repos": {
+    "my-omp-harness": { "url": "https://github.com/ARQAWA/my-omp-harness", "bundles": ["provenance/bundles/my-omp-harness-remaster.bundle", "provenance/bundles/my-omp-harness-cursor-base-tools.bundle", "provenance/bundles/my-omp-harness-cursor-search-descriptions.bundle"] },
+    "my-codex-harness": { "url": "https://github.com/ARQAWA/my-codex-harness" }
+  },
+  "movedRoots": ["research/cursor/", "research/history/"],
+  "rules": [
+    {
+      "kind": "tree", "repo": "my-omp-harness", "branch": "cursor-base-tools", "commit": "9b9002a4fcc109902f24e80f756a93871054851d", "sourcePrefix": "research/cursor/", "targetPrefix": "research/cursor/",
+      "remap": [
+        { "sourcePrefix": "research/cursor/README.md", "targetPrefix": "research/history/omp-cursor-base-tools/research/cursor/README.md" },
+        { "sourcePrefix": "research/cursor/discussion.md", "targetPrefix": "research/history/omp-cursor-base-tools/research/cursor/discussion.md" },
+        { "sourcePrefix": "research/cursor/implementation-evidence.md", "targetPrefix": "research/history/omp-cursor-base-tools/research/cursor/implementation-evidence.md" },
+        { "sourcePrefix": "research/cursor/planning/", "targetPrefix": "research/history/omp-cursor-base-tools/research/cursor/planning/" }
+      ]
+    },
+    { "kind": "diff", "repo": "my-omp-harness", "branch": "cursor-base-tools", "commit": "9b9002a4fcc109902f24e80f756a93871054851d", "base": "26137623e0e9addbbb10086893cfc937c8af5adb", "excludePrefix": "research/", "targetPrefix": "research/history/omp-cursor-base-tools/" },
+    { "kind": "paths", "repo": "my-omp-harness", "branch": "remaster", "commit": "c8f273fd0866a72e2c3e7132d54fcd03bcf1e08f", "paths": ["CONTRACT.md", "DESKTOP-RESEARCH.md", "FEASIBILITY.md", "PLAN.md", "README.md", "extensions/remaster.ts", "lib/tools/apply-patch.ts", "lib/tools/glob.ts", "lib/tools/read-file.ts", "lib/tools/rg.ts", "lib/tools/shell.ts", "package.json"], "targetPrefix": "research/history/omp-remaster/" },
+    { "kind": "alias", "repo": "my-omp-harness", "branch": "remaster", "commit": "c8f273fd0866a72e2c3e7132d54fcd03bcf1e08f", "map": [ { "sourcePrefix": "reference/cursor/", "targetPrefix": "research/cursor/reverse/" }, { "sourcePrefix": "reference/prepared-prompts/", "targetPrefix": "research/cursor/remaster/prompts/" } ] },
+    { "kind": "paths", "repo": "my-omp-harness", "branch": "cursor-search-descriptions", "commit": "3a42e320125ef27bb18a4b72d85a7e4e1ebe7262", "paths": ["extensions/rg.ts"], "targetPrefix": "research/history/omp-cursor-search-descriptions/" },
+    { "kind": "deleted", "repo": "my-codex-harness", "branch": "master", "commit": "3fdd0f45d1981c319b30ac852661ea26e56fc55b", "deletedIn": "007147a0767aff21a8e472b32dfcaeaf14cfd902", "targetPrefix": "research/history/codex-harness-cursor/" },
+    { "kind": "paths", "repo": "my-codex-harness", "branch": "master", "commit": "9fcfbdd6c598507f89bbd85c38e83d6f79da3166", "paths": ["tools/ab-eval.mjs"], "targetPrefix": "research/history/codex-harness-cursor/" }
+  ]
+}

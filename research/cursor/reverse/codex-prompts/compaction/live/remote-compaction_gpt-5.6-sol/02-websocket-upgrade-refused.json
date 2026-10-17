@@ -1,0 +1,31 @@
+{
+  "proxy_seq": 2,
+  "time": "2026-10-16T11:19:41.865Z",
+  "method": "GET",
+  "url": "/backend-api/codex/responses",
+  "status": null,
+  "duration_ms": null,
+  "request_headers": {
+    "host": "127.0.0.1:18788",
+    "connection": "Upgrade",
+    "upgrade": "websocket",
+    "sec-websocket-version": "13",
+    "sec-websocket-key": "Z+3z/YZoeL49QFv8Kal8cQ==",
+    "chatgpt-account-id": "[REDACTED]",
+    "authorization": "[REDACTED]",
+    "user-agent": "codex-tui/0.162.0-alpha.17.2 (Mac OS 26.6.2; arm64) herdr/0.9.3 (codex-tui; 0.162.0-alpha.17.2)",
+    "originator": "codex-tui",
+    "openai-beta": "responses_websockets=2026-02-06",
+    "version": "0.162.0-alpha.17.2",
+    "x-codex-beta-features": "remote_compaction_v2",
+    "x-client-request-id": "01a14470-6f80-7c90-b12c-547cd99056cf",
+    "session-id": "01a14470-6f80-7c90-b12c-547cd99056cf",
+    "thread-id": "01a14470-6f80-7c90-b12c-547cd99056cf",
+    "x-codex-window-id": "01a14470-6f80-7c90-b12c-547cd99056cf:0",
+    "x-codex-turn-metadata": "{\"installation_id\":\"[REDACTED-INSTALLATION-ID]\",\"session_id\":\"01a14470-6f80-7c90-b12c-547cd99056cf\",\"thread_id\":\"01a14470-6f80-7c90-b12c-547cd99056cf\",\"agent_name\":\"/root\",\"turn_id\":\"\",\"window_id\":\"01a14470-6f80-7c90-b12c-547cd99056cf:0\",\"window_number\":0,\"context_window_id\":\"01a14470-6f84-7b31-b450-90d42080acf3\",\"request_kind\":\"prewarm\",\"thread_source\":\"user\",\"sandbox\":\"seatbelt\",\"sandbox_mode\":\"read-only\",\"auto_review_enabled\":false,\"node_repl_auto_review_required\":false,\"node_repl_disabled\":false,\"analytics_enabled\":true,\"model\":\"gpt-5.6-sol\",\"reasoning_effort\":\"low\"}",
+    "x-codex-routing-hint": "model=gpt-5.6-sol",
+    "sec-websocket-extensions": "permessage-deflate; client_max_window_bits"
+  },
+  "response_headers": {},
+  "note": "websocket upgrade refused with 426"
+}

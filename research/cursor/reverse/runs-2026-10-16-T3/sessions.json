@@ -1,0 +1,52 @@
+[
+  {
+    "session": "S1",
+    "key": "eac0b8c9-5a79-5122-a521-52a626e79aea",
+    "conversation_id": "98ed0054-102c-4b4a-b26e-38d8f13da48b",
+    "requests": 13,
+    "tools_array": "91f4e374",
+    "start": "2026-10-16T07:04:15.907Z",
+    "end": "2026-10-16T07:05:49.257Z",
+    "first_user_query": "Это проверка твоих субагентов ревью. Код репозитория не меняй, кроме одного временного файла ниже.\n\n1. Создай в корне репозитория файл T3_probe.py и не коммить его. В файле должна быть функция, котора"
+  },
+  {
+    "session": "S2",
+    "key": "29e58609-aa7d-528f-98c4-d28198dc1532",
+    "conversation_id": "abcb1a25-b784-47b3-8986-98cfc90385c9",
+    "requests": 16,
+    "tools_array": "91f4e374",
+    "start": "2026-10-16T07:04:28.013Z",
+    "end": "2026-10-16T07:05:39.795Z",
+    "first_user_query": "Составь план добавления в модуль workers/wallet повторных попыток с экспоненциальной задержкой и ограничением числа попыток. Код не меняй. Сохрани план тем инструментом, который этот режим даёт для пл"
+  },
+  {
+    "session": "S3",
+    "key": "26d2c600-0785-5103-bf65-41bad108296c",
+    "conversation_id": "3406fb66-1e5a-4280-86ac-1c90717c71c6",
+    "requests": 21,
+    "tools_array": "91f4e374",
+    "start": "2026-10-16T07:04:36.228Z",
+    "end": "2026-10-16T07:07:02.817Z",
+    "first_user_query": "Разберись, почему wallet_sync может пропускать кошельки при повторном запуске после сбоя. Код не меняй, только исследуй и объясни."
+  },
+  {
+    "session": "S4",
+    "key": "5d33e085-5a44-522a-ba50-f397167586b1",
+    "conversation_id": "98ed0054-102c-4b4a-b26e-38d8f13da48b",
+    "requests": 2,
+    "tools_array": "1c222b84",
+    "start": "2026-10-16T07:04:51.741Z",
+    "end": "2026-10-16T07:04:56.779Z",
+    "first_user_query": "You are reviewing local code changes for bugs.\n\nCarefully examine these changes and identify any bugs that may have been introduced. Your primary goal is to catch every potential bug before it reaches"
+  },
+  {
+    "session": "S5",
+    "key": "df8dbf21-4b8d-56c0-96b8-31e7a937864c",
+    "conversation_id": "98ed0054-102c-4b4a-b26e-38d8f13da48b",
+    "requests": 8,
+    "tools_array": "9e9d83dd",
+    "start": "2026-10-16T07:04:56.623Z",
+    "end": "2026-10-16T07:05:26.980Z",
+    "first_user_query": "Perform a security review of these local code changes.\n\nScope:\n- Review only code added or modified in the diff.\n- Do not report vulnerabilities in unchanged existing code unless the changed code make"
+  }
+]

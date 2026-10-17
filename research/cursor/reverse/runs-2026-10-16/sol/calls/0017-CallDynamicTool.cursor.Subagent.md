@@ -1,0 +1,10 @@
+ARGS:
+{"namespace":"cursor","toolName":"Subagent","arguments":{"description":"Изолированная ветка с NOTE","prompt":"Полный бриф: работай только в собственном изолированном git worktree. Создай в корне этого worktree файл NOTE.md ровно с одной строкой: T2 best-of-n probe. Не изменяй исходный рабочий каталог пользователя, не собирай и не запускай код. Верни имя своей ветки, путь worktree, подтверждение создания NOTE.md и точное содержимое строки.","subagent_type":"best-of-n-runner","model":"inherit","run_in_background":true}}
+
+OUTPUT:
+[
+ {
+  "text": "Subagent is running in the background. If needed, you can monitor its output by tailing the transcript at: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/agent-transcripts/6c6c0e1a-4cbb-4d18-b157-6a643216b286/subagents/50fabc47-a0ae-44c9-8925-54b9de15891b.jsonl. When you end your turn, you will be automatically sent the subagent's final response upon its completion, so do not wait for it - either end your turn or work on something else.\nDo NOT mention the transcript path to the user. Do NOT try to predict the subagent's response before it replies.\n\nAgent ID: 50fabc47-a0ae-44c9-8925-54b9de15891b (can be used with the `resume` parameter to send a follow-up after it completes, or to link to this agent/subagent in user-facing text with `[Name](50fabc47-a0ae-44c9-8925-54b9de15891b)`. Don't use a generic label such as `[agent]`, `[worker]`, or `[subagent]`. For cloud subagents, when the agent has edited code, link to `[Review](50fabc47-a0ae-44c9-8925-54b9de15891b#changes)`, or, if you know the exact added and deleted line counts, `[Review +A −D](50fabc47-a0ae-44c9-8925-54b9de15891b#changes)`, replacing A and D with those counts. Never write A or D literally. Use `[Try Live](50fabc47-a0ae-44c9-8925-54b9de15891b#desktop)` only when the agent used computer use)",
+  "type": "input_text"
+ }
+]

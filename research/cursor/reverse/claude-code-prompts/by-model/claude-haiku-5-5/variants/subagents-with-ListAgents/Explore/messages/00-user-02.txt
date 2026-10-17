@@ -1,0 +1,1 @@
+List only the file names in the current working directory (/private/var/folders/cf/2mk2lmy9087c_lw961rpfvz00000gn/T/cc-by-model.F48Sbsa6eF/work). Do not read file contents. Report the names in one line, comma-separated.

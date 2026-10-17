@@ -1,0 +1,1 @@
+The directory has two files: alpha.txt and beta.txt

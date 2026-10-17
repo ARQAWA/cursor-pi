@@ -1,0 +1,11 @@
+[
+  {
+    "role": "user",
+    "content": [
+      {
+        "type": "text",
+        "text": "<session>\nUsing the Agent tool, launch four subagents in parallel in one message, with subagent_type general-purpose, Explore, Plan and claude. Each one should only list the file names in the current directory and report them in one line. Then reply with the word done.\n</session>\n\nWrite the title in the predominant language of the session — a stray word or code token in another language doesn't change it, and neither does the English of these instructions."
+      }
+    ]
+  }
+]

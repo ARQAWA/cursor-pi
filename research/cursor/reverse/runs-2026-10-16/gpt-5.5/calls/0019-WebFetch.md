@@ -1,0 +1,10 @@
+ARGS:
+{"url":"https://cursor.com/help/ai-features/plan-mode.md"}
+
+OUTPUT:
+[
+ {
+  "text": "# Content from https://cursor.com/help/ai-features/plan-mode.md\n\n# Plan mode\n\nPlan mode lets you generate and review a detailed plan before Agent writes any code. Use it for complex features where you want to approve the approach first.\n\n## How do I use Plan mode?\n\n1. Open the Agent panel: Mac: Press Cmd + I Windows/Linux: Press Ctrl + I\n2. Press Shift + Tab from the chat input to cycle through modes until you reach Plan.\n3. Type your request\n4. Press Return. Agent explores your codebase and may ask clarifying questions.\n5. Review the plan Agent creates. It opens as a virtual file you can read and edit.\n6. When you're happy with the plan, click Build to start coding.\n\n## How do I save plans?\n\nPlans are saved by default in your home directory. Click Save to workspace to move it to your workspace for future reference, team sharing, and documentation.\n\n## When should I use Plan mode?\n\nPlan mode works best for:\n\n- Complex features with multiple valid approaches\n- Tasks touching many files or systems\n- Unclear requirements where you want to explore first\n- Architectural decisions where you want to review the approach\n\nFor quick changes or tasks you've done many times, stay in Agent mode.\n\n## How do I start over in Plan mode?\n\nIf Agent builds something that doesn't match what you wanted, you can roll back to any earlier point in the conversation:\n\n1. Find the Revert button in the bottom right of a previous chat message\n2. Click Revert, then press Confirm to roll back your files to that stage\n3. Refine your plan to be more specific, then run it again\n\nSpend extra time making the plan precise for larger changes. The hard part is figuring out what to build. With clear instructions, Agent handles the rest.\n\n## Related\n\n- Agent mode\n- Agent reference\n- Plan mode reference\n\n---\n\n## Sitemap\n\nOverview of all docs pages",
+  "type": "input_text"
+ }
+]

@@ -1,0 +1,1 @@
+List the file names in the current directory (not recursive). Report them in one line, comma-separated. Do nothing else.

@@ -1,0 +1,11 @@
+{
+  "name": "lunatron",
+  "version": "0.0.0+codex.20261003072133",
+  "description": "Помогает основному агенту работать с помощниками.",
+  "author": {
+    "name": "A. Chukavin"
+  },
+  "agents": "./cursor/agents",
+  "hooks": "./cursor/hooks.json",
+  "skills": "./skills"
+}

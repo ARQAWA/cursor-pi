@@ -1,0 +1,10 @@
+ARGS:
+{"namespace":"cursor","toolName":"Subagent","arguments":{"description":"Анализ последней ошибки CI","prompt":"Полный бриф: репозиторий находится в /Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH. Найди любой открытый PR этого репозитория и разбери его последнюю упавшую CI-проверку. Если открытых PR нет, явно верни «Открытых PR нет». Если PR есть, верни ссылку/номер PR, название проверки, наблюдаемую ошибку и краткую первопричину. Это только диагностика: не изменяй код, не собирай и не запускай репозиторий.","subagent_type":"ci-investigator","model":"inherit","run_in_background":true}}
+
+OUTPUT:
+[
+ {
+  "text": "Subagent is running in the background. If needed, you can monitor its output by tailing the transcript at: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/agent-transcripts/6c6c0e1a-4cbb-4d18-b157-6a643216b286/subagents/982a5327-2127-4160-a978-b7fa7d3e6296.jsonl. When you end your turn, you will be automatically sent the subagent's final response upon its completion, so do not wait for it - either end your turn or work on something else.\nDo NOT mention the transcript path to the user. Do NOT try to predict the subagent's response before it replies.\n\nAgent ID: 982a5327-2127-4160-a978-b7fa7d3e6296 (can be used with the `resume` parameter to send a follow-up after it completes, or to link to this agent/subagent in user-facing text with `[Name](982a5327-2127-4160-a978-b7fa7d3e6296)`. Don't use a generic label such as `[agent]`, `[worker]`, or `[subagent]`. For cloud subagents, when the agent has edited code, link to `[Review](982a5327-2127-4160-a978-b7fa7d3e6296#changes)`, or, if you know the exact added and deleted line counts, `[Review +A −D](982a5327-2127-4160-a978-b7fa7d3e6296#changes)`, replacing A and D with those counts. Never write A or D literally. Use `[Try Live](982a5327-2127-4160-a978-b7fa7d3e6296#desktop)` only when the agent used computer use)",
+  "type": "input_text"
+ }
+]

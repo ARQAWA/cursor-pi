@@ -1,0 +1,10 @@
+ARGS:
+{"namespace":"cursor","toolName":"Subagent","arguments":{"description":"Explain Cursor modes","prompt":"Consult authoritative Cursor product documentation and explain how Plan, Ask, and Debug modes work. Do not modify files and do not run or build repository code. Return a concise Russian explanation for each mode, including purpose, write/tool behavior, and key limitations, plus source links.","subagent_type":"cursor-guide","model":"inherit","run_in_background":true}}
+
+OUTPUT:
+[
+ {
+  "text": "Subagent is running in the background. If needed, you can monitor its output by tailing the transcript at: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/agent-transcripts/e011a12a-b32d-4443-8a35-29522d4a1918/subagents/88e0e783-0ed3-45d8-880a-52ceb5120428.jsonl. When you end your turn, you will be automatically sent the subagent's final response upon its completion, so do not wait for it - either end your turn or work on something else.\nDo NOT mention the transcript path to the user. Do NOT try to predict the subagent's response before it replies.\n\nAgent ID: 88e0e783-0ed3-45d8-880a-52ceb5120428 (can be used with the `resume` parameter to send a follow-up after it completes, or to link to this agent/subagent in user-facing text with `[Name](88e0e783-0ed3-45d8-880a-52ceb5120428)`. Don't use a generic label such as `[agent]`, `[worker]`, or `[subagent]`. For cloud subagents, when the agent has edited code, link to `[Review](88e0e783-0ed3-45d8-880a-52ceb5120428#changes)`, or, if you know the exact added and deleted line counts, `[Review +A −D](88e0e783-0ed3-45d8-880a-52ceb5120428#changes)`, replacing A and D with those counts. Never write A or D literally. Use `[Try Live](88e0e783-0ed3-45d8-880a-52ceb5120428#desktop)` only when the agent used computer use)",
+  "type": "input_text"
+ }
+]

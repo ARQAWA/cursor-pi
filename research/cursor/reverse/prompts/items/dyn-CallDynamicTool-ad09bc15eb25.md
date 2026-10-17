@@ -1,0 +1,2 @@
+<!-- 704ada44-4cb2-422b-9af3-5b380ba360a9 CallDynamicTool args: {"namespace":"cursor","toolName":"SwitchMode","arguments":{"target_mode_id":"plan","explanation":"Задача — масштабное read-only исследование трёх модулей с подготовкой самостоятельного отчёта; сначала нужно системно изучить структуру и зависимости, не изменяя и не запуская код."}} -->
+Mode switch was rejected by the user. Do not attempt to switch modes again.

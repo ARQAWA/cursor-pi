@@ -1,0 +1,37 @@
+[
+  {
+    "file": "tools/tools-1-91f4e374.json",
+    "first_session": "S1",
+    "names": [
+      "Shell",
+      "Glob",
+      "rg",
+      "ReadFile",
+      "ApplyPatch",
+      "AskQuestion",
+      "GetDynamicTools",
+      "CallDynamicTool"
+    ]
+  },
+  {
+    "file": "tools/tools-2-1c222b84.json",
+    "first_session": "S4",
+    "names": [
+      "Glob",
+      "rg",
+      "ReadFile",
+      "WebSearch"
+    ]
+  },
+  {
+    "file": "tools/tools-3-9e9d83dd.json",
+    "first_session": "S5",
+    "names": [
+      "Glob",
+      "rg",
+      "ReadFile",
+      "WebSearch",
+      "UpdateCurrentStep"
+    ]
+  }
+]

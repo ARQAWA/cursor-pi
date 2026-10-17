@@ -1,0 +1,1 @@
+List only the file names in the directory /private/tmp/cc-trace/work-tui (do not read contents). Report them in a single line.

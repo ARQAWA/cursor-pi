@@ -1,0 +1,37 @@
+## composer.log
+## window1_wb0/renderer.log
+2026-10-16 14:43:33.433 [info] [IdleTimeContribution] Restarting extension hosts after idle stop due to focus.
+2026-10-16 14:43:33.470 [info] Started local extension host with pid 77257.
+2026-10-16 14:43:34.441 [info] [MainThreadShellExec] $updateShellExecCapabilities: hostKind=1, expectedHost=1, isRemote=false, sandboxSupported=true, linuxKernelVersion=none
+2026-10-16 14:43:34.850 [error] [Extension Host:unknown] (node:77257) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-16 14:43:35.243 [info] [PushRequestContextService] Updated git workspace caches (0 entries)
+2026-10-16 14:43:35.246 [info] [PushRequestContextService] Updated sandbox network file entries (0 entries)
+2026-10-16 14:43:35.286 [error] [MainThreadCursor] Error getting dynamic config value for "http2_session_establish_timeout": Dynamic config http2_session_establish_timeout not found
+2026-10-16 14:43:35.669 [info] [MainThreadCursorExplorerProviderService] Explorer provider registered
+2026-10-16 14:43:35.681 [error] [MainThreadCursor] Error getting dynamic config value for "http2_session_establish_timeout": Dynamic config http2_session_establish_timeout not found
+2026-10-16 14:43:35.720 [info] [Cursor Proclist Polling] Replaying 6 stashed sample(s) after transport recovery
+2026-10-16 14:43:37.074 [info] [SharedSessionFileWatcherGateMirror] Mirrored gate (reason=gate-change, enabled=false)
+2026-10-16 14:43:37.074 [info] [UpdateSupervisorGateMirror] Mirrored gates (reason=gate-change, enabled=true, shipItCacheResetKilled=false)
+2026-10-16 14:44:04.297 [info] [composer] renderer conversation root write session=3b530fd7-8e54-4a54-b72e-8ba090968695 reason=agent_checkpoint hostOwned=unknown fields=summary:added:0->1,summary:added:0->1,tool_state:removed:1->0,other:removed:259->3,other:changed:1->1,other:added:0->1
+2026-10-16 14:45:14.109 [info] [SharedSessionFileWatcherGateMirror] Mirrored gate (reason=gate-change, enabled=false)
+2026-10-16 14:45:14.109 [info] [UpdateSupervisorGateMirror] Mirrored gates (reason=gate-change, enabled=true, shipItCacheResetKilled=false)
+## window1_wb1/renderer.log
+2026-10-16 14:43:33.466 [info] [IdleTimeContribution] Restarting extension hosts after idle stop due to focus.
+2026-10-16 14:43:33.471 [info] Started local extension host with pid 77258.
+2026-10-16 14:43:34.505 [info] [MainThreadShellExec] $updateShellExecCapabilities: hostKind=1, expectedHost=1, isRemote=false, sandboxSupported=true, linuxKernelVersion=none
+2026-10-16 14:43:34.851 [error] [Extension Host:unknown] (node:77258) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-16 14:43:34.877 [warning] [mainThreadStorage] large extension state detected (extensionId: anysphere.cursor-agent-host, global: false): 679.1318359375kb. Consider to use 'storageUri' or 'globalStorageUri' to store this data on disk instead.
+2026-10-16 14:43:35.353 [info] [PushRequestContextService] Updated sandbox network file entries (0 entries)
+2026-10-16 14:43:35.364 [error] [MainThreadCursor] Error getting dynamic config value for "http2_session_establish_timeout": Dynamic config http2_session_establish_timeout not found
+2026-10-16 14:43:35.385 [info] [MainThreadCursorAgentHost] ensureLoaded: bdf97570-b371-491d-86fa-272725f842df is not this workbench's to hydrate
+2026-10-16 14:43:35.385 [info] [MainThreadCursorAgentHost] ensureLoaded: d11e2233-d0a4-48b6-bb1e-72ed5a99a938 is not this workbench's to hydrate
+2026-10-16 14:43:35.393 [info] [MainThreadCursorAgentHost] ensureLoaded: bdf97570-b371-491d-86fa-272725f842df is not this workbench's to hydrate
+2026-10-16 14:43:35.394 [info] [MainThreadCursorAgentHost] ensureLoaded: d11e2233-d0a4-48b6-bb1e-72ed5a99a938 is not this workbench's to hydrate
+2026-10-16 14:43:35.403 [warning] [AgentHostChildSessionMirror] attachSession failed for bdf97570-b371-491d-86fa-272725f842df Agent host session not found: bdf97570-b371-491d-86fa-272725f842df
+2026-10-16 14:43:35.404 [warning] [AgentHostChildSessionMirror] attachSession failed for d11e2233-d0a4-48b6-bb1e-72ed5a99a938 Agent host session not found: d11e2233-d0a4-48b6-bb1e-72ed5a99a938
+2026-10-16 14:43:35.405 [info] [PushRequestContextService] Updated git workspace caches (1 entries)
+2026-10-16 14:43:35.757 [info] [MainThreadCursorExplorerProviderService] Explorer provider registered
+2026-10-16 14:43:35.766 [info] [MainThreadCursorAgentHost] ensureLoaded: created host session 3b530fd7-8e54-4a54-b72e-8ba090968695 {"turnCount":39,"coldBootstrap":false,"workspacePaths":["/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH"]}
+2026-10-16 14:43:35.907 [info] [MainThreadCursorAgentHost] ensureLoaded: created host session bdf97570-b371-491d-86fa-272725f842df {"turnCount":3,"coldBootstrap":false,"workspacePaths":["/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH"]}
+2026-10-16 14:43:35.908 [info] [MainThreadCursorAgentHost] ensureLoaded: created host session d11e2233-d0a4-48b6-bb1e-72ed5a99a938 {"turnCount":13,"coldBootstrap":false,"workspacePaths":["/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH"]}
+2026-10-16 14:43:39.374 [info] [buildRequestedModel] composerId=3b530fd7-8e54-4a54-b72e-8ba090968695 catalogModelId=gpt-5.5 idSource=selectedModels[0] experimentalOverrideApplied=false hasAssistantTurn=true composerModelName=gpt-5.5 selectedModelIds=gpt-5.5 matchingSelectedModel=true maxMode=false resolvedParams=3

@@ -1,0 +1,12 @@
+2026-10-16 14:43:35.279 [info] [PrivateInferenceHttpGuard] installed (lockdown disabled)
+2026-10-16 14:43:35.279 [info] Activating agent host extension
+2026-10-16 14:43:35.279 [info] Native cloud subagent ownership disabled
+2026-10-16 14:43:35.279 [info] Hosted MCP routing OFF
+2026-10-16 14:43:35.279 [info] Subagent interaction policy: surface-to-user (question/plan/MCP auth/SCM connect on child; web search/fetch on parent; compatibility stubs rejected)
+2026-10-16 14:43:35.339 [info] Hosted MCP routing adapter ready (gate OFF at activation, flip-on next_launch, listing TTL 300000 ms)
+2026-10-16 14:43:35.339 [info] Acquired shared agent runtime from cursor-agent-exec (move_exec OFF; reusing exec IDE git and MCP; routing gate off at activation)
+2026-10-16 14:43:35.340 [info] AgentService remote egress route=auto probe=false remoteName=<unset>
+2026-10-16 14:43:35.340 [info] Host-owned session storage creation disabled: committed host-owned chats still reopen and mirror to the renderer
+2026-10-16 14:43:35.381 [info] Agent host storage ready /Users/arkadijcukavin/Library/Application Support/Cursor/User/globalStorage/anysphere.cursor-agent-host
+2026-10-16 14:43:35.381 [info] Created agent host and registered provider (network kind: builtin, timeToBridgeRegisterMs: 143)
+2026-10-16 14:43:39.388 [info] Selected Agent Host turn runtime {"runtime":"connect","disposition":"expected","reason":"managed-local-unavailable","conversationId":"3b530fd7-8e54-4a54-b72e-8ba090968695","generationUUID":"fce67cfa-c247-4b0c-a6db-fa1af760555e","actionCase":"summarizeAction","modelId":"gpt-5.5"}

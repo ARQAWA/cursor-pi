@@ -1,0 +1,10 @@
+ARGS:
+{"namespace":"cursor","toolName":"Subagent","arguments":{"description":"Bugbot","prompt":"Full Repository Path: /Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH\nDiff: uncommitted changes\nCustom Instructions: Review only; do not modify, build, or run repository code. Return concise findings with severity, file/line references, and rationale; if no findings, explicitly say so.","subagent_type":"bugbot","model":"inherit","run_in_background":true}}
+
+OUTPUT:
+[
+ {
+  "text": "Subagent is running in the background. If needed, you can monitor its output by tailing the transcript at: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/agent-transcripts/6c6c0e1a-4cbb-4d18-b157-6a643216b286/subagents/f187eb38-0d87-426a-a19d-c52401dcb021.jsonl. When you end your turn, you will be automatically sent the subagent's final response upon its completion, so do not wait for it - either end your turn or work on something else.\nDo NOT mention the transcript path to the user. Do NOT try to predict the subagent's response before it replies.\n\nAgent ID: f187eb38-0d87-426a-a19d-c52401dcb021 (can be used with the `resume` parameter to send a follow-up after it completes, or to link to this agent/subagent in user-facing text with `[Name](f187eb38-0d87-426a-a19d-c52401dcb021)`. Don't use a generic label such as `[agent]`, `[worker]`, or `[subagent]`. For cloud subagents, when the agent has edited code, link to `[Review](f187eb38-0d87-426a-a19d-c52401dcb021#changes)`, or, if you know the exact added and deleted line counts, `[Review +A −D](f187eb38-0d87-426a-a19d-c52401dcb021#changes)`, replacing A and D with those counts. Never write A or D literally. Use `[Try Live](f187eb38-0d87-426a-a19d-c52401dcb021#desktop)` only when the agent used computer use)",
+  "type": "input_text"
+ }
+]

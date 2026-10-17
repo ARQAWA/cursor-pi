@@ -1,0 +1,19 @@
+[
+  {
+    "role": "user",
+    "content": "Using the Agent tool, launch four subagents in parallel in one message, with subagent_type general-purpose, Explore, Plan and claude. Each one should only list the file names in the current directory and report them in one line. Then reply with the word done."
+  },
+  {
+    "role": "system",
+    "content": [
+      {
+        "type": "text",
+        "text": "<total_tokens>15000000 tokens left</total_tokens>",
+        "cache_control": {
+          "type": "ephemeral",
+          "ttl": "1h"
+        }
+      }
+    ]
+  }
+]

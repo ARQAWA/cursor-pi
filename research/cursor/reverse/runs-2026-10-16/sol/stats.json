@@ -1,0 +1,37 @@
+{
+ "requests": 83,
+ "efforts": {
+  "medium": 50,
+  "low": 33
+ },
+ "toolsets": {
+  "Shell,Glob,rg,ReadFile,ApplyPatch,AskQuestion,GetDynamicTools,CallDynamicTool": 33,
+  "Glob,rg,ReadFile,UpdateCurrentStep,TodoWrite,cursor-ide-browser-browser_cdp,cursor-ide-browser-browser_click,cursor-ide-browser-browser_drag,cursor-ide-browser-browser_fill,cursor-ide-browser-browser_get_bounding_box,cursor-ide-browser-browser_highlight,cursor-ide-browser-browser_lock,cursor-ide-browser-browser_mouse_click_xy,cursor-ide-browser-browser_navigate,cursor-ide-browser-browser_press_key,cursor-ide-browser-browser_scroll,cursor-ide-browser-browser_select_option,cursor-ide-browser-browser_snapshot,cursor-ide-browser-browser_tabs,cursor-ide-browser-browser_take_screenshot,cursor-ide-browser-browser_type": 9,
+  "rg,ReadFile,WebSearch,WebFetch,UpdateCurrentStep": 16,
+  "Shell,Glob,rg,ReadFile,ApplyPatch,GetDynamicTools,UpdateCurrentStep,CallDynamicTool": 25
+ },
+ "callCounts": {
+  "GetDynamicTools.cursor.all": 1,
+  "GetDynamicTools.cursor.Lint|Plan|Mode|Review": 1,
+  "GetDynamicTools.cursor.SwitchMode": 1,
+  "GetDynamicTools.cursor.Subagent": 1,
+  "CallDynamicTool.cursor.Subagent": 9,
+  "UpdateCurrentStep": 15,
+  "WebFetch": 8,
+  "cursor-ide-browser-browser_navigate": 1,
+  "Shell": 12,
+  "cursor-ide-browser-browser_cdp": 2,
+  "GetDynamicTools.cursor-origin.list_repositories|list_pull_requests|checks_read": 1,
+  "GetDynamicTools.cursor-origin.list_repositories": 1,
+  "GetDynamicTools.cursor-origin.list_namespaces": 1,
+  "GetDynamicTools.cursor.AwaitShell": 1,
+  "CallDynamicTool.cursor-origin.list_namespaces": 1,
+  "CallDynamicTool.cursor-origin.list_repositories": 1,
+  "ReadFile": 4,
+  "ApplyPatch": 5,
+  "CallDynamicTool.cursor.AwaitShell": 3,
+  "AskQuestion": 1,
+  "CallDynamicTool.cursor.SwitchMode": 1,
+  "GetDynamicTools..Lint|Plan|Mode|Review": 1
+ }
+}

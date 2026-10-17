@@ -1,0 +1,802 @@
+[
+ {
+  "description": "\nTool to search for files matching a glob pattern\n\n- Works fast with codebases of any size\n- Returns matching file paths sorted by modification time\n- Use this tool when you need to find files by name patterns\n- You have the capability to call multiple tools in a single response. It is always better to speculatively perform multiple searches that are potentially useful as a batch.\n",
+  "name": "Glob",
+  "parameters": {
+   "properties": {
+    "glob_pattern": {
+     "description": "The glob pattern to match files against.\nPatterns not starting with \"**/\" are automatically prepended with \"**/\" to enable recursive searching.\n\nExamples:\n\t- \"*.js\" (becomes \"**/*.js\") - find all .js files\n\t- \"**/node_modules/**\" - find all node_modules directories\n\t- \"**/test/**/test_*.ts\" - find all test_*.ts files in any test directory",
+     "type": "string"
+    },
+    "target_directory": {
+     "description": "Absolute path to directory to search for files in. If not provided, defaults to Cursor workspace root.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "glob_pattern"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Search the workspace with ripgrep.\n\n- Use this tool instead of shell rg; respects .gitignore and .cursorignore\n- Default scope is the workspace root; set path (absolute path) to narrow it\n- Supply a regex pattern; escape metacharacters, e.g. \"functionCall\\(\", \"\\{\", \"\\}\"\n- Prefer type over broad glob; wildcard globs like * bypass ignore rules and slow searches\n- Enable multiline only when a match spans lines—it can degrade performance\n- Context flags (-A, -B, -C) only affect content output\n- If results show \"at least …\", the output was truncated; tighten the query or raise head_limit",
+  "name": "rg",
+  "parameters": {
+   "properties": {
+    "-A": {
+     "description": "Number of lines to show after each match (rg -A). Requires output_mode: \"content\", ignored otherwise.",
+     "type": "number"
+    },
+    "-B": {
+     "description": "Number of lines to show before each match (rg -B). Requires output_mode: \"content\", ignored otherwise.",
+     "type": "number"
+    },
+    "-C": {
+     "description": "Number of lines to show before and after each match (rg -C). Requires output_mode: \"content\", ignored otherwise.",
+     "type": "number"
+    },
+    "-i": {
+     "description": "Case insensitive search (rg -i) Defaults to false",
+     "type": "boolean"
+    },
+    "glob": {
+     "description": "Glob pattern to filter files (e.g. \"*.js\", \"*.{ts,tsx}\") - maps to rg --glob",
+     "type": "string"
+    },
+    "head_limit": {
+     "description": "Limit output size. For \"content\" mode: limits total matches shown. For \"files_with_matches\" and \"count\" modes: limits number of files.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "multiline": {
+     "description": "Enable multiline mode where . matches newlines and patterns can span lines (rg -U --multiline-dotall). Default: false.",
+     "type": "boolean"
+    },
+    "offset": {
+     "description": "Skip first N entries. For \"content\" mode: skips first N matches. For \"files_with_matches\" and \"count\" modes: skips first N files. Use with head_limit for pagination.",
+     "minimum": 0,
+     "type": "number"
+    },
+    "output_mode": {
+     "description": "Output mode: \"content\" shows matching lines (supports -A/-B/-C context, -n line numbers, head_limit), \"files_with_matches\" shows file paths (supports head_limit), \"count\" shows match counts (supports head_limit). Defaults to \"content\".",
+     "enum": [
+      "content",
+      "files_with_matches",
+      "count"
+     ],
+     "type": "string"
+    },
+    "path": {
+     "description": "File or directory to search in (rg pattern -- PATH). Defaults to Cursor workspace root.",
+     "type": "string"
+    },
+    "pattern": {
+     "description": "The regular expression pattern to search for in file contents",
+     "type": "string"
+    },
+    "type": {
+     "description": "File type to search (rg --type). Common types: js, py, rust, go, java, etc. More efficient than glob for standard file types.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "pattern"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Reads a file from the local filesystem. You can access any file directly by using this tool.\nIf the User provides a path to a file assume that path is valid. It is okay to read a file that does not exist; an error will be returned.\n\nUsage:\n- You can optionally specify a line offset and limit (especially handy for long files), but it's recommended to read the whole file by not providing these parameters.\n- You have the capability to call multiple tools in a single response. It is always better to speculatively read multiple files as a batch that are potentially useful.\n- If you read a file that exists but has empty contents you will receive 'File is empty.'\n\nImage Support:\n- This tool can also read image files when called with the appropriate path.\n- Supported image formats: jpeg/jpg, png, gif, webp.\n\nPDF Support:\n- PDF files are converted into text content automatically (subject to the same character limits as other files).",
+  "name": "ReadFile",
+  "parameters": {
+   "properties": {
+    "limit": {
+     "description": "The number of lines to read. Only provide if the file is too large to read at once.",
+     "type": "integer"
+    },
+    "offset": {
+     "description": "The line number to start reading from. Positive values are 1-indexed from the start of the file. Negative values count backwards from the end (e.g. -1 is the last line). Only provide if the file is too large to read at once.",
+     "type": "integer"
+    },
+    "path": {
+     "description": "The absolute path of the file to read.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "path"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Record a concise (6 words or less), user-friendly update of the major step or phase you are working on for the parent timeline. Update when the subtask changes. Set `final_summary` and `completed_subtitle` ONCE per response as your last action before the final response. ALWAYS use in parallel with at least one other tool. ALWAYS start the update with a descriptive verb.",
+  "name": "UpdateCurrentStep",
+  "parameters": {
+   "properties": {
+    "completed_subtitle": {
+     "description": "4-6 word, past-tense, final summary of the work you have completed. Will be used as your agent subtitle in the UI. Keep the text concise, high-level, and user-friendly. Set this field ONCE per turn, as the last thing you do before your final response, at the same time that you set the final_summary field.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "current_step": {
+     "description": "Major step or phase you are on. Update when the subtask changes. Keep the text concise, high-level, and user-friendly.",
+     "minLength": 1,
+     "type": "string"
+    },
+    "final_summary": {
+     "description": "User-facing executive summary succinctly reporting on your work / responding to the user's message; write this as a concise message speaking back to the user, not as a status tag. Typically 1-3 sentences, or a brief lead-in plus bullet points when there are multiple distinct takeaways, decisions, test results, etc. When using bullets, make them pleasant and easy to scan: 2-5 bullets when possible, one useful idea per bullet, ordered by importance to the user, concise but not cryptic, and no nested bullets unless the user requested detail. Use prose instead of bullets when there is only one main takeaway. Include the most relevant takeaways for the user, as implied by the user's original request. No unnecessary details. When answering questions by the user, include the full answer that the user is seeking. Examples of what to include: full answer(s) to user's question(s), high-level root cause while debugging, status update of completed (or in-progress) work, test results for specifically requested testing, blocking questions the user must answer before you can continue, links to newly created PRs, etc. Examples of what NOT to include (unless implicitly or explicitly requested by the user): tool calls / results, code / log / shell command excerpts, long file paths, line numbers, low-level implementation details, etc. Set this field just ONCE per turn, as the last thing you do before your final response, at the same time that you set the completed_subtitle field.",
+     "minLength": 1,
+     "type": "string"
+    }
+   },
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Updates the todo list. Provide a list of todo items, each with an id, content, and status. Provide merge=true to update existing tasks.\n\n### Guidelines\n- At most one task can be in_progress at a time.\n- Cancel tasks that are no longer needed immediately.\n- Prefer creating the first todo as in_progress\n- Batch todo updates with other tool calls in parallel",
+  "name": "TodoWrite",
+  "parameters": {
+   "properties": {
+    "merge": {
+     "description": "Whether to merge the todos with the existing todos. If true, the todos will be merged into the existing todos based on the id field. You can leave unchanged properties undefined. If false, the new todos will replace the existing todos.",
+     "type": "boolean"
+    },
+    "todos": {
+     "description": "Array of TODO items to update or create",
+     "items": {
+      "properties": {
+       "content": {
+        "description": "The description/content of the todo item",
+        "type": "string"
+       },
+       "id": {
+        "description": "Unique identifier for the TODO item",
+        "type": "string"
+       },
+       "status": {
+        "description": "The current status of the TODO item",
+        "enum": [
+         "pending",
+         "in_progress",
+         "completed",
+         "cancelled"
+        ],
+        "type": "string"
+       }
+      },
+      "required": [
+       "id",
+       "content",
+       "status"
+      ],
+      "type": "object"
+     },
+     "minItems": 2,
+     "type": "array"
+    }
+   },
+   "required": [
+    "merge",
+    "todos"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Send a Chrome DevTools Protocol command to the target browser tab. Do not use CDP Input.* methods; use dedicated browser tools for clicks, text input, key presses, scrolling, and drag-and-drop. Browser-wide, storage, cookie, permission, download, target-management, and system-level commands are denied.",
+  "name": "cursor-ide-browser-browser_cdp",
+  "parameters": {
+   "properties": {
+    "method": {
+     "description": "CDP method name, for example Runtime.evaluate, DOM.getDocument, Profiler.start, or Performance.getMetrics.",
+     "type": "string"
+    },
+    "params": {
+     "description": "CDP params object. Omit or pass {} when the command takes no params.",
+     "type": "object"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after the CDP command completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "method"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Click an element by ref from browser_snapshot. Use this instead of CDP Input.* methods.",
+  "name": "cursor-ide-browser-browser_click",
+  "parameters": {
+   "properties": {
+    "button": {
+     "description": "Mouse button. Defaults to left.",
+     "enum": [
+      "left",
+      "right",
+      "middle"
+     ],
+     "type": "string"
+    },
+    "doubleClick": {
+     "description": "When true, double-click the element.",
+     "type": "boolean"
+    },
+    "element": {
+     "description": "Human-readable description of the element.",
+     "type": "string"
+    },
+    "holdDurationMs": {
+     "description": "Optional mouse hold duration before release.",
+     "type": "number"
+    },
+    "modifiers": {
+     "description": "Optional modifier keys.",
+     "items": {
+      "enum": [
+       "Control",
+       "Shift",
+       "Alt",
+       "Meta",
+       "ControlOrMeta"
+      ],
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "offsetX": {
+     "description": "Optional x offset from the element center.",
+     "type": "number"
+    },
+    "offsetY": {
+     "description": "Optional y offset from the element center.",
+     "type": "number"
+    },
+    "ref": {
+     "description": "Element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after the click completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Drag an element by ref to another ref or viewport coordinates.",
+  "name": "cursor-ide-browser-browser_drag",
+  "parameters": {
+   "properties": {
+    "sourceRef": {
+     "description": "Source element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after drag completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "targetRef": {
+     "description": "Optional target element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "targetX": {
+     "description": "Optional target viewport x coordinate.",
+     "type": "number"
+    },
+    "targetY": {
+     "description": "Optional target viewport y coordinate.",
+     "type": "number"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "sourceRef"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Set the value of an input, textarea, or contenteditable element by ref.",
+  "name": "cursor-ide-browser-browser_fill",
+  "parameters": {
+   "properties": {
+    "element": {
+     "description": "Human-readable description of the element.",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after filling completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "value": {
+     "description": "Value to set.",
+     "type": "string"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref",
+    "value"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Get the viewport bounding box for an element ref.",
+  "name": "cursor-ide-browser-browser_get_bounding_box",
+  "parameters": {
+   "properties": {
+    "element": {
+     "description": "Human-readable description of the element.",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Highlight an element by ref in the browser page for visual grounding.",
+  "name": "cursor-ide-browser-browser_highlight",
+  "parameters": {
+   "properties": {
+    "durationMs": {
+     "description": "Highlight duration in milliseconds. Defaults to 2000.",
+     "type": "number"
+    },
+    "element": {
+     "description": "Human-readable description of the element.",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Lock or unlock the browser to control whether the user can interact while you work. Set action to \"lock\" or \"unlock\". When locked, the user can still click \"Take Control\" to unlock if needed.",
+  "name": "cursor-ide-browser-browser_lock",
+  "parameters": {
+   "properties": {
+    "action": {
+     "description": "Whether to lock or unlock the browser for user interaction.",
+     "enum": [
+      "lock",
+      "unlock"
+     ],
+     "type": "string"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "action"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Click at viewport coordinates. Prefer browser_click with refs when possible.",
+  "name": "cursor-ide-browser-browser_mouse_click_xy",
+  "parameters": {
+   "properties": {
+    "button": {
+     "description": "Mouse button. Defaults to left.",
+     "enum": [
+      "left",
+      "right",
+      "middle"
+     ],
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after the click completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    },
+    "x": {
+     "description": "Viewport x coordinate.",
+     "type": "number"
+    },
+    "y": {
+     "description": "Viewport y coordinate.",
+     "type": "number"
+    }
+   },
+   "required": [
+    "x",
+    "y"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Navigate to a URL. By default reuses an existing tab; set newTab: true to open in a new tab.",
+  "name": "cursor-ide-browser-browser_navigate",
+  "parameters": {
+   "properties": {
+    "newTab": {
+     "description": "When true, creates a new tab before navigating instead of reusing an existing tab. Defaults to false.",
+     "type": "boolean"
+    },
+    "position": {
+     "description": "Only set when the user explicitly asks to reveal, show, focus, or open the browser visibly. Set to \"active\" for visible/revealed browser UI, or \"side\" if the user mentions \"side\", \"beside\", \"side panel\", or \"side by side\". Omit this parameter for background automation so focus is preserved.",
+     "enum": [
+      "active",
+      "side"
+     ],
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after navigation completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "url": {
+     "description": "The URL to navigate to",
+     "type": "string"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Press a key in the browser page using DOM keyboard events.",
+  "name": "cursor-ide-browser-browser_press_key",
+  "parameters": {
+   "properties": {
+    "key": {
+     "description": "Key to press, for example Enter, Escape, Tab, ArrowDown, or a single character.",
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after the key press completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "key"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Scroll the page, a scrollable container, or an element into view. Use this instead of CDP Input.* wheel events.",
+  "name": "cursor-ide-browser-browser_scroll",
+  "parameters": {
+   "properties": {
+    "amount": {
+     "description": "Scroll amount in pixels. Defaults to 300.",
+     "type": "number"
+    },
+    "deltaX": {
+     "description": "Explicit horizontal scroll delta.",
+     "type": "number"
+    },
+    "deltaY": {
+     "description": "Explicit vertical scroll delta.",
+     "type": "number"
+    },
+    "direction": {
+     "description": "Scroll direction.",
+     "enum": [
+      "up",
+      "down",
+      "left",
+      "right"
+     ],
+     "type": "string"
+    },
+    "ref": {
+     "description": "Optional element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "scrollIntoView": {
+     "description": "When true, scroll the ref into view.",
+     "type": "boolean"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after scrolling completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Select one or more options in a select element by ref.",
+  "name": "cursor-ide-browser-browser_select_option",
+  "parameters": {
+   "properties": {
+    "element": {
+     "description": "Human-readable description of the element.",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after selection completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "values": {
+     "description": "Option values or labels to select.",
+     "items": {
+      "type": "string"
+     },
+     "type": "array"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref",
+    "values"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Capture accessibility snapshot of the current page, this is better than screenshot",
+  "name": "cursor-ide-browser-browser_snapshot",
+  "parameters": {
+   "properties": {
+    "compact": {
+     "description": "When true, outputs a more compact snapshot format. Defaults to false.",
+     "type": "boolean"
+    },
+    "includeDiff": {
+     "description": "When true, include a diff vs the previous snapshot for this tab. Defaults to false.",
+     "type": "boolean"
+    },
+    "interactive": {
+     "description": "When true, only include interactive elements in the snapshot. Defaults to false.",
+     "type": "boolean"
+    },
+    "maxDepth": {
+     "description": "Maximum depth for snapshot output. Defaults to 20.",
+     "type": "number"
+    },
+    "selector": {
+     "description": "Optional CSS selector to scope the snapshot to a subtree.",
+     "type": "string"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after snapshot completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "List, create, close, or select a browser tab",
+  "name": "cursor-ide-browser-browser_tabs",
+  "parameters": {
+   "properties": {
+    "action": {
+     "description": "Operation to perform",
+     "enum": [
+      "list",
+      "new",
+      "close",
+      "select"
+     ],
+     "type": "string"
+    },
+    "index": {
+     "description": "Tab index. Required for \"select\". Optional for \"close\" (defaults to current tab).",
+     "type": "number"
+    },
+    "position": {
+     "description": "Only set for action \"new\" when the user explicitly asks to reveal, show, focus, or open the browser visibly. Set to \"active\" for visible/revealed browser UI, or \"side\" if the user mentions \"side\", \"beside\", \"side panel\", or \"side by side\". Omit this parameter for background automation so focus is preserved.",
+     "enum": [
+      "active",
+      "side"
+     ],
+     "type": "string"
+    }
+   },
+   "required": [
+    "action"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Take a screenshot of the current page. You can't perform actions based on the screenshot, use browser_snapshot for actions.",
+  "name": "cursor-ide-browser-browser_take_screenshot",
+  "parameters": {
+   "properties": {
+    "element": {
+     "description": "Description of the element, if taking a screenshot of an element",
+     "type": "string"
+    },
+    "filename": {
+     "description": "File name to save the screenshot to. Defaults to page-{timestamp}.{png|jpeg} if not specified.",
+     "type": "string"
+    },
+    "fullPage": {
+     "description": "When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Cannot be used with element screenshots.",
+     "type": "boolean"
+    },
+    "ref": {
+     "description": "CSS selector for the element, if taking a screenshot of an element",
+     "type": "string"
+    },
+    "type": {
+     "description": "Image format for the screenshot. Default is png.",
+     "type": "string"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ },
+ {
+  "description": "Type text into an input, textarea, or contenteditable element by ref.",
+  "name": "cursor-ide-browser-browser_type",
+  "parameters": {
+   "properties": {
+    "clear": {
+     "description": "When true, clear existing text first.",
+     "type": "boolean"
+    },
+    "element": {
+     "description": "Human-readable description of the element.",
+     "type": "string"
+    },
+    "ref": {
+     "description": "Element ref from browser_snapshot.",
+     "type": "string"
+    },
+    "slowly": {
+     "description": "When true, type character by character.",
+     "type": "boolean"
+    },
+    "submit": {
+     "description": "When true, press Enter after typing.",
+     "type": "boolean"
+    },
+    "take_screenshot_afterwards": {
+     "description": "When true, takes a screenshot after typing completes. Defaults to false.",
+     "type": "boolean"
+    },
+    "text": {
+     "description": "Text to type.",
+     "type": "string"
+    },
+    "viewId": {
+     "description": "Target browser tab ID. If omitted, uses the last interacted tab.",
+     "type": "string"
+    }
+   },
+   "required": [
+    "ref",
+    "text"
+   ],
+   "type": "object"
+  },
+  "strict": false,
+  "type": "function"
+ }
+]

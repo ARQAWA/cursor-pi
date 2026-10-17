@@ -1,0 +1,23 @@
+{
+  "tool": "SearchConversations",
+  "description": "Search a fast local index of the user's local conversations and cached cloud agent conversations. Every unquoted keyword must match the same conversation, so queries with many keywords often return no results; run several searches with 1–2 keywords each instead. Use quotes only for a short exact phrase. Returns conversation IDs, titles, and short snippets—not full transcripts. Some cloud agent conversations may not be searchable.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "minLength": 1,
+        "description": "One or two keywords, or a short exact phrase in quotes, to search for in conversation titles and visible user/assistant message text. Every unquoted keyword must match the same conversation; use separate searches for additional keywords."
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "description": "Maximum number of conversation results to return (1-100). Defaults to 20."
+      }
+    },
+    "required": [
+      "query"
+    ]
+  }
+}

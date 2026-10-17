@@ -1,0 +1,46 @@
+[
+  {
+    "session": "S1",
+    "key": "f97d71e6-bbf9-5e0c-af19-fa23bce1c078",
+    "requests": 19,
+    "start": "2026-10-16T07:25:21.275Z",
+    "first_user_query": "Составь план добавления в модуль workers/wallet повторных попыток с экспоненциальной задержкой и ограничением числа попыток. Код не меняй.",
+    "end": "2026-10-16T07:26:52.050Z",
+    "tools_array": "4b2bc1b7",
+    "conversation_id": "35834585-f561-44e9-b86e-ae98a9449508",
+    "observed_mode": "Agent (no mode reminder; SwitchMode to plan was rejected)"
+  },
+  {
+    "session": "S2",
+    "key": "81cb606f-3e6d-55bf-8037-bcc7ca612f92",
+    "requests": 23,
+    "start": "2026-10-16T07:25:26.422Z",
+    "first_user_query": "Разберись, почему wallet_sync может пропускать кошельки при повторном запуске после сбоя.",
+    "end": "2026-10-16T07:27:56.478Z",
+    "tools_array": "4b2bc1b7",
+    "conversation_id": "e38cb780-0574-4ec5-a930-4e8dd5dd0ae3",
+    "observed_mode": "Agent (no Debug reminder)"
+  },
+  {
+    "session": "S3",
+    "key": "8959303f-4102-5b2a-8887-4943dcafedd2",
+    "requests": 11,
+    "start": "2026-10-16T07:25:49.066Z",
+    "first_user_query": "Что делает workers/wallet и как он связан с wallet_sync?",
+    "end": "2026-10-16T07:26:45.425Z",
+    "tools_array": "4b2bc1b7",
+    "conversation_id": "73e640d3-b952-44eb-ac06-16c3e212e0df",
+    "observed_mode": "Agent (no Ask reminder)"
+  },
+  {
+    "session": "S4",
+    "key": "a14dd194-be81-5fd7-9b36-375988fcc296",
+    "requests": 21,
+    "start": "2026-10-16T07:28:03.382Z",
+    "first_user_query": "Составь план добавления в модуль workers/wallet повторных попыток с экспоненциальной задержкой и ограничением числа попыток. Код не меняй.",
+    "end": "2026-10-16T07:32:59.023Z",
+    "tools_array": "13103e63",
+    "conversation_id": "3b530fd7-8e54-4a54-b72e-8ba090968695",
+    "observed_mode": "Plan (system_reminder \"Plan mode is active\", CreatePlan in tools)"
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "tool": "FetchMcpResource",
+  "description": "Reads a specific resource from an MCP server, identified by server name and resource URI. Optionally, set downloadPath (relative to the workspace) to save the resource to disk; when set, the resource will be downloaded and not returned to the model.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "server": {
+        "type": "string",
+        "description": "The MCP server identifier"
+      },
+      "uri": {
+        "type": "string",
+        "description": "The resource URI to read"
+      },
+      "downloadPath": {
+        "type": "string",
+        "description": "Optional relative path in the workspace to save the resource to. When set, the resource is written to disk and is not returned to the model."
+      },
+      "requestSmartModeApproval": {
+        "type": "boolean",
+        "description": "Set to true when immediately retrying the exact same resource fetch after Auto-review blocks it and you decide the user should approve it through the native approval card."
+      },
+      "smartModeBlockReason": {
+        "type": "string",
+        "description": "Provide the exact block reason returned by Auto-review in the prior rejection. Required when requestSmartModeApproval is true so the approval card shows the original classifier reason without re-running the classifier."
+      }
+    },
+    "required": [
+      "server",
+      "uri"
+    ]
+  }
+}

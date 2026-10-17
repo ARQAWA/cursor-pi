@@ -1,0 +1,10 @@
+ARGS:
+{"namespace":"cursor","toolName":"Subagent","arguments":{"description":"Investigate latest CI failure","prompt":"Repository: /Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH. Find any open pull request for this repository and investigate the most recent failed CI check. If there are no open PRs, return exactly that fact. Do not modify files, do not run or build repository code. Return PR identification/link, failed check name/link, concise root cause and evidence; if access is unavailable, state the exact blocker.","subagent_type":"ci-investigator","model":"inherit","run_in_background":true}}
+
+OUTPUT:
+[
+ {
+  "text": "Subagent is running in the background. If needed, you can monitor its output by tailing the transcript at: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/agent-transcripts/e011a12a-b32d-4443-8a35-29522d4a1918/subagents/cddb503e-273b-43bd-94a1-2d66ea59cb2d.jsonl. When you end your turn, you will be automatically sent the subagent's final response upon its completion, so do not wait for it - either end your turn or work on something else.\nDo NOT mention the transcript path to the user. Do NOT try to predict the subagent's response before it replies.\n\nAgent ID: cddb503e-273b-43bd-94a1-2d66ea59cb2d (can be used with the `resume` parameter to send a follow-up after it completes, or to link to this agent/subagent in user-facing text with `[Name](cddb503e-273b-43bd-94a1-2d66ea59cb2d)`. Don't use a generic label such as `[agent]`, `[worker]`, or `[subagent]`. For cloud subagents, when the agent has edited code, link to `[Review](cddb503e-273b-43bd-94a1-2d66ea59cb2d#changes)`, or, if you know the exact added and deleted line counts, `[Review +A −D](cddb503e-273b-43bd-94a1-2d66ea59cb2d#changes)`, replacing A and D with those counts. Never write A or D literally. Use `[Try Live](cddb503e-273b-43bd-94a1-2d66ea59cb2d#desktop)` only when the agent used computer use)",
+  "type": "input_text"
+ }
+]

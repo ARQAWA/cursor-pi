@@ -1,0 +1,11 @@
+<summary>
+The session so far is three short Q&A turns. No files, tools, code or project work were involved, and nothing is pending.
+
+1. The user said "say ok". I replied "ok".
+2. The user asked "What is 17 plus 25? Answer with the number only." I replied "42".
+3. The user's latest message asked "Name one primary color of light. One word." That same message also asked for this summary, with text only and no tool calls. The color question has not been answered yet. A correct one-word answer would be "Red", or "Green" or "Blue".
+
+The user has shown a preference for very short answers in the exact format they ask for, such as the number only or one word. They have not given any security rules or other constraints.
+
+The environment is a working directory at /private/tmp/cc-compact.zZlI4Q/work-tui, which is not a git repository, on macOS (darwin) with zsh. Today is 2026-10-16.
+</summary>

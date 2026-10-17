@@ -1,0 +1,320 @@
+[
+  {
+    "file": "calls/001-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/.cursor/skills-cursor/review-bugbot/SKILL.md\"}"
+  },
+  {
+    "file": "calls/002-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/.cursor/skills-cursor/review-security/SKILL.md\"}"
+  },
+  {
+    "file": "calls/003-S1-GetDynamicTools.md",
+    "session": "S1",
+    "name": "GetDynamicTools",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"Subagent\"}"
+  },
+  {
+    "file": "calls/004-S2-GetDynamicTools.md",
+    "session": "S2",
+    "name": "GetDynamicTools",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"SwitchMode\"}"
+  },
+  {
+    "file": "calls/005-S1-Shell.md",
+    "session": "S1",
+    "name": "Shell",
+    "args_head": "{\"command\":\"git status --short --untracked-files=all\",\"working_directory\":\"/Users/arkadijcukavin/Pyc"
+  },
+  {
+    "file": "calls/006-S2-CallDynamicTool.md",
+    "session": "S2",
+    "name": "CallDynamicTool",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"SwitchMode\",\"arguments\":{\"target_mode_id\":\"plan\",\"explanation\":\"Вы"
+  },
+  {
+    "file": "calls/007-S3-rg.md",
+    "session": "S3",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"wallet_sync\",\"output_mode\":\"content\",\"head_limit\":100}"
+  },
+  {
+    "file": "calls/008-S2-Glob.md",
+    "session": "S2",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/workers/wallet/**\"}"
+  },
+  {
+    "file": "calls/009-S1-ApplyPatch.md",
+    "session": "S1",
+    "name": "ApplyPatch",
+    "args_head": "*** Begin Patch *** Add File: /Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/T3_probe."
+  },
+  {
+    "file": "calls/010-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/"
+  },
+  {
+    "file": "calls/011-S2-GetDynamicTools.md",
+    "session": "S2",
+    "name": "GetDynamicTools",
+    "args_head": "{\"pattern\":\"[Pp]lan|CreateGoal\"}"
+  },
+  {
+    "file": "calls/012-S1-CallDynamicTool.md",
+    "session": "S1",
+    "name": "CallDynamicTool",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"Subagent\",\"arguments\":{\"description\":\"Bugbot\",\"subagent_type\":\"bug"
+  },
+  {
+    "file": "calls/013-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/"
+  },
+  {
+    "file": "calls/014-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/015-S1-CallDynamicTool.md",
+    "session": "S1",
+    "name": "CallDynamicTool",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"Subagent\",\"arguments\":{\"description\":\"Security Review\",\"subagent_t"
+  },
+  {
+    "file": "calls/016-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/aWalletSync.py\"}"
+  },
+  {
+    "file": "calls/017-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/T3_probe.py\"}"
+  },
+  {
+    "file": "calls/018-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/019-S3-Glob.md",
+    "session": "S3",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/*wallet*/*.py\"}"
+  },
+  {
+    "file": "calls/020-S5-UpdateCurrentStep.md",
+    "session": "S5",
+    "name": "UpdateCurrentStep",
+    "args_head": "{\"current_step\":\"Inspecting probe and execution context\"}"
+  },
+  {
+    "file": "calls/021-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/022-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/023-S5-ReadFile.md",
+    "session": "S5",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/.cursor/skills-cursor/review-security/SKILL.md\"}"
+  },
+  {
+    "file": "calls/024-S2-Glob.md",
+    "session": "S2",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/*wallet*\"}"
+  },
+  {
+    "file": "calls/025-S5-ReadFile.md",
+    "session": "S5",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/T3_probe.py\"}"
+  },
+  {
+    "file": "calls/026-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/027-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/p"
+  },
+  {
+    "file": "calls/028-S5-rg.md",
+    "session": "S5",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"evaluate_input|T3_probe\",\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9"
+  },
+  {
+    "file": "calls/029-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/p"
+  },
+  {
+    "file": "calls/030-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/031-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/p"
+  },
+  {
+    "file": "calls/032-S5-Glob.md",
+    "session": "S5",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"*\",\"target_directory\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH"
+  },
+  {
+    "file": "calls/033-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/p"
+  },
+  {
+    "file": "calls/034-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wa"
+  },
+  {
+    "file": "calls/035-S5-rg.md",
+    "session": "S5",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"T3_probe|evaluate_input\",\"glob\":\"*.{py,toml,yml,yaml,json,sh}\",\"head_limit\":30}"
+  },
+  {
+    "file": "calls/036-S3-rg.md",
+    "session": "S3",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"run_bounded_workers|wallet_sync:|interval_seconds\",\"path\":\"/Users/arkadijcukavin/Pycharm"
+  },
+  {
+    "file": "calls/037-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/038-S5-UpdateCurrentStep.md",
+    "session": "S5",
+    "name": "UpdateCurrentStep",
+    "args_head": "{\"completed_subtitle\":\"Reviewed probe for exploitable vulnerabilities\",\"final_summary\":\"No validated"
+  },
+  {
+    "file": "calls/039-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/docker-compose.app.yml\",\"offse"
+  },
+  {
+    "file": "calls/040-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/p"
+  },
+  {
+    "file": "calls/041-S1-GetDynamicTools.md",
+    "session": "S1",
+    "name": "GetDynamicTools",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"Delete\"}"
+  },
+  {
+    "file": "calls/042-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/platform/runti"
+  },
+  {
+    "file": "calls/043-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet"
+  },
+  {
+    "file": "calls/044-S1-CallDynamicTool.md",
+    "session": "S1",
+    "name": "CallDynamicTool",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"Delete\",\"arguments\":{\"path\":\"/Users/arkadijcukavin/PycharmProjects"
+  },
+  {
+    "file": "calls/045-S1-Shell.md",
+    "session": "S1",
+    "name": "Shell",
+    "args_head": "{\"command\":\"git status --short --untracked-files=all\",\"working_directory\":\"/Users/arkadijcukavin/Pyc"
+  },
+  {
+    "file": "calls/046-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wa"
+  },
+  {
+    "file": "calls/047-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/migrations/postgres/000007_wal"
+  },
+  {
+    "file": "calls/048-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/"
+  },
+  {
+    "file": "calls/049-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/"
+  },
+  {
+    "file": "calls/050-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wa"
+  },
+  {
+    "file": "calls/051-S3-Shell.md",
+    "session": "S3",
+    "name": "Shell",
+    "args_head": "{\"command\":\"git status --short && git log -5 --oneline\",\"working_directory\":\"/Users/arkadijcukavin/P"
+  },
+  {
+    "file": "calls/052-S3-rg.md",
+    "session": "S3",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"^def test_|restart|unfinished|processed_count|complete_ready\",\"path\":\"/Users/arkadijcuka"
+  },
+  {
+    "file": "calls/053-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/p"
+  }
+]

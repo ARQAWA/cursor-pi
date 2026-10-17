@@ -1,0 +1,428 @@
+[
+  {
+    "file": "calls/001-S1-GetDynamicTools.md",
+    "session": "S1",
+    "name": "GetDynamicTools",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"SwitchMode\"}"
+  },
+  {
+    "file": "calls/002-S2-rg.md",
+    "session": "S2",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"wallet_sync\",\"output_mode\":\"files_with_matches\"}"
+  },
+  {
+    "file": "calls/003-S1-CallDynamicTool.md",
+    "session": "S1",
+    "name": "CallDynamicTool",
+    "args_head": "{\"namespace\":\"cursor\",\"toolName\":\"SwitchMode\",\"arguments\":{\"target_mode_id\":\"plan\",\"explanation\":\"Пользователь просит только план без изменения кода.\"}}"
+  },
+  {
+    "file": "calls/004-S1-Glob.md",
+    "session": "S1",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/workers/wallet/**\"}"
+  },
+  {
+    "file": "calls/005-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/daemon.rs\"}"
+  },
+  {
+    "file": "calls/006-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/failures.py\"}"
+  },
+  {
+    "file": "calls/007-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/store.rs\"}"
+  },
+  {
+    "file": "calls/008-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/scheduler.py\"}"
+  },
+  {
+    "file": "calls/009-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/aWalletSync.py\"}"
+  },
+  {
+    "file": "calls/010-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/login_sync.py\"}"
+  },
+  {
+    "file": "calls/011-S2-Glob.md",
+    "session": "S2",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/*wallet*/*.py\"}"
+  },
+  {
+    "file": "calls/012-S1-Glob.md",
+    "session": "S1",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/*wallet*\"}"
+  },
+  {
+    "file": "calls/013-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_iterations.py\"}"
+  },
+  {
+    "file": "calls/014-S3-Glob.md",
+    "session": "S3",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/*wallet*\"}"
+  },
+  {
+    "file": "calls/015-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_sync_failure_sql.py\"}"
+  },
+  {
+    "file": "calls/016-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/daemon.py\"}"
+  },
+  {
+    "file": "calls/017-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/daemon.py\"}"
+  },
+  {
+    "file": "calls/018-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_sync_results.py\"}"
+  },
+  {
+    "file": "calls/019-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/scheduler.py\"}"
+  },
+  {
+    "file": "calls/020-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/rust/services/wallet_sync/src/daemon.rs\"}"
+  },
+  {
+    "file": "calls/021-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_retry_schedule.py\"}"
+  },
+  {
+    "file": "calls/022-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/iteration.py\"}"
+  },
+  {
+    "file": "calls/023-S3-rg.md",
+    "session": "S3",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"wallet_sync|aWalletSync|entrypoints.wallet\",\"glob\":\"*.{yml,yaml,toml,md,py}\",\"head_limit\":65}"
+  },
+  {
+    "file": "calls/024-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_stats_sql.py\"}"
+  },
+  {
+    "file": "calls/025-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/iteration.py\"}"
+  },
+  {
+    "file": "calls/026-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wallet_failure_contracts.py\"}"
+  },
+  {
+    "file": "calls/027-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/T3_probe.py\"}"
+  },
+  {
+    "file": "calls/028-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/login_sync.py\"}"
+  },
+  {
+    "file": "calls/029-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/docker-compose.app.yml\",\"offset\":45,\"limit\":40}"
+  },
+  {
+    "file": "calls/030-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/daemon.py\"}"
+  },
+  {
+    "file": "calls/031-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_retry_schedule.py\"}"
+  },
+  {
+    "file": "calls/032-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/scheduler.py\"}"
+  },
+  {
+    "file": "calls/033-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wallet_backlog_contracts.py\"}"
+  },
+  {
+    "file": "calls/034-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/clients/steam/wallet/client.py\"}"
+  },
+  {
+    "file": "calls/035-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/entrypoints/wallet/runner.py\"}"
+  },
+  {
+    "file": "calls/036-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/migrations/postgres/000012_wallet_due_scheduler.sql\"}"
+  },
+  {
+    "file": "calls/037-S2-rg.md",
+    "session": "S2",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"async def run_bounded_workers|processed_count|restart|unfinished\",\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contrac"
+  },
+  {
+    "file": "calls/038-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/migrations/postgres/000007_wallet_sync.sql\"}"
+  },
+  {
+    "file": "calls/039-S3-rg.md",
+    "session": "S3",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"wallet|Python\",\"glob\":\"*boundary*\",\"head_limit\":25}"
+  },
+  {
+    "file": "calls/040-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_sync_results.py\"}"
+  },
+  {
+    "file": "calls/041-S1-ReadFile.md",
+    "session": "S1",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_roster.py\"}"
+  },
+  {
+    "file": "calls/042-S2-rg.md",
+    "session": "S2",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"def run_bounded_workers\",\"-A\":110}"
+  },
+  {
+    "file": "calls/043-S3-ReadFile.md",
+    "session": "S3",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/fetch_event.py\"}"
+  },
+  {
+    "file": "calls/044-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wallet_scheduler_contracts.py\"}"
+  },
+  {
+    "file": "calls/045-S1-rg.md",
+    "session": "S1",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"WALLET_|wallet\",\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/platform/settings\",\"head_limit\":50}"
+  },
+  {
+    "file": "calls/046-S2-ReadFile.md",
+    "session": "S2",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/migrations/postgres/000007_wallet_sync.sql\"}"
+  },
+  {
+    "file": "calls/047-S2-rg.md",
+    "session": "S2",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"wallet_sync:|wallet_sync\\\\]|interval_seconds|aWalletSync|wallet_sync/target|cargo.*wallet\",\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-te"
+  },
+  {
+    "file": "calls/048-S2-Shell.md",
+    "session": "S2",
+    "name": "Shell",
+    "args_head": "{\"command\":\"git status --short && python --version && uv --version\",\"working_directory\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH\",\"descript"
+  },
+  {
+    "file": "calls/049-S2-Shell.md",
+    "session": "S2",
+    "name": "Shell",
+    "args_head": "{\"command\":\"python3 --version; command -v uv; command -v cargo\",\"description\":\"Available verification tools\"}"
+  },
+  {
+    "file": "calls/050-S2-Shell.md",
+    "session": "S2",
+    "name": "Shell",
+    "args_head": "{\"command\":\"python3 - <<'PY'\\nimport ast\\nimport asyncio\\nfrom datetime import UTC, datetime, timedelta\\nfrom pathlib import Path\\nfrom types import SimpleNames"
+  },
+  {
+    "file": "calls/051-S4-Glob.md",
+    "session": "S4",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/workers/wallet/**\"}"
+  },
+  {
+    "file": "calls/052-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/failures.py\"}"
+  },
+  {
+    "file": "calls/053-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/scheduler.py\"}"
+  },
+  {
+    "file": "calls/054-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/iteration.py\"}"
+  },
+  {
+    "file": "calls/055-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/login_sync.py\"}"
+  },
+  {
+    "file": "calls/056-S4-Glob.md",
+    "session": "S4",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/*wallet*\"}"
+  },
+  {
+    "file": "calls/057-S4-AskQuestion.md",
+    "session": "S4",
+    "name": "AskQuestion",
+    "args_head": "{\"questions\":[{\"id\":\"scope\",\"prompt\":\"Что должно происходить после исчерпания лимита повторов для аккаунта? Сейчас есть полные проходы по аккаунтам и отдельные "
+  },
+  {
+    "file": "calls/058-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_sync_failure_sql.py\"}"
+  },
+  {
+    "file": "calls/059-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_sync_results.py\"}"
+  },
+  {
+    "file": "calls/060-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_retry_schedule.py\"}"
+  },
+  {
+    "file": "calls/061-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/entrypoints/wallet/runner.py\"}"
+  },
+  {
+    "file": "calls/062-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/workers/wallet/daemon.py\"}"
+  },
+  {
+    "file": "calls/063-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wallet_failure_contracts.py\"}"
+  },
+  {
+    "file": "calls/064-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/repositories/postgres/wallet/store_roster.py\"}"
+  },
+  {
+    "file": "calls/065-S4-rg.md",
+    "session": "S4",
+    "name": "rg",
+    "args_head": "{\"pattern\":\"WALLET_|pytest|\\\\[tool\",\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/platform/settings.py\",\"head_limit\":70}"
+  },
+  {
+    "file": "calls/066-S4-Glob.md",
+    "session": "S4",
+    "name": "Glob",
+    "args_head": "{\"glob_pattern\":\"**/settings/**\"}"
+  },
+  {
+    "file": "calls/067-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/src/superbot_ng/platform/settings/runtime.py\"}"
+  },
+  {
+    "file": "calls/068-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/migrations/postgres/000012_wallet_due_scheduler.sql\"}"
+  },
+  {
+    "file": "calls/069-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/migrations/postgres/000007_wallet_sync.sql\"}"
+  },
+  {
+    "file": "calls/070-S4-ReadFile.md",
+    "session": "S4",
+    "name": "ReadFile",
+    "args_head": "{\"path\":\"/Users/arkadijcukavin/PycharmProjects/superbot-test-Gd9Ld3YH/tests/contracts/wallet/test_wallet_scheduler_contracts.py\",\"limit\":100}"
+  },
+  {
+    "file": "calls/071-S4-CreatePlan.md",
+    "session": "S4",
+    "name": "CreatePlan",
+    "args_head": "{\"name\":\"Wallet Exponential Retry\",\"overview\":\"Добавить экспоненциальную задержку и максимум 5 дополнительных попыток для аккаунта, используя существующее распи"
+  }
+]

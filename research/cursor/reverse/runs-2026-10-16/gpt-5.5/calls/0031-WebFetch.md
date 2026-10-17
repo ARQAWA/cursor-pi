@@ -1,0 +1,10 @@
+ARGS:
+{"url":"https://cursor.com/docs/agent/plan-mode.md"}
+
+OUTPUT:
+[
+ {
+  "text": "# Content from https://cursor.com/docs/agent/plan-mode.md\n\n# Plan Mode\n\nPlan Mode creates detailed implementation plans before writing any code. Agent researches your codebase, asks clarifying questions, and generates a reviewable plan you can edit before building.\n\nPress Shift+Tab from the chat input to rotate to Plan Mode. Cursor also suggests it automatically when you type keywords that indicate complex tasks.\n\n## How it works\n\n1. Agent asks clarifying questions to understand your requirements\n2. Researches your codebase to gather relevant context\n3. Creates a comprehensive implementation plan\n4. You review and edit the plan through chat or markdown files\n5. Click to build the plan when ready\n\nPlans are saved by default in your home directory. Click \"Save to workspace\" to move it to your workspace for future reference, team sharing, and documentation.\n\n## When to use Plan Mode\n\nPlan Mode works best for:\n\n- Complex features with multiple valid approaches\n- Tasks that touch many files or systems\n- Unclear requirements where you need to explore before understanding scope\n- Architectural decisions where you want to review the approach first\n\nFor quick changes or tasks you've done many times before, jumping straight to Agent mode is fine.\n\n## Starting over from a plan\n\nSometimes Agent builds something that doesn't match what you wanted. Instead of trying to fix it through follow-up prompts, go back to the plan.\n\nRevert the changes, refine the plan to be more specific about what you need, and run it again. This is often faster than fixing an in-progress agent, and produces cleaner results.\n\nFor larger changes, spend extra time creating a precise, well-scoped plan. The hard part is often figuring out what change should be made. With the right instructions, delegate implementation to Agent.\n\n## Switching modes\n\n- Use the mode picker dropdown in Agent\n- Press Shift+Tab for quick switching\n\n## Related\n\n- Plan mode help\n\n---\n\n## Sitemap\n\nOverview of all docs pages",
+  "type": "input_text"
+ }
+]

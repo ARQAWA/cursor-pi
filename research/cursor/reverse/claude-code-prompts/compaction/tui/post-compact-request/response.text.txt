@@ -1,0 +1,1 @@
+Your first request was "say ok", and I replied "ok". After that you asked for 17 plus 25 and I said "42". Then you asked for a primary color of light and I said "Red".

@@ -1,0 +1,10 @@
+ARGS:
+{"namespace":"cursor","toolName":"Subagent","arguments":{"description":"Latest ripgrep release","prompt":"Use browser automation to open https://github.com/BurntSushi/ripgrep/releases and identify the title of the latest release. Do not modify any files, do not run or build repository code. Return exactly: (1) the latest release title, (2) the release URL, and (3) a short note on how you verified it.","subagent_type":"browser-use","model":"inherit","run_in_background":true}}
+
+OUTPUT:
+[
+ {
+  "text": "Subagent is running in the background. If needed, you can monitor its output by tailing the transcript at: /Users/arkadijcukavin/.cursor/projects/Users-arkadijcukavin-PycharmProjects-superbot-test-Gd9Ld3YH/agent-transcripts/e011a12a-b32d-4443-8a35-29522d4a1918/subagents/aa37a5b4-e180-4d7e-a42e-86ddc6aa7584.jsonl. When you end your turn, you will be automatically sent the subagent's final response upon its completion, so do not wait for it - either end your turn or work on something else.\nDo NOT mention the transcript path to the user. Do NOT try to predict the subagent's response before it replies.\n\nAgent ID: aa37a5b4-e180-4d7e-a42e-86ddc6aa7584 (can be used with the `resume` parameter to send a follow-up after it completes, or to link to this agent/subagent in user-facing text with `[Name](aa37a5b4-e180-4d7e-a42e-86ddc6aa7584)`. Don't use a generic label such as `[agent]`, `[worker]`, or `[subagent]`. For cloud subagents, when the agent has edited code, link to `[Review](aa37a5b4-e180-4d7e-a42e-86ddc6aa7584#changes)`, or, if you know the exact added and deleted line counts, `[Review +A −D](aa37a5b4-e180-4d7e-a42e-86ddc6aa7584#changes)`, replacing A and D with those counts. Never write A or D literally. Use `[Try Live](aa37a5b4-e180-4d7e-a42e-86ddc6aa7584#desktop)` only when the agent used computer use)",
+  "type": "input_text"
+ }
+]

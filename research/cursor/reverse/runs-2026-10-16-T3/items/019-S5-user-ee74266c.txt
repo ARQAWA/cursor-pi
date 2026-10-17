@@ -1,0 +1,84 @@
+<timestamp>Friday, Oct 16, 2026, 10:04 AM (UTC+3)</timestamp>
+<user_query>
+Perform a security review of these local code changes.
+
+Scope:
+- Review only code added or modified in the diff.
+- Do not report vulnerabilities in unchanged existing code unless the changed code makes them newly exploitable.
+- Report only concrete, validated security issues with realistic exploitability.
+- Use readonly tools to inspect surrounding code before making claims.
+- Consider common application security vulnerabilities, insecure configuration, infrastructure security, unsafe code patterns or parameters, and security-related TODOs that were added but not completed.
+
+Prioritize:
+- Authorization, privilege escalation, and cross-tenant or cross-user access.
+- Credential, secret, token, or sensitive data exposure.
+- Injection, unsafe deserialization, path traversal, SSRF, XSS, CSRF, and command execution.
+- Privacy or storage policy bypasses for protected code, prompts, or user data.
+- Feature gate or control-plane bypasses with security impact.
+- Agent/tool trust boundaries: hidden prompts or command blocks, auto-approved tools, MCP capabilities, delimiter handling, command execution identity, tool timeouts, and fail-open behavior.
+- Filesystem and workspace boundaries: path normalization and containment, symlink-sensitive writes, unsafe project/root switching, archive extraction, cache/plugin paths, and agent/tool-controlled filesystem inputs.
+- Config/template injection: newly wiring source code, file contents, paths, prompts, completions, search results, stack traces, or serialized code-bearing payloads into config objects or templates.
+- API/RPC privilege annotations for newly added procedures, especially actions involving admin, permission, policy, secret, token, credential, rollout, deploy, delete, backfill, suspend, block, override, or other sensitive control-plane behavior.
+- Platform-sensitive patterns: unauthenticated route markers, unvalidated identity accessors, auth context mutation, TLS validation bypasses, sensitive debug logging, and CSP or unsafe HTML/script exceptions.
+
+Triage requirements:
+- Trace data origin through the call chain before reporting. Ask whether an attacker can realistically control the input and what constraints apply.
+- Check implicit sanitization and validation such as URL parsing, database existence checks, auth/permission checks, type coercion, enum validation, schema validation, framework middleware, React/SolidJS escaping, and ORM parameterization.
+- Verify functions, variables, type definitions, initialization, validation logic, and authorization patterns with tools before claiming they are missing.
+- Report security-related TODOs or comments only when they represent a real missing control on the changed path and you can trace a concrete attacker-controlled path to meaningful impact.
+- Only report medium, high, or critical issues. Discard low-severity hygiene, speculative defense-in-depth comments, and findings without a demonstrated security consequence.
+
+Cursor product threat-model baselines:
+- User-owned configuration is not a hostile trust boundary by itself. Users can control their own prompts, rules, repository contents, workspace paths, and per-user/team settings. Report only when the change crosses into another user's data, a service-account-only capability, hidden security policy, credentials, or a backend-enforced restriction the user is not allowed to bypass.
+- Internal developers and same-repo PR authors are usually trusted for ordinary development paths. Do not report ordinary influence over model choice, automation source, routing, build/test inputs, generated artifacts, or other intentionally configurable product behavior unless a less-privileged actor can impersonate system/service authority, bypass a mandatory policy gate, reach production or cross-tenant state, or gain access beyond their intended control.
+- Same-host local control is not automatically a security boundary. For client-only or Glass/local workspace flows, omit attacks that require the attacker to already rewrite files, create symlinks, race paths, or otherwise control the victim's local filesystem/workspace, unless the changed code escapes an intended sandbox/root, crosses users on a shared host, writes with a more privileged process identity, or defeats an explicit containment control.
+- Intentional product routing is not a bypass just because the selector is caller-supplied. Treat caller-provided source, mode, user rule, or team setting fields as design intent unless the code trusts them for a security decision reserved to stronger authority.
+
+LLM and prompt-injection calibration:
+- Do not report a finding solely because a changed path touches an LLM, prompt, agent tool, MCP tool, or model-controlled field.
+- For LLM-mediated findings, require a specific trust boundary and an autonomous consequence such as unauthorized data access, credential exposure, command/file execution outside intended scope, persistent policy bypass, or privileged mutation without adequate confirmation/control.
+- Cap at medium when the consequence is trusted UI confusion, phishing/open-link steering, metadata misbinding, or a user-confirmed target change with no automatic data disclosure or privileged mutation.
+- Omit issues that amount only to "the model might be instructed to call this tool," self-only confusion, values constrained to the feature's intended scope, or exploitation requiring the user to ignore normal review/confirmation UI.
+- Do not report prompt injection or training-data poisoning solely because offline agentsft/eval transcripts preserve user/provider-authored content, MCP tool names, XML-like tags, newlines, or delimiter-looking text. Report only if changed code reinterprets that stored content as trusted runtime instructions for another user/session, bypasses privacy or consent gates, corrupts labels/control policy, or creates scalable cross-user influence.
+- Treat intentional classifier, reviewer, policy, routing, or other model inference over bounded product inputs as expected product behavior when authorized for the data class and purpose, configured model/provider/privacy controls are respected, and raw inputs/outputs are not persisted beyond the product contract.
+
+Privacy and data-handling checks:
+- For changed code that reads, writes, transmits, logs, computes over, or stores customer data, identify the data class and whether it can include source, prompts, paths, credentials, completions, embeddings, memories, training artifacts, or customer config.
+- Report concrete privacy-mode violations involving code data, credentials, prompts, file contents, or another protected class. Do not treat canonical URLs, repository identifiers, internal hostnames, or repo names as high/critical by themselves.
+- Credentials must not be logged, stored plaintext, used for training/evals, sent through unauthorized or blocked providers/models, or included in model provider requests.
+- New proto fields under agent schemas should have redaction classification. New analytics events carrying code/path/prompt data should have appropriate sanitization. New data stores should be registered when applicable.
+- For Cloud Agents and Full Self Driving, NO_STORAGE users are blocked by backend product/storage gates. Do not require duplicate client-side NO_STORAGE checks unless changed backend code can bypass those gates or store, log, train on, or transmit code data before backend filtering.
+
+Resource-exhaustion triage:
+- Do not report missing or mismatched size limits as medium+ unless the changed code creates a realistic resource-exhaustion path with meaningful shared blast radius.
+- Omit authenticated self-scoped oversized metadata, duplicate storage in owned records, or client/schema limit bypasses without high amplification.
+- Report only when there is unauthenticated or low-cost amplification, cross-tenant or cross-user storage/response growth, attacker-controlled fanout, expensive processing per byte, quota/rate-limit bypass with shared impact, or persistence in a hot global index or frequently read shared path.
+
+Common false positives to avoid:
+- Command injection via already-validated parameters.
+- Missing auth when framework-level middleware exists.
+- SQL injection in parameterized ORM calls such as Prisma or TypeORM.
+- XSS in ordinary JSX expressions; focus on explicit raw-HTML insertion sinks and framework escape hatches.
+- Path traversal from validated database records.
+- Same-user rules, prompts, repo files, or local workspace paths affecting only that user's own feature behavior.
+- Same-host symlink or TOCTOU races in client-only flows where the attacker already controls the victim's local workspace and no sandbox, privilege, or cross-user boundary is crossed.
+
+When reporting a finding, include severity, affected file/location, impact, attack path, evidence, and remediation. The location must point to changed code in the diff, and the evidence should support exploitability. If no security issues are found, say that clearly.
+
+The user provided these additional instructions:
+<user_instructions>
+This is a review probe. Do not modify any repository files. Include untracked T3_probe.py in the review.
+</user_instructions>
+
+Diff to review:
+<diff>
++++ T3_probe.py
+@@ -0,0 +1,6 @@
+     1 +def evaluate_input():
+     2 +    return eval(input())
+     3 +
+     4 +
+     5 +def average(values):
+     6 +    return sum(values) / len(values)
+</diff>
+</user_query>

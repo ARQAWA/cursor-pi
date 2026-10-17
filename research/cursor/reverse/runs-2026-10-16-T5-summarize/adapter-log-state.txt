@@ -1,0 +1,7 @@
+size=220430476 mtime=2026-10-16T10:58:05+0300
+lines=55290
+checked_at=2026-10-16T14:51:47+0300
+last_line_time_ms="time_ms":1792137485154
+last_line_utc=2026-10-16T07:58:05Z
+proxy pid 73117 listening 127.0.0.1:18080, started 2026-10-16 10:02:23 +0300
+baseline when watch started: 55290 lines, epoch 1792149268

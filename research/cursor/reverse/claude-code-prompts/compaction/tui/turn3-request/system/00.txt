@@ -1,0 +1,1 @@
+x-anthropic-billing-header: cc_version=2.1.301.b14; cc_entrypoint=cli; cch=e1542; cc_prev_req=req_011Cg5pfuCRG547P5wvHsiQD; cc_prompt_id=3e1631b2-6209-4cdc-8aed-1f872a5efdd9; cc_turn_origin=human; cc_prompt_index=3; cc_turn_index=3;

@@ -1,0 +1,255 @@
+{
+  "tui": {
+    "trigger": "manual",
+    "preTokens": 38687,
+    "postTokens": 2274,
+    "cumulativeDroppedTokens": 36413,
+    "durationMs": 6133,
+    "preservedSegment": {
+      "headUuid": "d3f99f02-b9dd-4758-b6c2-64c82de05dea",
+      "anchorUuid": "84b8c1b5-5993-4617-ae2f-353fce40a1f0",
+      "tailUuid": "f1b19962-789c-460c-8d09-721271492b1e"
+    },
+    "preservedMessages": {
+      "anchorUuid": "84b8c1b5-5993-4617-ae2f-353fce40a1f0",
+      "uuids": [
+        "d3f99f02-b9dd-4758-b6c2-64c82de05dea",
+        "f1b19962-789c-460c-8d09-721271492b1e"
+      ],
+      "allUuids": [
+        "d3f99f02-b9dd-4758-b6c2-64c82de05dea",
+        "f1b19962-789c-460c-8d09-721271492b1e"
+      ]
+    }
+  },
+  "tui_kept_messages": [
+    {
+      "type": "assistant",
+      "message": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011Cg5pgpZtRzBHZExyCetfP",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "Red"
+          }
+        ],
+        "container": null,
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 39,
+          "cache_read_input_tokens": 38642,
+          "output_tokens": 4,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 39,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "global",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 4,
+              "cache_read_input_tokens": 38642,
+              "cache_creation_input_tokens": 39,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 39
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard",
+          "fallback_credit": null
+        },
+        "input_transformations": [],
+        "diagnostics": {
+          "cache_miss_reason": {
+            "type": "messages_changed",
+            "cache_missed_input_tokens": 9746
+          }
+        },
+        "context_management": null
+      }
+    },
+    {
+      "type": "system",
+      "message": null
+    }
+  ],
+  "print": {
+    "trigger": "manual",
+    "preTokens": 21374,
+    "durationMs": 6373,
+    "preservedSegment": {
+      "headUuid": "694d6a10-ba8a-4f8c-b38e-6904c1eacb5b",
+      "anchorUuid": "f83e435a-ab95-4ac5-88de-f493c34bdd60",
+      "tailUuid": "694d6a10-ba8a-4f8c-b38e-6904c1eacb5b"
+    },
+    "preservedMessages": {
+      "anchorUuid": "f83e435a-ab95-4ac5-88de-f493c34bdd60",
+      "uuids": [
+        "694d6a10-ba8a-4f8c-b38e-6904c1eacb5b"
+      ],
+      "allUuids": [
+        "694d6a10-ba8a-4f8c-b38e-6904c1eacb5b"
+      ]
+    },
+    "postTokens": 1845,
+    "cumulativeDroppedTokens": 19529
+  },
+  "print_kept_messages": [
+    {
+      "type": "assistant",
+      "message": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011Cg5pWqQDodoxckm8MRRaz",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "Red"
+          }
+        ],
+        "container": null,
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 66,
+          "cache_read_input_tokens": 21302,
+          "output_tokens": 4,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 66,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "global",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 4,
+              "cache_read_input_tokens": 21302,
+              "cache_creation_input_tokens": 66,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 66
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard",
+          "fallback_credit": null
+        },
+        "input_transformations": [],
+        "diagnostics": {
+          "cache_miss_reason": {
+            "type": "messages_changed",
+            "cache_missed_input_tokens": 8422
+          }
+        },
+        "context_management": null
+      }
+    }
+  ],
+  "print-with-tools": {
+    "trigger": "manual",
+    "preTokens": 21772,
+    "durationMs": 7452,
+    "preservedSegment": {
+      "headUuid": "336d55c8-ea74-4460-8316-07366139ab9c",
+      "anchorUuid": "1ff9b54c-22db-4a65-ba6d-499eab7a2a65",
+      "tailUuid": "336d55c8-ea74-4460-8316-07366139ab9c"
+    },
+    "preservedMessages": {
+      "anchorUuid": "1ff9b54c-22db-4a65-ba6d-499eab7a2a65",
+      "uuids": [
+        "336d55c8-ea74-4460-8316-07366139ab9c"
+      ],
+      "allUuids": [
+        "336d55c8-ea74-4460-8316-07366139ab9c"
+      ]
+    },
+    "postTokens": 2009,
+    "cumulativeDroppedTokens": 19763
+  },
+  "print-with-tools_kept_messages": [
+    {
+      "type": "assistant",
+      "message": {
+        "model": "claude-opus-5-5",
+        "id": "msg_011Cg5q2zGreUUqx7oq4LSwv",
+        "type": "message",
+        "role": "assistant",
+        "content": [
+          {
+            "type": "text",
+            "text": "alpha.txt says \"hello from alpha\"."
+          }
+        ],
+        "container": null,
+        "stop_reason": "end_turn",
+        "stop_sequence": null,
+        "stop_details": null,
+        "usage": {
+          "input_tokens": 2,
+          "cache_creation_input_tokens": 119,
+          "cache_read_input_tokens": 21634,
+          "output_tokens": 17,
+          "output_tokens_details": {
+            "thinking_tokens": 0
+          },
+          "server_tool_use": {
+            "web_search_requests": 0,
+            "web_fetch_requests": 0
+          },
+          "service_tier": "standard",
+          "cache_creation": {
+            "ephemeral_1h_input_tokens": 119,
+            "ephemeral_5m_input_tokens": 0
+          },
+          "inference_geo": "global",
+          "iterations": [
+            {
+              "input_tokens": 2,
+              "output_tokens": 17,
+              "cache_read_input_tokens": 21634,
+              "cache_creation_input_tokens": 119,
+              "cache_creation": {
+                "ephemeral_5m_input_tokens": 0,
+                "ephemeral_1h_input_tokens": 119
+              },
+              "type": "message"
+            }
+          ],
+          "speed": "standard",
+          "fallback_credit": null
+        },
+        "input_transformations": [],
+        "diagnostics": null,
+        "context_management": null
+      }
+    }
+  ]
+}

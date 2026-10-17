@@ -1,0 +1,1 @@
+Using the Agent tool, launch four subagents in parallel in one message, with subagent_type general-purpose, Explore, Plan and claude. Each one should only list the file names in the current directory and report them in one line. Then reply with the word done.

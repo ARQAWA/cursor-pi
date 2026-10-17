@@ -1,0 +1,4 @@
+<timestamp>Friday, Oct 16, 2026, 10:25 AM (UTC+3)</timestamp>
+<user_query>
+Что делает workers/wallet и как он связан с wallet_sync?
+</user_query>

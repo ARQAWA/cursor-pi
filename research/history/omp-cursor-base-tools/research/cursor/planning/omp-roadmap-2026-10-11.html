@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roadmap: omp быстрее Cursor</title>
+<style>
+:root{--bg:#141619;--card:#1c1f24;--line:#2c3038;--text:#e6e6e3;--dim:#a3a7ae;--accent:#f2c46d;--ok:#8fd19e;--bad:#f09a8a;--blue:#9cc4ff}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);margin:0;font:19px/1.75 -apple-system,"Segoe UI",Verdana,system-ui,sans-serif;letter-spacing:.01em;word-spacing:.06em}
+main{max-width:720px;margin:0 auto;padding:28px 18px 80px}
+h1{font-size:30px;line-height:1.3;margin:0 0 10px}
+h2{font-size:25px;line-height:1.35;margin:64px 0 6px;padding-top:18px;border-top:3px solid var(--line)}
+.part{display:inline-block;font-size:14px;font-weight:700;color:var(--bg);background:var(--accent);border-radius:6px;padding:2px 10px;margin-bottom:6px}
+p{margin:10px 0}
+.lead{color:var(--dim);font-size:17px}
+.toc{display:grid;gap:10px;margin:22px 0}
+.toc a{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;color:var(--text);text-decoration:none}
+.toc b{color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--blue);border-radius:12px;padding:16px 18px;margin:18px 0}
+.src{display:block;color:var(--dim);font-size:15px;margin-top:8px}
+code{font:16px/1.5 ui-monospace,Menlo,monospace;background:#262a31;border-radius:5px;padding:1px 6px;color:var(--accent);word-break:break-word}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.flow span{background:#262a31;border:1px solid var(--line);border-radius:10px;padding:6px 12px;font-size:17px}
+.flow i{color:var(--dim);font-style:normal;font-size:20px}
+.cut{margin:8px 0 12px}
+.cut .row{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:6px 0;font-size:17px}
+.cut .row span:last-child{color:var(--bad);font-weight:700;white-space:nowrap}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:26px 0}
+.stage .head{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.stage .big{font-size:34px;font-weight:800;color:var(--accent);line-height:1}
+.stage h3{font-size:21px;margin:0;line-height:1.35}
+.k{display:block;font-size:14px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.06em;margin-top:16px}
+.k.ok{color:var(--ok)}
+ul{margin:6px 0;padding-left:22px}li{margin:6px 0}
+.files code{display:inline-block;margin:3px 4px 3px 0}
+.note{border:2px dashed var(--accent);border-radius:12px;padding:12px 16px;margin:14px 0}
+.end{background:#22262d;border-radius:14px;padding:18px;margin-top:40px;font-size:20px}
+</style>
+</head>
+<body>
+<main>
+
+<h1>Roadmap: omp быстрее Cursor</h1>
+<p class="lead">Цель: harness быстрее Cursor находит всё, что относится к задаче, без обрезок и перечитываний. Четыре этапа идут по порядку, в конце — что сделаем потом.</p>
+
+<nav class="toc">
+<a href="#s1"><b>Этап 1.</b> Полные результаты без обрезок</a>
+<a href="#s2"><b>Этап 2.</b> Базовые инструменты не слабее Cursor</a>
+<a href="#s3"><b>Этап 3.</b> Субагенты поиска</a>
+<a href="#s4"><b>Этап 4.</b> Правила harness</a>
+<a href="#later"><b>Потом.</b> Карта репозитория, Instant Grep и xhigh</a>
+</nav>
+
+<div class="stage" id="s1"><div class="head"><span class="big">1</span><h3>Полные результаты без обрезок и перечитываний</h3></div>
+<span class="k ok">Уже есть</span>
+<ul>
+<li><code>read</code> отдаёт файл целиком, если в нём меньше 100 тысяч символов и 90 КБ.</li>
+<li>При обрыве <code>read</code> и <code>grep</code> пишут, с какого места продолжить.</li>
+</ul>
+<span class="k">Что меняем</span>
+<p>Сейчас результат режется здесь:</p>
+<div class="cut">
+<div class="row"><span>список <code>glob</code></span><span>5 000 символов</span></div>
+<div class="row"><span>дерево папки</span><span>2 500 символов</span></div>
+<div class="row"><span>строка в <code>grep</code></span><span>1 000 символов</span></div>
+<div class="row"><span>чтение документов omp</span><span>49,6 КБ</span></div>
+<div class="row"><span>строка в документах omp и ответах субагентов</span><span>512–768 символов</span></div>
+<div class="row"><span>вывод <code>eval</code></span><span>7,8 КБ</span></div>
+<div class="row"><span>длинный ответ субагента</span><span>превью</span></div>
+</div>
+<ul>
+<li>Один бюджет до 100 тысяч символов на любой результат.</li>
+<li>Дерево: все папки видны всегда, файлы — пока хватает бюджета, а большая папка сворачивается в строку «N файлов, такие-то типы».</li>
+<li>Общий бюджет на один ответ, чтобы пачка параллельных чтений не переполняла окно и не вызывала сжатие.</li>
+<li>Ни одной молчаливой обрезки: полный результат сохраняется, а строка обрыва говорит, как получить остаток.</li>
+<li>Неудачная правка показывает ближайшее совпадение с номерами строк, и файл не нужно перечитывать перед повтором.</li>
+</ul>
+<span class="k">Файлы</span>
+<p class="files"><code>extensions/rg.ts</code><code>extensions/harness.ts</code><code>install-instructions/omp.md</code></p>
+<span class="src">Последний — если лимит задаёт настройка omp.</span></div>
+
+<div class="stage" id="s2"><div class="head"><span class="big">2</span><h3>Базовые инструменты не слабее Cursor</h3></div>
+<span class="k ok">Уже есть</span>
+<ul>
+<li>omp выполняет вызовы одного ответа одновременно. Фоновых задач может быть до 100, а запросы к провайдеру по умолчанию не ограничены.</li>
+<li>Редкие инструменты лежат под <code>xd://</code> и выдают описание по запросу, как GetDynamicTools и CallDynamicTool в Cursor.</li>
+<li>Поиск в <code>rg.ts</code> работает на нативном движке omp, а он собран и для Mac, и для Windows.</li>
+<li>Встроенный bash omp работает одинаково на Mac, Linux и Windows, у него свои grep, sed, find и jq.</li>
+<li>omp пишет ОС и архитектуру в промпт, а skill <code>omp-tools</code> задаёт вид путей: <code>/Users/...</code> на Mac, <code>C:/...</code> на Windows.</li>
+</ul>
+<span class="k">Что меняем</span>
+<ul>
+<li>Функции не слабее базовых инструментов Cursor: Shell, Glob, rg, ReadFile, ApplyPatch, AskQuestion, GetDynamicTools и CallDynamicTool, у субагента ещё UpdateCurrentStep. Имена и дополнительные функции свои.</li>
+<li>Поисковые инструменты видны сразу. В этой сессии <code>grep</code>, <code>lsp</code>, <code>find</code> и <code>ast_grep</code> пришли позже, по запросу. Редкие инструменты остаются по запросу.</li>
+<li>Ввод прощает ошибки: путь в любом виде, шаблон без <code>**/</code>, regex с неэкранированными скобками.</li>
+<li>На выходе везде один формат <code>путь:строка</code>, его можно сразу подать в следующий вызов. Ошибка называет причину и точное исправление.</li>
+<li>Путь в любом виде (<code>/c/Users</code>, <code>C:\Users</code>, <code>C:/Users</code>, <code>~</code>) приводится к одному. В промпте одна строка: ОС, оболочка, вид путей и доступные программы. Windows проверяем отдельным запуском.</li>
+<li>10–50 вызовов в одном ответе без лишних очередей.</li>
+</ul>
+<div class="note">Сейчас <code>eval</code>, <code>write</code> и <code>todo</code> выполняются по одному и задерживают остальные вызовы.</div>
+<span class="k">Файлы</span>
+<p class="files"><code>extensions/rg.ts</code><code>extensions/harness.ts</code><code>skills/omp-tools/SKILL.md</code></p></div>
+
+<div class="stage" id="s3"><div class="head"><span class="big">3</span><h3>Субагенты поиска</h3></div>
+<span class="k ok">Уже есть</span>
+<ul>
+<li><code>codebase_explorer</code> работает на Haiku 5.5 с reasoning high.</li>
+<li>Main сам читает только известные пути и делает один поиск, остальное отдаёт explorer.</li>
+<li>Main переиспользует свободного субагента: метка <code>[task id#n]</code> прячет от него прежнюю работу.</li>
+<li>Хуки omp: <code>tool_call</code> может переписать вход вызова, а <code>tool_result</code> — заменить содержимое результата.</li>
+<li>По твоим словам, окно Haiku — миллион токенов, а мы ограничили его 400 тысячами со сжатием около 270 тысяч.</li>
+</ul>
+<span class="k">Что меняем</span>
+<div class="flow"><span>Main ставит задачу</span><i>→</i><span>бриф: вопрос, где, глубина</span><i>→</i><span>explorer на Haiku ищет</span><i>→</i><span>полный ответ: факты, file:line, код</span><i>→</i><span>Main работает дальше</span></div>
+<ul>
+<li>Explorer ведёт любой поиск, кроме чтения известного пути. Main только ставит задачу.</li>
+<li>Бриф из трёх полей: вопрос, где искать и глубина. Как искать и что вернуть, записано в определении агента. Если нужна строгая форма, расширение подставляет шаблон через <code>tool_call</code>. Для поисковых агентов это заменяет правила skill <code>subagent-brief</code>.</li>
+<li>Explorer отдаёт полный ответ на 7–8 тысяч токенов и больше, а этап 1 гарантирует, что он дойдёт до Main без обрезки.</li>
+<li>Форма ответа: факты с <code>file:line</code> и дословные куски кода, которых хватает, чтобы Main не открывал файлы сам.</li>
+<li>Отдельный веб-агент для внешней документации: <code>.md</code>-версии страниц и <code>llms.txt</code>. Документы внутри репозитория ищет агент для кода. Третий агент нужен, только если для документации появится свой механизм. MCP не используем: в репозитории они запрещены.</li>
+<li>Если Haiku держит миллион токенов, explorer получает большее окно и порог сжатия. Иначе глубокий поиск делится на несколько explorer по областям.</li>
+<li>Транспорт IRC оставляем, меняем только размер ответа.</li>
+</ul>
+<span class="k">Файлы</span>
+<p class="files"><code>agents/codebase_explorer.md</code><code>новый веб-агент в agents/</code><code>skills/subagent-brief/SKILL.md</code><code>SYSTEM.md</code><code>extensions/harness.ts</code><code>extensions/subagent-model-policy.ts</code><code>extensions/autocompaction.ts</code><code>settings/models.yml</code><code>install-instructions/harness.md</code></p></div>
+
+<div class="stage" id="s4"><div class="head"><span class="big">4</span><h3>Правила harness</h3></div>
+<span class="k ok">Уже есть</span>
+<ul>
+<li>Gold Standard и манифест требуют собирать минимум сведений, нужных для решения.</li>
+</ul>
+<span class="k">Что меняем</span>
+<ul>
+<li>Кто ищет: Main читает только известный путь, всё остальное ищет explorer.</li>
+<li>Когда поиск закончен: раунды идут по тексту, по связям через <code>lsp</code>, по структуре через <code>ast_grep</code> и по смыслу через <code>find</code>. Поиск заканчивается, когда раунд не приносит ни одного нового релевантного файла.</li>
+<li>99,9% проверить нечем, эталона нет, поэтому полноту задаёт это правило.</li>
+<li>Для поиска правило «минимум сведений» меняется на «всё, что относится к задаче». Это правило Gold Standard и манифеста меняешь ты: <code>skills/gold-standard/SKILL.md</code> и <code>WORKFLOW-CONCEPT.md</code> правим только по твоему решению.</li>
+</ul>
+<span class="k">Файлы</span>
+<p class="files"><code>SYSTEM.md</code><code>skills/gold-standard/SKILL.md</code><code>skills/omp-tools/SKILL.md</code><code>agents/codebase_explorer.md</code><code>WORKFLOW-CONCEPT.md</code></p></div>
+
+<h2 id="later"><span class="part">Потом</span><br>Следующий этап, сейчас вне работы</h2>
+<div class="card"><ul>
+<li>Карта репозитория — индекс модулей, ключевых символов и связей. Свой skill, по которому агент строит и поддерживает её сам.</li>
+<li>Единая версия индекса при работе с worktree.</li>
+<li>Свой Instant Grep: триграммный индекс, как у Cursor.</li>
+<li>Reasoning xhigh для explorer, code_writer и shell_runner.</li>
+</ul></div>
+
+<div class="end"><b>Коротко:</b> сначала убираем обрезки, потом доводим инструменты, потом отдаём поиск субагентам и в конце пишем правила. Всё из блока «Потом» делаем после этих четырёх этапов.</div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,1 @@
+I’ll inspect the repository’s current branch without modifying or running code, then report the scope blocker.

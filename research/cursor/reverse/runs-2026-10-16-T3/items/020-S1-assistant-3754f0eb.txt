@@ -1,0 +1,1 @@
+Оба ревью запущены в фоне с `Diff: uncommitted changes`: [Bugbot](7087e541-3e95-4669-ae79-4bf5b68baccb) и [Security Review](3f38841c-1a20-4519-84bd-dbc5d4d41f90). После получения обоих результатов удалю временный файл и проверю `git status`.

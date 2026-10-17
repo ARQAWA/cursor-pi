@@ -1,0 +1,305 @@
+{
+  "reason": "Verbatim moved file (listed in provenance/manifest.json, or a byte-identical copy of a listed file): its bytes are fixed by sha256. The link points to material that was not moved (raw captures, local absolute paths, files of the source harness), to a path the file had in its source repository, or is part of captured prompt or tool text.",
+  "links": [
+    {
+      "file": "research/cursor/reverse/REPORT.md",
+      "target": "raw/"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-5.5.as-sent.md",
+      "target": "/abs/path/My Project/My Report.md:3"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-5.5.as-sent.md",
+      "target": "/abs/path/app.py:12"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-5.5.md",
+      "target": "/abs/path/My Project/My Report.md:3"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-5.5.md",
+      "target": "/abs/path/app.py:12"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-5.6-sol.md",
+      "target": "/abs/path/My Project/My Report.md:3"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-5.6-sol.md",
+      "target": "/abs/path/app.py:12"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-6-luna.md",
+      "target": "/abs/path/My Project/My Report.md:3"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-6-luna.md",
+      "target": "/abs/path/app.py:12"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-6-sol.md",
+      "target": "/abs/path/My Project/My Report.md:3"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-6-sol.md",
+      "target": "/abs/path/app.py:12"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-6.1-sol.md",
+      "target": "/abs/path/My Project/My Report.md:3"
+    },
+    {
+      "file": "research/cursor/reverse/codex-prompts/gpt-6.1-sol.md",
+      "target": "/abs/path/app.py:12"
+    },
+    {
+      "file": "research/cursor/reverse/prompts/items/context-67caf0cc4755.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/prompts/items/context-9fe7d7d86a76.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/prompts/items/context-a89a85ce8dba.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/prompts/items/context-b315a735c81c.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/prompts/items/context-c3941e3581a5.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/prompts/items/context-f22099c58fb0.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/prompts/items/context-f9687b690c71.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16-T3/finals/S1-assistant-messages.md",
+      "target": "3f38841c-1a20-4519-84bd-dbc5d4d41f90"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16-T3/finals/S1-assistant-messages.md",
+      "target": "7087e541-3e95-4669-ae79-4bf5b68baccb"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/gpt-5.5/items/user-0003-f0dde1d9a117.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/gpt-5.5/items/user-0009-2ac02f141b08.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/gpt-5.5/items/user-0012-3a05ce2dcae5.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/gpt-5.5/items/user-0016-37740d5eda20.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/gpt-5.5/items/user-0018-749038702558.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/sol/items/assistant-0029-0a52a5f02c0e.md",
+      "target": "2bf78b8a-868e-487c-bce5-f95ac45757fa"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/sol/items/assistant-0029-0a52a5f02c0e.md",
+      "target": "b96778c6-f66a-4dae-89b3-c292774866ff"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/sol/items/user-0002-8b99719554be.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/sol/items/user-0005-5e24dbfaf2a7.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/sol/items/user-0008-0e74cda01fff.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/sol/items/user-0010-6250003d3b4f.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/runs-2026-10-16/sol/items/user-0012-e17983684817.md",
+      "target": "uuid excluding .jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/159ffaa4-db8e-4f8f-ace4-99103e93fd45.md",
+      "target": "../raw/adapter/159ffaa4-db8e-4f8f-ace4-99103e93fd45.jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/159ffaa4-db8e-4f8f-ace4-99103e93fd45.md",
+      "target": "../raw/transcripts/159ffaa4-db8e-4f8f-ace4-99103e93fd45/159ffaa4-db8e-4f8f-ace4-99103e93fd45.jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/38083b08-c794-4bbf-8868-e3cdfc302d4a.md",
+      "target": "../raw/adapter/38083b08-c794-4bbf-8868-e3cdfc302d4a.jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/38083b08-c794-4bbf-8868-e3cdfc302d4a.md",
+      "target": "../raw/transcripts/38083b08-c794-4bbf-8868-e3cdfc302d4a/38083b08-c794-4bbf-8868-e3cdfc302d4a.jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/704ada44-4cb2-422b-9af3-5b380ba360a9.md",
+      "target": "../raw/adapter/704ada44-4cb2-422b-9af3-5b380ba360a9.jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/704ada44-4cb2-422b-9af3-5b380ba360a9.md",
+      "target": "../raw/transcripts/704ada44-4cb2-422b-9af3-5b380ba360a9/704ada44-4cb2-422b-9af3-5b380ba360a9.jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/81d2a5dd-24dc-414b-b090-cd5692e47b66.md",
+      "target": "../raw/adapter/81d2a5dd-24dc-414b-b090-cd5692e47b66.jsonl"
+    },
+    {
+      "file": "research/cursor/reverse/sessions/81d2a5dd-24dc-414b-b090-cd5692e47b66.md",
+      "target": "../raw/transcripts/81d2a5dd-24dc-414b-b090-cd5692e47b66/81d2a5dd-24dc-414b-b090-cd5692e47b66.jsonl"
+    },
+    {
+      "file": "research/future-speedup-by-old-harness/gpt-6.1-sol-original.md",
+      "target": "/abs/path/My Project/My Report.md:3"
+    },
+    {
+      "file": "research/future-speedup-by-old-harness/gpt-6.1-sol-original.md",
+      "target": "/abs/path/app.py:12"
+    },
+    {
+      "file": "research/history/codex-harness-cursor/install-instructions/cursor-harness.md",
+      "target": "../INSTALL_FOR_AGENTS.md"
+    },
+    {
+      "file": "research/history/codex-harness-cursor/install-instructions/cursor-harness.md",
+      "target": "lunatron.md"
+    },
+    {
+      "file": "research/history/codex-harness-cursor/install-instructions/cursor-harness.md",
+      "target": "scope-focus.md"
+    },
+    {
+      "file": "research/history/codex-harness-cursor/new-model-instructions-cursor.md",
+      "target": "src"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/AGENTS.md",
+      "target": ".agents/skills/finalize-work/SKILL.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/AGENTS.md",
+      "target": ".agents/skills/repo-audit/SKILL.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/README.md",
+      "target": "DESIGN-SYSTEM.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/README.md",
+      "target": "INSTALL_FOR_AGENTS.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/README.md",
+      "target": "WORKING-ENVIRONMENTS.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/README.md",
+      "target": "install-instructions/herdr.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/README.md",
+      "target": "install-instructions/system-prompt.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/install-instructions/harness.md",
+      "target": "../INSTALL_FOR_AGENTS.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/install-instructions/harness.md",
+      "target": "system-prompt.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/install-instructions/omp.md",
+      "target": "../INSTALL_FOR_AGENTS.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/install-instructions/omp.md",
+      "target": "../WORKING-ENVIRONMENTS.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/install-instructions/omp.md",
+      "target": "../settings/keybindings.yml"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/install-instructions/omp.md",
+      "target": "../settings/titanium-arq.json"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/REPORT.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/bench-luna/analysis/"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/bench-luna/analysis/_summary.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/coverage/prompts.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/coverage/requests.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/prompts/README.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/prompts/T1-full-toolset.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/prompts/items/"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/prompts/items/dyn-CallDynamicTool-bc2f0c22ef21.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/prompts/items/dyn-GetDynamicTools-76ee702ca2d9.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/prompts/items/subagent-task-33666c41b589.md"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/prompts/tools/"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/runs-2026-10-10/"
+    },
+    {
+      "file": "research/history/omp-cursor-base-tools/research/cursor/README.md",
+      "target": "reverse/sessions/"
+    }
+  ]
+}

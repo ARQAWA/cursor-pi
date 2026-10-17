@@ -1,0 +1,4 @@
+2026-10-16 14:43:35.758 [info] [hostStorage] session 3b530fd7-8e54-4a54-b72e-8ba090968695 has no host store and nothing to seed one from; it stays where it was {"component":"storage"}
+2026-10-16 14:43:35.906 [info] [hostStorage] session bdf97570-b371-491d-86fa-272725f842df has no host store and nothing to seed one from; it stays where it was {"component":"storage"}
+2026-10-16 14:43:35.907 [info] [hostStorage] session d11e2233-d0a4-48b6-bb1e-72ed5a99a938 has no host store and nothing to seed one from; it stays where it was {"component":"storage"}
+2026-10-16 14:44:04.551 [info] Turn terminal blob reads {"component":"storage","sessionId":"3b530fd7-8e54-4a54-b72e-8ba090968695","source":"renderer_callback","count":0,"hits":0,"misses":0,"errors":0}

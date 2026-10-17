@@ -1,0 +1,634 @@
+# The harness package
+
+Order boundaries: [INSTALL_FOR_AGENTS.md](../INSTALL_FOR_AGENTS.md).
+
+## Contents
+
+The package lies at the root of the clone: `package.json` (the `omp.extensions`
+and `dependencies` fields), `bun.lock`, `extensions/harness.ts` with the
+`/define-goal` procedure in `extensions/define-goal.md`, `extensions/rg.ts`,
+`extensions/subagent-model-policy.ts`, `extensions/status-bar.ts`, `extensions/autocompaction.ts`,
+`extensions/model-arrows.js`, `extensions/reasoning-arrows.js`,
+`extensions/subagent-reuse.ts`,
+`extensions/diagram.ts`, `extensions/cursor-feed.ts` with modules in
+`extensions/cursor-feed/`,
+`extensions/write.ts`, `extensions/edit.ts`, `extensions/bash.ts`,
+`extensions/todo.ts`, `extensions/results.ts`, `extensions/base-tools.ts`, `skills/` and
+`agents/`. omp loads a directory from the
+`extensions` list in `config.yml` as a whole: it takes the extensions from its
+`package.json` and finds `skills/` and `agents/` next to it. The dependency of
+`diagram.ts`, the `beautiful-mermaid` library, is installed from `bun.lock` into
+the clone's `node_modules/`.
+The system prompt is a separate component: [system-prompt.md](system-prompt.md).
+
+On every model request (`before_agent_start`), `harness.ts` appends to the
+system prompt:
+
+- for root Main, the full `skills/gold-standard/SKILL.md`,
+  `skills/omp-tools/SKILL.md`, `skills/main-workflow/SKILL.md`,
+  `skills/subagents/SKILL.md` and `skills/clear-communication/SKILL.md`;
+- for a subagent, only `skills/omp-tools/SKILL.md`. A subagent keeps the whole
+  system prompt, `SYSTEM.md` included, and works from its definition and brief.
+
+`base-tools.ts` presents `bash`, `glob`, `grep`, `read`, `apply_patch`, `get_tools`
+and `eval` to every model. Subagents
+also keep their native `yield`, subject to their existing role restrictions.
+Operational `task`, `wait`, `todo`, `goal` and `send_message` are discovered
+with `get_tools` in the `harness` namespace and invoked through `eval`.
+The gateway's `eval` accepts a namespace, a tool name and an arguments object,
+not Python or JavaScript code. It delegates a literal-safe generated call to
+the native eval bridge through the public extension API. Stock plan mode and
+`ast_edit` are disabled by the settings in [omp.md](omp.md).
+
+`rg.ts` gives all agents, including
+`spotty`, `smarty` and `bossy`, one set of search and read
+tools: `glob` (replaces the built-in one; `glob_pattern`, `target_directory`,
+`offset`, matching files and directories newest first, directories marked
+with `/`, hidden entries included, .gitignore applied), `grep`
+(replaces the built-in one: content search on the `rg` engine, lines
+`path:line:text` that fit `read path:line`, in `<workspace_result>`;
+`head_limit` and `offset` count matches, files or entries; `type` also knows
+ruby, php, swift, kotlin, html, css, sql and other languages; explicit positive
+globs override ignore rules, while default, type-only and exclusion-only
+searches keep them; an invalid regex
+is searched as literal text; a path with a URL, for example `history://`,
+`artifact://` or `local://`, goes to the native omp `grep`, which takes only
+`pattern`, `path` and `-i`) and
+`read` (`path`, `offset`, `limit`; every tenth line is numbered, a long file is
+cut off with the line `[Use offset=N to continue]`; a line that does not fit
+into the output is returned in fragments with the tail
+`[Use path=<file>:<line>:chars:<start>+<count> to continue]`, which is passed as
+`path`; `path:N` reads from line N; a directory is returned as a tree with all
+folders, and files beyond the budget fold into the line `[N files: …]` at the
+folder or `[N more files]` inside it, both with the way to read them). Every
+result holds up to 100 000 characters, and every cut names the way to get the
+rest. A URL without a selector, for example `agent://`, `omp://` or
+`artifact://`, is also returned whole up to 100 000 characters: `read` pages
+the native `read` by 3000 lines, and `agent://<id>` reads the subagent's answer
+file and unwraps its JSON. Paths are forgiven: `~`, backslashes, and on Windows
+`/c/Users` and `c:/`; a missing path names the nearest existing folder and
+similar names. Images, archives and omp selectors like `:raw`, `:50-80`,
+`:conflicts`, `:img` go to the native `read`. The `bash` result comes in a
+Shell wrapper (`Exit code`, `Command output`, `Command completed in N ms.`).
+`spotty`, `smarty` and `bossy` retain their read-only `read, glob, grep`,
+`shell_runner` gets `bash, read, grep`, and `codebase_explorer` gets
+`bash, read, glob, grep` for read-only codebase research.
+
+The extension preserves enabled operational backends but removes their schemas
+from model requests; excluded tools are disabled and absent from the gateway
+catalog. Full namespace or exact-tool lookups return schemas and descriptions;
+catalog and pattern lookups limit descriptions to 200 characters, including
+the truncation suffix.
+`eval` requires a previously fetched full schema and drops `token_budget`
+from `goal` op `create`, so a goal never has a token budget. Matching uses the existing
+native regex engine rather than Cursor's RE2 engine. The package disables
+stock xdev mounting for this session without changing its persisted setting.
+`harness.ts` appends to the `omp-tools` block in every agent's system prompt
+the environment line: the built-in
+bash-compatible shell, the form of absolute paths (on Windows `C:/Users/...`,
+without `/c/...` and backslashes) and the programs found on PATH.
+
+`write.ts` is an internal agent-message transport only. It accepts
+`agent://<id>` and `agent://all`, rejects filesystem and other device paths,
+and is never advertised as a model-facing tool. The virtual `send_message`
+operation maps its `agent` and `content` fields to this native transport;
+it keeps the existing agent-reuse procedure without providing a file writer.
+
+`edit.ts` wraps the built-in edit tool and sets `edit.mode` to `apply_patch`
+with an empty `edit.modelVariants` map for the session, without writing
+`config.yml`. Every model receives one JSON function named `apply_patch`,
+with the same `input` string and description. The registered internal name
+remains `edit` so public `ctx.invokeTool` reaches native edit bookkeeping.
+A constant wire alias routes incoming calls to that wrapper; the public
+provider-request hook projects the same JSON function name for all providers,
+preserving native wire prefixes. No model-specific format branch remains.
+All agents create and change files through the same mass-patch engine.
+Patch headers use absolute native paths; the wrapper adapts the stock prompt's
+relative-only wording and names the shared `apply_patch.input` contract explicitly.
+Different files are applied independently. A file whose patch is already in
+progress is refused as busy; other files continue.
+
+The wrapper splits `apply_patch` by file and applies files
+independently through omp's patcher. If a plain update with several hunks
+fails, it retries those hunks in order; applicable ones stay applied and
+rejected ones return with their file, hunk number and native error. Add,
+delete and move sections remain whole operations. Batch patch
+results carry the actual diff and per-file results for the `+N −M` feed counts.
+
+`bash.ts` replaces the built-in `bash` with a wrapper over it. A command
+without `timeout` has no deadline and is never killed, neither at once nor in
+the background; `timeout` in seconds sets the deadline. `block_until_ms` sets
+how long to wait for the command before it moves to the background: 0 starts it
+in the background at once, like `async: true`, and without the parameter the
+wait is 30 000 ms, matching the recorded Cursor default. The wait goes through the shared setting
+`bash.autoBackground.thresholdMs`: the wrapper sets the call's value before it
+starts and separates changes of the value between calls with a 50 ms pause.
+
+Cursor's `notify_on_output` regex trigger is not exposed: stock omp's public
+Bash contract has no such input. This implementation keeps native completion
+notifications and service readiness without adding another shell executor.
+The native permission policy also replaces Cursor-specific smart-mode fields.
+Cursor's optional command `description` uses omp's existing short intent field
+`i`, added by `tools.intentTracing`; no second command-label parameter is added.
+
+No agent has a question tool: `base-tools.ts` keeps omp's built-in one out of
+the active tools. Questions to the owner go into the chat in the question format of
+`skills/clear-communication`: a bold header «Вопросы · N», each question with
+a bold number and title, one context line and lettered options with the
+recommended one marked, and a closing line that says how to answer; the owner
+answers with an ordinary message.
+
+The `grep`, `glob`, `read`, `bash` and `get_tools` wrappers treat as absent the empty
+fields that GPT models send: an empty string, `0` in numeric fields and `ready`
+without `log` and `port`. `read` of a URL that does not accept a line range
+repeats the request without the range; `xd://` reads ignore `offset` and `limit`,
+strip trailing numeric line selectors, and invoke the native reader. For GPT
+models, `harness.ts` appends short tool
+notes about known paths and setting names, listed PATH programs, internal URLs,
+and retrying only rejected hunks.
+
+A subagent's step is visible in its row at the parent: `tools.intentTracing
+true` in step 4 of [omp.md](omp.md) adds a short intent to every tool call, and
+the subagent's row shows the latest one.
+
+`todo.ts` replaces the built-in `todo` with its own tool of the same name and
+the same omp task panel; the list does not depend on the goal. A call runs in
+parallel with other calls and takes a chain of operations `ops` (`init`,
+`append`, `start`, `done`, `drop`, `block`, `unblock`, `rm`, `plan`, `step`,
+`closed`) applied in order. On the first error the completed operations are
+kept, and the answer names the failed operation, its fix, the operations not
+applied and the current list. An item is found by its number `phase.item`, for
+example `2.3`, or by its text even when dashes, arrows, quotes, spaces and case
+differ. An item has a title and a plan of steps in order; `step` marks the
+current step, and the step bar stands directly beneath the item's row on the panel. The
+answer is one or two lines: what changed and what to do next. While the list
+has open items, Main sees the open items with their numbers and the plan of the
+current item in every model request, and omp's list block is removed from the
+goal context. Closed items fold into counts: a phase without open items takes
+one line, and the other phases show only their open items with their numbers.
+The `closed` operation with an optional phase shows the closed items and does
+not change the list. A closed list leaves the context and panel, but stays in
+session history. With no open items, Main receives an ephemeral reminder to
+create the next multi-step task's list before acting, extend unfinished work
+with `append`, and replace a closed list with `init`. Empty fields that GPT
+models send are ignored. While the list has `pending` or `in_progress` items,
+Main cannot finish its turn (`session_stop`): it closes them, drops them or
+marks them as waiting.
+
+`results.ts` gives the agent full results: a subagent's answer preview
+(`<preview full-output="agent://…">`) becomes the whole answer in an
+`<output>` block when it fits 80 000 characters, so Main does not read it a
+second time, and a longer answer stays a preview cut at 80 000 characters with
+its continuation line; `Full output: artifact://…` is replaced with the full
+output up to 80 000 characters, and the cut output of `bash` and `eval` with
+the full output from the artifact up to 100 000 characters. All results of one turn share a budget: 150 000 tokens (at 4
+characters per token) while the context is below 50 000 tokens, otherwise half
+of the room left before the compaction threshold. A result beyond the budget is
+cut, the full text is saved to a file next to the session, and the cut line
+names the file and the `offset` to continue. When a `codebase_explorer`
+without an output schema writes its answer as the text of its final message
+and puts a shorter note into `data` of the `yield` in that same message,
+`results.ts` removes `data` from that call, so omp delivers the written text.
+
+The Gold Standard works as a working contract:
+
+- The agent takes the shortest direct path: it gathers the minimum of needed
+  information, digs deeper only at a contested point and only until it is
+  settled, and chooses a solution by expertise, documentation and logic,
+  without experiments and measurements.
+- Heavy work (deep research, comparing options, experiments, measurements, new
+  tests, checks beyond those covering the change, extra reviews and subagents
+  outside code research) runs only on the user's direct order or under an
+  adopted procedure.
+- Existing checks run once for affected inputs, including the document contracts
+  they cover; valid evidence is reused while those inputs remain unchanged.
+- Reviews run automatically by the work class from `main-workflow`: micro
+  (point corrections here and there with an obvious meaning) without a check,
+  small (up to 5 requirements and up to 5 changed files) is checked by Spotty
+  before handover, large by Smarty; in `/define-goal` the class is written in the
+  goal. An answer or a requested report file without changes to the project or
+  settings has no class review. Two more automatic Spotty checks run in plan mode. Bossy runs on
+  explicit choice, including an explicitly adopted standing audit procedure.
+  Every check runs until CLEAN. A gate required at the same stage by the
+  repository's instructions runs in parallel with the class check; a
+  settings reconciliation or audit does not start merely for ordinary handover.
+  When the repository requires documentation consistency for the same result,
+  the class pass includes that criterion in the same brief and uses the
+  class's reviewer; gates on different inputs retain separate evidence.
+
+`omp-tools` puts the speed of the result first and the number of turns second:
+independent calls go in one response, one `get_tools` call for the `harness`
+namespace at the start of a task fetches every operational schema, todo and
+goal calls go in the same responses as the work, `eval` invokes one discovered
+operational tool through its structured arguments,
+output limits are counted for the whole batch, temporary files are created only
+in the OS temporary folder, which the system cleans. Root Main writes briefs for
+`code_writer` and `shell_runner` by the visible skill `subagent-brief`.
+
+`main-workflow` applies only to root Main:
+
+- Root Main automatically keeps a `todo` list for every task except one answer
+  or one short action, and always for work with a review. It creates or extends
+  the list before the first action; continued unfinished work uses `append`,
+  and a new task after a closed list uses `init`. When it starts an item, it
+  writes the item's plan as steps and marks the steps as it goes. Phases,
+  items and steps are written in Russian. All
+  list changes of one moment go in one call. The list holds stages with draft
+  decisions; findings lie in `local://<subject>.md` files named in the list
+  items.
+- For a task of several dependent stages, root Main sets a goal (`goal`) itself
+  and completes it only after the result and the mandatory actions.
+- Before work with changes, except micro, root Main asks the user only about
+  wording that admits different results, so a reviewer could not confirm the
+  work by it, and about decisions it made itself, about the result or how it
+  will do the task, that add to or depart from the user's words. Everything
+  else starts at once. Each question carries Main's proposal with its reason
+  and the alternatives; the reply starts the work, and an accepted proposal is
+  not asked again. No requirement list, work class or go question goes into
+  the chat; Main classifies the work itself, and the agreement is the user's
+  words, answers and accepted proposals.
+- Micro includes mechanical replacement of a specified effort, existing model
+  or setting and its required matching mentions when no new decision is needed.
+  Adding a provider, introducing a new model contract or changing behavior is not automatically
+  micro. For other work the small/large thresholds stay unchanged.
+- Main does not invent binding commands, metadata formats, caps or
+  untouched-file promises.
+- `/define-goal [rough objective]` in root Main starts the procedure
+  `extensions/define-goal.md`: `harness.ts` registers the command, sends the
+  message `Define goal: …` and supplies the procedure in a hidden message. The
+  agent reads the affected files, asks in the chat only what they do not
+  settle, and writes for itself a goal with the sections Objective, Quotes
+  (verbatim user quotes), Success criteria (a check for every criterion),
+  Boundaries, Stop conditions and Review (the work class). Each interview
+  question gives its context and lettered options with the recommended one
+  marked. It checks the goal against the user's words and puts a short retelling
+  into the chat: a bold sentence with the main point, numbered items with exact
+  values, then «Границы», «Остановка» and «Проверка». It gives its own proposals
+  in the retelling with a reason; each choice is a question with options under
+  the retelling, and the message ends with the go question that accepts the
+  whole goal; the goal itself does not go into the chat, and the accepted
+  retelling replaces the approval step. Questions and messages are clear without earlier
+  messages: the agent does not refer to codes and item numbers without
+  restating them. Before completing the goal, the agent itself runs the criteria
+  checks and the reviewer of the class (small — Spotty, large — Smarty) until
+  CLEAN, and gives the result briefly: what is done and whether the checks
+  passed. In plan mode and with an active or paused goal, the command only shows
+  a notice.
+- In omp plan mode, Light Review (Spotty) checks the plan before it is proposed
+  for approval and the result of carrying out the approved plan.
+
+Clear Communication: Main starts a chat message with a bold sentence carrying
+the main point and puts the question at the end. Usually it is one paragraph of
+1–4 short sentences, at most 12, and a reply of several parts is 2–3 paragraphs
+of 1–3 sentences separated by a `---` line with empty lines around it. Main
+writes reasons, the course of work, checks and options only on request, and at
+an approval it shows its proposal, its reason and the real alternatives. Every
+message and every question is clear without earlier messages. The same skill
+holds the rules for progress messages and a self-contained final answer. Blocks
+with bold labels are the detailed form, only on a direct request. The harness
+has no HTML reports.
+
+Main launches only the harness agents from `agents/*.md`; omp's built-in agents
+are turned off by `task.disabledAgents` in [omp.md](omp.md). The hidden skill
+`subagents` lists them for Main: name, when to use it and its model, plus the
+reuse and brief rules. `harness.ts` gives it only to root Main.
+
+`subagent-model-policy.ts` sets the models and wraps the `task` tool:
+
+- Each named agent is started by name in `agent` and runs on one model from the
+  `NAMED` table under any parent: `spotty` on `anthropic/claude-haiku-5-5:low`,
+  `smarty` on `anthropic/claude-haiku-5-5:medium`, `bossy` on
+  `anthropic/claude-sonnet-5-5:low`, `codebase_explorer` on
+  `anthropic/claude-haiku-5-5:medium`, and `code_writer` and `shell_runner` on
+  `anthropic/claude-haiku-5-5:max`. Without an `anthropic` sign-in these agents
+  do not start.
+- The agent `custom` has no role. Main launches it only when the user directly
+  tells it to run a subagent on a named model: one `task` item with
+  `agent: "custom"`, `model` (`provider/model` from the available models) and
+  an optional `effort` (off, minimal, low, medium, high, xhigh, max). The
+  wrapper checks the model, strips both fields, delegates to omp's own `task`
+  and sets that model through `before_subagent_spawn`; such calls run one at a
+  time until their subagent starts. Without `model`, `custom` runs on Main's
+  current model.
+- The extension blocks no launch. In subagents it turns off
+  `retry.modelFallback`.
+
+A new agent is a file `agents/<name>.md`, a line in `NAMED`, a line in the
+`subagents` skill and a row in the table below; a model change touches `NAMED`,
+the skill and the table. `node tests/run.mjs` catches a mismatch between them.
+
+`codebase_explorer` receives the same SYSTEM as other agents plus its short
+file-search role. Code research follows Cursor: Main answers a narrow
+question or one about a single area with its own searches and reads, and
+splits a broad question that spans several modules or areas across explorers,
+one per module or area, launched together in one call. The research rules live
+in one place, the `task` tool description: a short self-contained brief with
+the question, known scope, thoroughness and the form of the answer and no
+`outputSchema`; Main carries every relevant fact from the answers into its
+result and closes a gap with a question to that explorer. Main continues known
+independent work while they run and waits when their evidence is needed. The
+explorer writes its full findings with exact file:line locations, verbatim
+definitions, relevant code, connections and stated gaps as the text of its
+final message and ends it with a data-less `yield`, which delivers that text;
+Main uses that material without repeating the exploration.
+
+`subagent-reuse.ts` lets Main reuse an unoccupied subagent with a context reset: when an IRC message sent through the discovered `send_message` operation starts with the marker `[task <id>#<n>]`, the extension, in the subagent's session, cuts everything before the last such message before each model request, so the model sees only the system prompt and the new task. The session file keeps all tasks whole; an earlier task is found by its marker in `history://<id>`. The public `context`, `message_end` and `agent_end` events keep the current numbered task's statistics for the hub; a new marker resets its displayed tokens, tools, requests and time. Main's reuse rule is in the `subagents` skill, together with the rule that sizes every subagent task to keep its context within about 100 000 tokens.
+
+`cursor-feed.ts` redraws the omp feed in a compact Cursor style with plain
+English labels. The feed draws the calls and results; the separate base-tools
+extension gives the model the small base set and operational discovery through
+`get_tools` and `eval`. Each state-bearing item or result in the feed, todo panel, `task`
+card, the agent panel and the agent board starts with the same circle `●` in
+one column and one space after it; its color is the state (yellow — running or
+waiting, green — done, red — error or stopped, grey — not started), and a nested
+line moves right by exactly two columns. Headers and summary lines carry no
+icon and no circle: "To-dos", "N agents working", the board title "Agents", the
+agent card, "Task from Main", the goal card and "Worked for
+7m 11s ›"; an icon stands only where it says something that the text does not. A line that is cut at its end ends with "…" in
+the color of the text it cuts. Every call of a built-in tool is one
+line: the circle, a verb, the essence of the call (path, pattern, command) and
+the time. A path is
+shown relative to the working folder, or with `~` for the home folder; when the
+line is too long, the path loses its start (`…/cursor-feed/rows.ts`), so the
+file name and the `+N −M` counts always stay visible. Consecutive reads,
+searches, other tools including MCP, and bash commands merge into
+"Explored N files, M searches, K tools, ran C commands"; zero counts are
+omitted and the live group says "Exploring". Goal get/resume count as tools;
+text, todo, goal create/complete/drop, subagent cards and errors split
+the group. Consecutive edits and writes fold into the same row, counted as
+"edited E files"; a lone edit or write keeps its own row "Edited path +N \u2212M" or
+"Wrote path +N", and an error keeps its own red row. Expanded groups show every
+call with the last six lines of its diff or output.
+Reasoning text stays hidden in both modes, during streaming and replay.
+The current-action row says "Planning next moves" with a light sheen only
+while the model thinks; while a tool runs or the agent waits it shows a yellow
+status circle and a phrase such as "Reading client.py", "Searching files",
+"Running command" or "Waiting for subagent" without a sheen. The row has no
+timer and disappears when no action is active. omp's own "Working\u2026" row
+with the esc hint and intent text never appears. No reasoning-duration rows remain in the transcript. Collapsed
+calls have no raw argument fields, output body or Expand hint. A finished Main turn
+is folded: everything between the question and the final answer becomes the
+line "Worked for 7m 11s ›". Ctrl+O expands and folds everything at once: Explored one action per line,
+each call with the last six lines of its diff or output, Worked for the turn. So that lines that have scrolled up also
+change, at the end of a turn and after Ctrl+O omp redraws the screen once and
+erases the terminal history, including the text that was in the window before
+omp started. A `task` call is a card: the header "Running 2 agents · 1 done" or
+"3 agents finished · 1 failed · 4m 10s", then two rows per subagent: its status
+circle, name and agent type, followed by its indented live action with a
+light sheen. That second row has no circle and ends as "Completed", "Stopped"
+or "Failed". Main's live-subagent rows in the feed carry the grey hint
+"press ← twice: agents" beside each agent ID. Their panel shows "N agents working", up to
+four agents and the current action of each, without clicks.
+
+Every way of opening omp's Agent Hub (a double ← in an empty field, the omp hub key,
+ctrl+s, `/hub`, the agents pill) opens the harness agent board instead, a
+fullscreen view split into two equal halves. The top line shows "Agents", the
+counts of working, idle, done and failed agents and "esc close". Hub lifecycle
+colours are green for working, yellow for idle, grey for done or parked, and red
+for failed or stopped; circles, labels and counts agree. The left half lists the
+subagents, working ones first, in two lines each: status circle, name with its
+current numbered task `#n` and time,
+then the description. The right half is the card of the selected agent: its type
+and model, then Task, Now (while it works), Result (when done) or Error (when it
+failed), Time with the start time, and Usage in tokens, tools and requests,
+counted only since the current task's `[task id#n]` marker. Keys:
+↑/↓ or j/k select, Enter opens the agent's feed in the main window in the same
+style, where its assignment is shown as a "Task from Main" card, x stops a
+working agent, and Esc or q close the board; left has no action. Below 60
+columns only the list is shown; in a collab guest session the stock Agent Hub
+opens. In a subagent's feed the input says
+"Subagent view · esc main · ←← agents" and accepts no typing or Enter.
+Model and reasoning-level changes are blocked. Esc returns to Main; double-left
+opens the hub. Every subagent view has the red hint
+"alt+x alt+x stops this agent"; pressing alt+x twice within 500 ms stops only
+that agent. Its title and status rows show its own state in colours reduced
+by 10%. The title shows its full session ID and current task `#n`.
+The main draft returns when leaving the view; wheel scrolling remains
+available. This look
+comes from the owner's settings from [omp.md](omp.md):
+`display.hideToolActivity: false` (with `true` omp hides calls entirely) and
+`hideThinkingBlock: true`.
+
+One widget directly above the input draws, top to bottom, the current action
+if present, one blank row after it, the todo panel and the session title/ID
+row; omp's divider and input follow. The action and blank row disappear
+together when no action is active. The collapsed panel has no header and
+shows up to four tasks across all stages: the previous, the current and the
+next two. Near the end it shifts back to keep four tasks visible; fewer tasks
+use fewer rows. The panel draws from the harness's own committed list, not from
+omp's todo HUD. Done keeps a green circle and dim text, the current
+task a yellow circle, and waiting a grey circle. The current task's plan bar
+sits directly beneath it, indented two more columns: eight Nerd Font progress
+cells followed by "2/4 step text". This nested row is additional to the header
+and task rows. Ctrl+O shows every stage and task and all steps of the current
+task, with done and current step marks. The panel hides when every task is completed or abandoned; blocked
+tasks keep it visible. There is no separate native todo panel or progress widget. A `todo` call in the feed is the line
+"● To-do 4/7 ● closed ● started", where the closed task's circle is
+green and the started task's circle is yellow. Interactive actions stay in
+the feed and split the "Worked for" fold into parts.
+`goal` is "Goal set" with the complete wrapped Objective section in both modes,
+"Goal complete", "Goal checked", "Goal resumed" or
+"Goal dropped" after the status circle; `/goal <objective>` and `/define-goal`
+messages are the cards "Goal" and "Define goal", with the complete initial
+goal text in the normal text colour, visible in both modes and selectable
+for copying. Goal and assignment instruction bodies use the same readable
+text colour; pausing, resuming and dropping
+the goal are the lines "Goal paused" (yellow circle), "Goal resumed" (green)
+and "Goal dropped" (red) instead of the omp statuses. The `/goal` menu, "Drop goal?", the goal input and the choice
+after a plan leave the line "title → choice" with a green circle or
+"title — no answer" with a grey one. The lines of dialogs and goal events survive omp's feed rebuild (a
+cancelled send, a settings change, compaction) and live until the session
+restarts.
+
+The queued-message band refreshes when the queue changes, including the first
+owner message. It uses omp's existing band and input behavior.
+
+`status-bar.ts` builds the omp status line under the input field up to three
+rows and a row above the line over the field: on the left the bold session
+name with the same natural gold gradient as the full compaction bar
+and "Worked …" for the last turn, on the right the full session ID without
+an icon, followed by two spaces before the edge. A long title is cut before
+the ID. Under the field come the compaction bar and two status rows. The
+compaction bar, right next to the field, is a full-width white-grey bar with a grey label
+`N% <tokens>/<trigger>` that measures the context up to the compaction trigger
+(`compaction.thresholdTokens`, else `compaction.thresholdPercent`, else the
+window minus the reserve) and shows 100% at or above it; the bar fills by the
+same share. At the trigger the bar
+turns natural gold, a gradient from dark gold `#8a6d1c` through `#c9a227` to
+light gold `#e3c45a`, and while automatic compaction runs (`auto_compaction_start`
+until `auto_compaction_end` or `session_compact`) a
+warm glint moves along it. Status row 1 holds, left to right, the model with its reasoning level, the
+modes (plan, goal, loop, prewalk) and the count of working subagents (the
+one-cell Nerd Font users glyph U+F0C0); at its right edge the generation speed
+`token_rate` (the extension takes the live speed of the omp session, the same
+counter as the built-in `composer.tokenRate`, which is turned off, updates it
+every 80 ms during a turn, keeps the last value between turns, puts the theme's
+speed icon right in front of the number and colors it: below 30 tok/s red,
+below 60 yellow, below 90 pale green, otherwise bright green). Status row 2 holds, left
+to right, the folder, the collab and stream indicators and the count of hidden
+background jobs; at its right edge the git branch with its change count and
+the PR. The extension takes the right segments from the line above the input
+field, and that line stays a plain grey line whose brightness follows the
+reasoning level. The rows have no turn timer; the completed turn keeps
+"Worked …" above the input. In a subagent view the rows use its model, speed
+and context.
+The layout and segments are set by [omp.md](omp.md). `autocompaction.ts` sets
+Main's autocompaction threshold: 450 000 tokens for all Claude and all GPT
+models at their 700 000 context window from [omp.md](omp.md), if the threshold
+is below the context window.
+
+Context compaction is omp's own, set by the step 4 keys of [omp.md](omp.md).
+`compaction.methodOrder` `["remote", "soft"]`: `remote` is the provider's
+server-side compaction, the Anthropic compaction beta for the Claude models
+and the streaming Responses compaction, the same mechanism as Codex CLI, for
+the `openai-codex` models; the provider of the active model compacts, and its
+native block stays in the history. When `remote` is unavailable or fails
+(omp allows five minutes per request and two retries), `soft` follows: omp's
+own text summary by the current model, with the last 20 000 tokens of messages
+kept (`compaction.keepRecentTokens` at its default). `compaction.asyncEnabled
+true` starts the summary in the background once the context enters the
+32 000-token band under the threshold and splices the ready result in when the
+threshold is crossed, so the turn does not wait. `compaction.experimentalContextManagement false` removes the
+notepad, `context_notes` and `new_context`; `compaction.supersedeReads false`
+and `compaction.dropUseless false` turn off trimming of tool outputs.
+
+`model-arrows.js`: shift+↑ and shift+↓ switch Main's model through the list
+Claude Opus 5.5, Claude Sonnet 5.5, Claude Haiku 5.5, GPT-6.1 Sol, GPT-6 Luna,
+GPT-5.6 Luna.
+`harness.ts`: ctrl+shift+P pauses the active goal, and a second press resumes it
+(the extension puts `/goal pause` or `/goal resume` into the empty input field);
+the key arrives separately from ctrl+P only in a terminal with the kitty
+protocol or CSI u. ctrl+P itself does not switch the model: `keybindings.yml`
+from [omp.md](omp.md) turns it off. A paused goal (after Esc or ctrl+shift+P) is
+resumed by the next message: for a regular message (not `/` and not `!`)
+`harness.ts` first runs `/goal resume` and passes the message with its images to
+the agent after the goal resumes, and replaces `.` or `c` with Enter with
+`/goal resume`. When omp pauses the goal itself, for example when Esc or a
+steering message interrupts a turn, `harness.ts` resumes it as soon as Main
+works again (a turn starts, Main starts writing a message or calls a tool); a goal paused with a `/goal`
+command, including ctrl+shift+P, stays paused while Main works and resumes only
+by the owner's action: `/goal resume`, a second ctrl+shift+P or the owner's
+next message, as described above. If a Main turn starts without an owner
+message, for example with a subagent's result, while the goal is paused,
+`harness.ts` tells Main in a hidden message to fetch the full `goal` schema
+with `get_tools` if needed, then invoke op `resume` through `eval`.
+shift+↑ works thanks to `keybindings.yml` from [omp.md](omp.md).
+`reasoning-arrows.js`: shift+← and shift+→ lower and raise reasoning among the
+levels the model supports; `off` is added as the no-reasoning level: for Sonnet 5.5 it is
+`between_tools` with effort medium, for Haiku 5.5 thinking is turned off
+(`thinking: disabled`) with effort high; the request hook sets them on send.
+
+Named agents:
+
+| Agent | Model | Role |
+|---|---|---|
+| `spotty` | `anthropic/claude-haiku-5-5:low` | Light review |
+| `smarty` | `anthropic/claude-haiku-5-5:medium` | Blind review |
+| `bossy` | `anthropic/claude-sonnet-5-5:low` | High review |
+| `codebase_explorer` | `anthropic/claude-haiku-5-5:medium` | read-only codebase research with full evidence |
+| `code_writer` | `anthropic/claude-haiku-5-5:max` | code and configs from Main's briefs |
+| `shell_runner` | `anthropic/claude-haiku-5-5:max` | program runs from Main's briefs |
+| `custom` | the model the user names | no role; only on the user's direct order |
+
+Skills. Eight hidden ones (`hide: true`) are called through `/skill:<name>` and
+`skill://<name>`; Main reads the visible `subagent-brief` before a brief for
+`code_writer` or `shell_runner`.
+
+| Skill | Purpose | Visibility |
+|---|---|---|
+| `gold-standard` | the complete result by the shortest direct path, heavy work only on a direct order | hidden |
+| `main-workflow` | root Main's plan mode, `todo` and goal | hidden |
+| `clear-communication` | short chat messages, progress messages and the final answer | hidden |
+| `subagents` | root Main's subagent types with their models, reuse of idle subagents and briefs | hidden |
+| `omp-tools` | omp tool mechanics: the speed of the result first, then the number of turns, output limits, safe writes, temporary files in the OS temporary folder | hidden |
+| `subagent-brief` | briefs for `code_writer` and `shell_runner` and acceptance of their finals | visible |
+| `blind-review-cycle` | blind Smarty passes until CLEAN; the shared contract of the three cycles: Main and the reviewer work as one team on the user's agreement, findings and rejections rest on verbatim quotes, Main must fix a finding with quotes, rejections are passed to the next passes | hidden |
+| `light-review-cycle` | blind Spotty passes until CLEAN | hidden |
+| `high-review-cycle` | blind Bossy passes until CLEAN | hidden |
+
+Every cycle ends with one clean pass. The agents' models are in the table above.
+
+| Skill | Agent | When it runs |
+|---|---|---|
+| `blind-review-cycle` | `smarty` | on explicit invocation and in the check of large work (including a `/define-goal` goal) |
+| `light-review-cycle` | `spotty` | on explicit invocation, in the check of small work (including a `/define-goal` goal), in omp plan mode (the plan before it is proposed and the result of carrying out the approved plan) and in the repository's finalization gate |
+| `high-review-cycle` | `bossy` | on explicit invocation or an explicitly adopted standing audit procedure |
+
+## Requirements
+
+- [omp](omp.md) and git. Windows needs Git for Windows. Run commands through the
+  omp bash tool or Git Bash.
+- Provider credentials:
+  - `openai-codex` for GPT;
+  - `anthropic` for Claude and for all named agents under any parent.
+- Global `config.yml` values; the other keys are kept:
+  - `extensions` contains the clone path.
+  - `modelRoles.default` equals `anthropic/claude-sonnet-5-5:high`: every new
+    session starts on it (step 4 of [omp.md](omp.md)).
+  - `task.maxConcurrency` equals `0` (no limit). Above a non-zero limit omp
+    queues launches, and `proc://` shows them as `running`.
+  - `tools.artifactSpillThreshold` is not below 100 (omp sets 50 by default),
+    otherwise omp cuts out the middle of reads in chunks of ~90 KB;
+    `read.defaultLimit` is assumed to equal 3000.
+  - On Windows, `shellPath` is the path to `bash.exe` from Git for Windows:
+    services, terminals and `!` go through it. Regular bash tool calls already
+    work in omp's built-in POSIX shell.
+
+## First installation
+
+The commands are the same on macOS and Windows (bash).
+
+1. If there is no clone, clone the repository and remember the clone path:
+
+   ```bash
+   git clone https://github.com/ARQAWA/my-omp-harness.git ~/my-omp-harness
+   CLONE="$(git -C ~/my-omp-harness rev-parse --show-toplevel)"
+   ```
+
+   On macOS it is `/Users/...`, on Windows `C:/Users/...`.
+2. Run `omp config get extensions --json`. If the array has no `CLONE` (or an
+   entry with `~` for the same path), run
+   `omp config set extensions '<JSON array of the previous elements and the $CLONE value>'`.
+3. Run `omp config get task.maxConcurrency`. If the value is not `0`, run
+   `omp config set task.maxConcurrency 0`.
+   Run `omp config get tools.artifactSpillThreshold`. If the value is below 100,
+   run `omp config set tools.artifactSpillThreshold 100`.
+4. Windows only: run `omp config get shellPath`. If the value is empty, set the
+   path to `bash.exe`: by default `C:/Program Files/Git/bin/bash.exe`, and for a
+   single-user Git installation `%LOCALAPPDATA%/Programs/Git/bin/bash.exe` (the
+   variable expands to an absolute path).
+5. If the system prompt is part of the order, install it by
+   [its instruction](system-prompt.md).
+6. Install the package dependencies from `bun.lock`:
+   `BUN_BE_BUN=1 omp install --cwd "$CLONE" --frozen-lockfile`. The
+   `BUN_BE_BUN=1` variable runs the Bun built into omp; a separate Bun is not
+   needed.
+7. Extensions load in a new omp process. Ask the owner to restart omp without
+   interrupting the current task.
+
+## Post-installation check
+
+The installing agent runs the check on the target OS; `omp read` and `omp -p`
+start new processes.
+
+1. Read the values from "Requirements" again with `omp config get`.
+2. Run `omp read skill://blind-review-cycle`. The first line must name
+   `<CLONE>/skills/blind-review-cycle/SKILL.md`, and the content must contain
+   `# Blind Review Cycle`.
+3. Other model requests and trial tasks are not part of the check.
+
+## Update
+
+1. Run `git -C "$CLONE" pull --ff-only`. If there are local changes or the
+   branches have diverged, stop and report; overwrite nothing.
+2. Recheck the values from "Requirements": keep higher limits and the other
+   settings.
+3. If the system prompt is part of the order, update it by
+   [its instruction](system-prompt.md).
+4. Run `BUN_BE_BUN=1 omp install --cwd "$CLONE" --frozen-lockfile`: the command
+   installs the package dependencies from `bun.lock` and changes nothing if they
+   are already in place.
+5. Ask the owner to restart omp: open sessions keep the previous context.
+6. Run only the checks whose required settings, skill loading or dependencies
+   changed; reuse the unchanged check evidence. Do not repeat the full
+   first-installation check or add model requests and trial tasks without a request.

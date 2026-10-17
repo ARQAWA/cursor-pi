@@ -1,0 +1,21 @@
+model = "gpt-5.6-sol"
+model_reasoning_effort = "low"
+approval_policy = "never"
+sandbox_mode = "read-only"
+model_provider = "proxy"
+
+[projects."<EMPTY_WORKDIR>"]
+trust_level = "trusted"
+
+[model_providers.proxy]
+name = "ChatGPT backend via local logging proxy"
+base_url = "http://127.0.0.1:18789/backend-api/codex"
+wire_api = "responses"
+requires_openai_auth = true
+capabilities = { remote_compaction = "unsupported" }
+
+[tui]
+screen_reader_detection_done = true
+
+[tui.model_availability_nux]
+"gpt-6.1-sol" = 1

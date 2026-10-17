@@ -1,0 +1,154 @@
+[
+  {
+    "file": "items/001-S1-developer-260171f2.txt",
+    "session": "S1",
+    "role": "developer",
+    "chars": 19362,
+    "first_seen_request": 0,
+    "head": "You are GPT-5.5. You operate in Cursor. You are a coding agent in the Cursor IDE that helps the USER with soft"
+  },
+  {
+    "file": "items/002-S1-user-06a7b147.txt",
+    "session": "S1",
+    "role": "user",
+    "chars": 24664,
+    "first_seen_request": 0,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/003-S1-user-7b2239a3.txt",
+    "session": "S1",
+    "role": "user",
+    "chars": 227,
+    "first_seen_request": 0,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:25 AM (UTC+3)</timestamp> <user_query> Составь план добавления в модуль wo"
+  },
+  {
+    "file": "items/004-S2-developer-260171f2.txt",
+    "session": "S2",
+    "role": "developer",
+    "chars": 19362,
+    "first_seen_request": 1,
+    "head": "You are GPT-5.5. You operate in Cursor. You are a coding agent in the Cursor IDE that helps the USER with soft"
+  },
+  {
+    "file": "items/005-S2-user-ad3fb65f.txt",
+    "session": "S2",
+    "role": "user",
+    "chars": 24664,
+    "first_seen_request": 1,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/006-S2-user-d0abf6dc.txt",
+    "session": "S2",
+    "role": "user",
+    "chars": 178,
+    "first_seen_request": 1,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:25 AM (UTC+3)</timestamp> <user_query> Разберись, почему wallet_sync может"
+  },
+  {
+    "file": "items/007-S1-assistant-d5a3d28a.txt",
+    "session": "S1",
+    "role": "assistant",
+    "chars": 136,
+    "first_seen_request": 2,
+    "head": "Изучу `workers/wallet` и существующие механизмы обработки ошибок, затем составлю план добавления повторных поп"
+  },
+  {
+    "file": "items/008-S2-assistant-e28a7c40.txt",
+    "session": "S2",
+    "role": "assistant",
+    "chars": 136,
+    "first_seen_request": 4,
+    "head": "Проверю, как `wallet_sync` сохраняет прогресс и выбирает кошельки при повторном запуске, особенно если предыду"
+  },
+  {
+    "file": "items/009-S3-developer-260171f2.txt",
+    "session": "S3",
+    "role": "developer",
+    "chars": 19362,
+    "first_seen_request": 11,
+    "head": "You are GPT-5.5. You operate in Cursor. You are a coding agent in the Cursor IDE that helps the USER with soft"
+  },
+  {
+    "file": "items/010-S3-user-453d091d.txt",
+    "session": "S3",
+    "role": "user",
+    "chars": 24664,
+    "first_seen_request": 11,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/011-S3-user-fc9183f3.txt",
+    "session": "S3",
+    "role": "user",
+    "chars": 145,
+    "first_seen_request": 11,
+    "head": "<timestamp>Friday, Oct 16, 2026, 10:25 AM (UTC+3)</timestamp> <user_query> Что делает workers/wallet и как он "
+  },
+  {
+    "file": "items/012-S3-assistant-c6dc587e.txt",
+    "session": "S3",
+    "role": "assistant",
+    "chars": 100,
+    "first_seen_request": 16,
+    "head": "Посмотрю код `workers/wallet` и места использования `wallet_sync`, чтобы объяснить их роли и связь. "
+  },
+  {
+    "file": "items/013-S1-assistant-1a356f64.txt",
+    "session": "S1",
+    "role": "assistant",
+    "chars": 246,
+    "first_seen_request": 32,
+    "head": "Повторные попытки уже планируются через PostgreSQL, но задержка фиксирована в 30 секунд, а лимита нет. Проверю"
+  },
+  {
+    "file": "items/014-S2-assistant-51a0138c.txt",
+    "session": "S2",
+    "role": "assistant",
+    "chars": 247,
+    "first_seen_request": 33,
+    "head": "Восстановление отправляет сохранённые результаты в Kafka, но не возобновляет список кошельков прерванной итера"
+  },
+  {
+    "file": "items/015-S4-developer-ec703596.txt",
+    "session": "S4",
+    "role": "developer",
+    "chars": 19719,
+    "first_seen_request": 53,
+    "head": "You are GPT-5.5. You operate in Cursor. You are a coding agent in the Cursor IDE that helps the USER with soft"
+  },
+  {
+    "file": "items/016-S4-user-42102336.txt",
+    "session": "S4",
+    "role": "user",
+    "chars": 24392,
+    "first_seen_request": 53,
+    "head": "<user_info> OS Version: darwin 25.6.0 Shell: zsh Workspace Path: /Users/arkadijcukavin/PycharmProjects/superbo"
+  },
+  {
+    "file": "items/017-S4-user-d4efb4aa.txt",
+    "session": "S4",
+    "role": "user",
+    "chars": 4491,
+    "first_seen_request": 53,
+    "head": " <system_reminder> Plan mode is active, unless you have already seen the <end_plan_mode/> tag below. The user "
+  },
+  {
+    "file": "items/018-S4-assistant-3e2f5acb.txt",
+    "session": "S4",
+    "role": "assistant",
+    "chars": 130,
+    "first_seen_request": 54,
+    "head": "Посмотрю, как устроен `workers/wallet`, где обрабатываются ошибки и какие тесты уже есть, затем составлю план "
+  },
+  {
+    "file": "items/019-S4-assistant-952b56cb.txt",
+    "session": "S4",
+    "role": "assistant",
+    "chars": 265,
+    "first_seen_request": 67,
+    "head": "Повторные попытки уже запускаются через расписание в PostgreSQL, но задержка фиксирована и лимита нет. Учту вы"
+  }
+]
