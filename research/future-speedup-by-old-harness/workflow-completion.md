@@ -1,0 +1,15 @@
+# Completion evidence
+
+Agreement: local://workflow-research-agreement.md, unchanged active goal with original owner quotes and S1-S5.
+Result: local://workflow-proposals.md and local://workflow-final.md, latest wording includes answer-only questions, bounded status continuation, relevant cancellations as inactive and resolved outcomes.
+
+Actual required final reviewer: WorkflowResultReview#7, Spotty, pre-completion, full object. Verdict read from local://workflow-research-review.md: CLEAN. Its UNCHECKED notes concern the unavailable former secondary Cursor extraction and not independently rerunning git status. The source-copy equality and direct catalog extraction have actual retrievable eval output, inspected by the reviewer (current session JSONL records at lines 324-325), so the lost secondary path is a disclosed limitation, not a missing donor. Main ran git status --short again after CLEAN: exit 0, no output. No project source or installed settings changed.
+
+Final audit:
+- S1: original donor had been read in the Cursor research materials, compared with current SYSTEM.md and primary catalog; current source is the exact matching catalog extraction local://gpt-6.1-sol-original.md. Unavailable secondary path disclosed. Direct equality evidence remains valid for unchanged source text.
+- S2: all 405 nonempty accessible sessions across 24 project entries covered by disjoint 98/37/270-session Sonnet 5.5 xhigh researchers after prompt analysis; all 2426 user-role records examined; 12 remaining metadata-only sessions checked. Snapshot scope and inaccessible/deleted/remote-history limits disclosed in local://omp-workflow-coverage.md.
+- S3: original owner statements and relevant neighbouring actions support the proposals; contrary/later-changed requirements treated chronologically in the synthesis. Key raw records verified directly. No archived text treated as current authorization.
+- S4: three focused donor mechanisms, exact English text for four existing paragraph locations, mapped to evidence and existing policy. No redundant large workflow block, code verification policy, tool/registry implementation or harness redesign proposed. Latest actual SYSTEM.md paragraphs re-read after CLEAN, still the 115-line baseline, main_goal remains the original per-message sentence. No code/config changed; no runtime tests apply.
+- S5: final answer cites actual current raw sources and primary donor catalog, distinguishes hypothesis from observed evidence, does not claim speed gains, successful runtime testing or implemented changes. No secrets/private unrelated content included. Final answer was re-read from the exact reviewed local://workflow-final.md after CLEAN; its contents remain the reviewed result.
+
+No missing concrete deliverable remains. The task was research and proposals only; no release, merge, push, installation or source edit was requested by this active goal. The earlier task-rewrite and Define Goal setup were completed before this research goal began and had their separate actual pre-action CLEAN.
