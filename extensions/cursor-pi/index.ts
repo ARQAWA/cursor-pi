@@ -2,6 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { buildContextMessageText } from "./context-message.ts";
 import { discoverCursorRules, renderRulesSection } from "./rules.ts";
 import { promptForModel, SUPPORTED_MODELS } from "./prompts.ts";
+import { registerAllTools, registerCapturedToolPayload } from "./tools/index.ts";
 
 // Session entry holding the context text computed on the first run, so resumed sessions reuse it.
 const CONTEXT_ENTRY = "cursor-pi-context";
@@ -40,6 +41,8 @@ function registerContextMessage(pi: ExtensionAPI): void {
 }
 
 export default function cursorPi(pi: ExtensionAPI): void {
+	registerAllTools(pi);
+	registerCapturedToolPayload(pi);
 	registerContextMessage(pi);
 	// A returned systemPrompt replaces the whole system prompt for the run.
 	pi.on("before_agent_start", (_event, ctx) => {

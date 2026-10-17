@@ -8,8 +8,17 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promptForModel } from "../extensions/cursor-pi/prompts.ts";
+import { MAIN_TOOL_ORDER } from "../extensions/cursor-pi/tools/declarations.ts";
 
 const CAPTURE = join(dirname(fileURLToPath(import.meta.url)), "capture-request.mjs");
+// Pi's reserved deferred tool for Anthropic native tool changes; it is not a Cursor tool.
+const PI_PLACEHOLDER = "__pi_deferred_placeholder__";
+const CAPTURED_TOOLS = JSON.parse(
+  await readFile(
+    join(dirname(fileURLToPath(import.meta.url)), "..", "research", "cursor", "reverse", "runs-2026-10-16-T4", "tools", "tools-1-4b2bc1b7.json"),
+    "utf8",
+  ),
+);
 const MODELS = [
   ...["gpt-6.1-sol", "gpt-6-sol", "gpt-6-luna", "gpt-5.6-sol", "gpt-5.6-luna", "gpt-5.6-terra"].map((id) => ({
     provider: "openai-codex",
@@ -67,8 +76,11 @@ function checkBody(provider, body, expectedText) {
     if (scanned.includes(phrase)) failures.push(`body contains "${phrase}"`);
   }
 
-  if (body.tools !== undefined && !(Array.isArray(body.tools) && body.tools.length === 0)) {
-    failures.push("tools are declared");
+  if (provider === "openai-codex") {
+    if (JSON.stringify(body.tools) !== JSON.stringify(CAPTURED_TOOLS)) failures.push("tools differ from the captured main array");
+  } else {
+    const names = (Array.isArray(body.tools) ? body.tools.map((tool) => tool?.name) : []).filter((name) => name !== PI_PLACEHOLDER);
+    if (JSON.stringify(names) !== JSON.stringify(MAIN_TOOL_ORDER)) failures.push("tool names differ from MAIN_TOOL_ORDER");
   }
   return failures;
 }
