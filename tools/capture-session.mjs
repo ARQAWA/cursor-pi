@@ -64,7 +64,8 @@ function runCursorPi(args, { cwd, agentDir, timeoutMs }) {
   });
 }
 
-// Runs one prompt through Cursor Pi with the scripted turns, and returns the requests Pi sent in order.
+// Runs one prompt, or several in order as one session (Pi's print mode runs each message as a turn), through Cursor Pi
+// with the scripted turns, and returns the requests Pi sent in order.
 export async function runScriptedSession({ model, cwd, prompt, turns, timeoutMs = RUN_TIMEOUT_MS }) {
   const provider = providerOf(model);
   const fake = await startFakeProvider({ provider, turns });
@@ -82,7 +83,7 @@ export async function runScriptedSession({ model, cwd, prompt, turns, timeoutMs 
     await writeFile(join(agentDir, "models.json"), `${JSON.stringify(models, null, 2)}\n`);
     const args = ["-p", "--no-session", "--model", model];
     if (provider === "anthropic") args.push("--api-key", "sk-ant-api03-capture");
-    args.push(prompt);
+    args.push(...[prompt].flat());
     const run = await runCursorPi(args, { cwd, agentDir, timeoutMs });
     return { ...run, requests: fake.requests, errors: fake.errors.map((error) => error.message) };
   } finally {

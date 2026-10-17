@@ -1,6 +1,8 @@
 import { readFile, stat } from "node:fs/promises";
+import { homedir } from "node:os";
 import type { AgentToolResult, ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
 import { discoverCursorRules, type CursorRule } from "../rules.ts";
+import { discoverAgentSkills, type DiscoveredSkill } from "../skills.ts";
 import { declaration, PASSTHROUGH_PARAMETERS } from "./declarations.ts";
 import { parseReadFileArgs, type ReadFileArgs } from "./read-file/args.ts";
 import { decodeTextFile, FORMAT_HEADER_BYTES, formatForHeader, rememberEncoding } from "./read-file/encoding.ts";
@@ -10,7 +12,7 @@ import { computeReadSlice, formatReadCodeBlock, READ_CHAR_HARD_LIMIT, readTextRa
 import { formatNotebookForLLM } from "./read-file/notebook.ts";
 import { isCursorIgnored, resolveReadPath, resolveRealPath } from "./read-file/paths.ts";
 import { readPdfText } from "./read-file/pdf.ts";
-import { relatedCursorRules, renderCursorRuleReminder, renderSkillReminder, type SkillReminder } from "./read-file/reminders.ts";
+import { relatedCursorRules, relatedSkills, renderCursorRuleReminder, renderSkillReminder } from "./read-file/reminders.ts";
 import { isAgentToolOutputFile, isTerminalFilePath, looksLikeKnownBinaryFormat, readTerminalFileText, TERMINAL_BINARY_REASON } from "./read-file/terminal.ts";
 
 const READ_FILE = declaration("ReadFile");
@@ -63,9 +65,10 @@ async function readPath(params: unknown, ctx: ExtensionToolContext): Promise<Age
 	const seen = seenPathsOf(ctx);
 	const isNewPath = !seen.has(file);
 	const relatedRules = isNewPath ? await relatedRulesFor(file, ctx, seen) : [];
+	const relatedSkillsForFile = isNewPath ? await relatedSkillsFor(file, ctx, seen) : [];
 	seen.add(file);
 	if (loaded.kind === "image") return loaded.result;
-	return renderTextRead(loaded.read, args, file, loaded.fileSize, relatedRules);
+	return renderTextRead(loaded.read, args, file, loaded.fileSize, relatedRules, relatedSkillsForFile);
 }
 
 function seenPathsOf(ctx: ExtensionToolContext): Set<string> {
@@ -84,6 +87,13 @@ async function relatedRulesFor(file: string, ctx: ExtensionToolContext, seen: Se
 	const rules = await discoverCursorRules(ctx.cwd);
 	if (rules.length === 0) return [];
 	return relatedCursorRules({ rules, readPath: file, workspacePaths: [ctx.cwd], seen });
+}
+
+// The skills that a first read of this file reminds the model about, from the same list the catalog is built from.
+async function relatedSkillsFor(file: string, ctx: ExtensionToolContext, seen: Set<string>): Promise<DiscoveredSkill[]> {
+	const skills = await discoverAgentSkills(ctx.cwd, homedir());
+	if (skills.length === 0) return [];
+	return relatedSkills({ skills, readPath: file, workspacePaths: [ctx.cwd], seen });
 }
 
 // Reads the file the way Cursor's executor does: terminal and agent-tool captures, images, PDFs, binary rejection, text.
@@ -162,7 +172,7 @@ async function imageResult(bytes: Buffer, file: string, rawPath: string): Promis
 
 // Cursor's read result for text: an empty file, a range read with the lines it selects, or a result too long to send.
 // Reminders are appended to content results only, after the formatted lines.
-function renderTextRead(read: TextRead, args: ReadFileArgs, file: string, fileSize: number, relatedRules: CursorRule[]): AgentToolResult<undefined> {
+function renderTextRead(read: TextRead, args: ReadFileArgs, file: string, fileSize: number, relatedRules: CursorRule[], relatedSkillList: DiscoveredSkill[]): AgentToolResult<undefined> {
 	if (read.content === "" && !read.rangeApplied) return textResult("File is empty.");
 	let content = read.content;
 	let totalLines = read.totalLines;
@@ -187,17 +197,15 @@ function renderTextRead(read: TextRead, args: ReadFileArgs, file: string, fileSi
 		);
 	}
 	const body = file.endsWith(".ipynb") ? formatNotebookForLLM(content) : formatReadCodeBlock(content, readRange, totalLines);
-	return textResult(withReminders(body, relatedRules));
+	return textResult(withReminders(body, relatedRules, relatedSkillList));
 }
 
 // Cursor's reminder order: the cursor rules, then the skills, each after a blank line.
-function withReminders(body: string, relatedRules: CursorRule[]): string {
+function withReminders(body: string, relatedRules: CursorRule[], relatedSkillList: DiscoveredSkill[]): string {
 	let content = body;
 	const rules = renderCursorRuleReminder(relatedRules);
 	if (rules !== undefined) content = `${content}\n\n${rules}`;
-	// No skills are discovered yet, so the list stays empty and the skill reminder is not rendered.
-	const relatedSkills: SkillReminder[] = [];
-	const skills = renderSkillReminder(relatedSkills);
+	const skills = renderSkillReminder(relatedSkillList);
 	if (skills !== undefined) content = `${content}\n\n${skills}`;
 	return content;
 }

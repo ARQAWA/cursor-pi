@@ -6,7 +6,9 @@
 // Terminal and agent-tool captures: Cursor reads them under .cursor/projects, Cursor Pi under .cursor-pi/projects.
 // Usage: bun tools/check-read-file.mjs   (exit 1 on any FAIL)
 
+import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, realpath, writeFile } from "node:fs/promises";
+import { promisify } from "node:util";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import vm from "node:vm";
@@ -205,6 +207,19 @@ function rulesFixtures() {
 	};
 }
 
+const execFileAsync = promisify(execFile);
+
+// The skills root: a glob-scoped skill at the root and a skill in a subfolder. Cursor's nested skill walk only runs inside a
+// git repository, so the root is one.
+function skillsFixtures() {
+	return {
+		"text.txt": "alpha\nbeta\ngamma\n",
+		"sub/notes.txt": "nested\n",
+		".cursor/skills/ts/SKILL.md": "---\ndescription: Two-space checks.\nglobs: \"*.txt\"\n---\nUse two spaces.\n",
+		"sub/.cursor/skills/nested/SKILL.md": "---\ndescription: Nested folder skill.\n---\nNested body.\n",
+	};
+}
+
 async function writeFixtureTree(files) {
 	const base = await realpath(await mkdtemp(join(tmpdir(), "cursor-pi-read-")));
 	for (const [name, content] of Object.entries(files)) {
@@ -228,11 +243,13 @@ async function makeRoots() {
 		await writeFile(join(main, tree, "projects", "ws1", "agent-tools", "bin.txt"), whitePng(1, 1));
 	}
 	const rules = await writeFixtureTree(rulesFixtures());
-	return { main, rules };
+	const skills = await writeFixtureTree(skillsFixtures());
+	await execFileAsync("git", ["init", "-q"], { cwd: skills });
+	return { main, rules, skills };
 }
 
 // The cases. Arguments are as the model sends them; "@BASE" stands for the case root. A case may name its root
-// ("rules"), a different path for Cursor Pi (`ours`), the rules Cursor is given (`rules`), and whether our text output
+// ("rules" or "skills"), a different path for Cursor Pi (`ours`), the rules and skills Cursor is given (`rules`, `skills`), and whether our text output
 // has its .cursor-pi paths shown as .cursor paths (`normalize`).
 const CASES = [
 	{ name: "full text", args: { path: "text.txt" } },
@@ -308,6 +325,8 @@ const CASES = [
 		args: { path: "text.txt" },
 		rules: true,
 	},
+	{ name: "skill reminder for a glob-scoped skill", root: "skills", args: { path: "text.txt" }, skills: true },
+	{ name: "skill reminder for a skill in a nested folder", root: "skills", args: { path: "sub/notes.txt" }, skills: true },
 ];
 
 // Cursor's rule list for the rules root: the rule as the IDE would give it, with its globs.
@@ -318,6 +337,16 @@ function cursorRulesFor(rulesRoot) {
 			content: "Use two spaces.\n",
 			type: { type: { case: "fileGlobbed", value: { globs: ["*.txt"] } } },
 		},
+	];
+}
+
+// Cursor's agentSkills for the skills root, as Cursor's loader lists the two skills: the glob-scoped one and the one in a
+// subfolder.
+function cursorSkillsFor(skillsRoot) {
+	const skill = (fullPath, description, globs) => ({ fullPath, description, globs, disableModelInvocation: false, environments: [], disabledEnvironments: [], scopedTo: [] });
+	return [
+		skill(join(skillsRoot, ".cursor", "skills", "ts", "SKILL.md"), "Two-space checks.", ["*.txt"]),
+		skill(join(skillsRoot, "sub", ".cursor", "skills", "nested", "SKILL.md"), "Nested folder skill.", []),
 	];
 }
 
@@ -352,6 +381,8 @@ function showingCursorPaths(output) {
 function makeStateHandler(cursor) {
 	return {
 		readPaths: new Set(),
+		// The IDE agent type: Cursor's skill environment filter reads it.
+		agentType: "ide",
 		recordReadPath(path) {
 			this.readPaths.add(path.unwrap(cursor.PrivacyCapability.UNSAFE_ALWAYS_ALLOWED));
 		},
@@ -367,7 +398,7 @@ async function oursRead(root, args, session) {
 
 // Cursor's createReadTool with its LocalReadExecutor. Permission checks are stubbed to allow, and Cursor's
 // .cursorignore path is not run here (see the ours-only case below).
-async function cursorRead(cursor, root, args, { cursorRules, stateHandler }) {
+async function cursorRead(cursor, root, args, { cursorRules, cursorSkills, stateHandler }) {
 	const ctx = cursor.createContext();
 	const executor = new cursor.LocalReadExecutor(
 		{ shouldBlockFileRead: async () => false, shouldBlockRead: async () => false },
@@ -387,7 +418,7 @@ async function cursorRead(cursor, root, args, { cursorRules, stateHandler }) {
 			return run(callCtx);
 		},
 	};
-	const meta = { toolCallId: "call-1", workspacePaths: [root], cursorRules, stateHandler };
+	const meta = { toolCallId: "call-1", workspacePaths: [root], cursorRules, agentSkills: cursorSkills, stateHandler };
 	const argsStream = (async function* () {
 		yield JSON.stringify(args);
 	})();
@@ -430,16 +461,19 @@ function report(name, ok, detail) {
 }
 
 async function runCase(cursor, roots, testCase) {
-	const root = testCase.root === "rules" ? roots.rules : roots.main;
+	const root = testCase.root === "rules" ? roots.rules : testCase.root === "skills" ? roots.skills : roots.main;
 	const args = substituteBase(testCase.args, root);
 	const oursArgs = substituteBase(testCase.ours ?? testCase.args, root);
 	const cursorRules = testCase.rules ? cursorRulesFor(roots.rules) : undefined;
-	const want = await cursorRead(cursor, root, args, { cursorRules, stateHandler: makeStateHandler(cursor) });
+	const cursorSkills = testCase.skills ? cursorSkillsFor(roots.skills) : undefined;
+	const want = await cursorRead(cursor, root, args, { cursorRules, cursorSkills, stateHandler: makeStateHandler(cursor) });
 	const got = await oursRead(root, oursArgs, {});
 	return compare(testCase.name, testCase.normalize ? showingCursorPaths(got) : got, want);
 }
 
 async function main() {
+	// Skill discovery reads the home folder's skill folders, so HOME points at an empty folder for this check.
+	process.env.HOME = await writeFixtureTree({});
 	const roots = await makeRoots();
 	const cursor = await loadCursor();
 	initModule(cursor, "../agent/dist/tools/core/read/read.js");
@@ -477,6 +511,18 @@ async function main() {
 		const oursSecond = await oursRead(roots.rules, { path: "text.txt" }, session);
 		if (!compare("rule reminder, first read in session", cursorFirst, oursFirst)) failed++;
 		if (!compare("rule reminder, repeat read in session", cursorSecond, oursSecond)) failed++;
+	}
+
+	// Skill reminders follow the same rule: the first read of a file reminds, a repeat read does not.
+	{
+		const state = makeStateHandler(cursor);
+		const session = {};
+		const cursorFirst = await cursorRead(cursor, roots.skills, { path: "text.txt" }, { cursorSkills: cursorSkillsFor(roots.skills), stateHandler: state });
+		const cursorSecond = await cursorRead(cursor, roots.skills, { path: "text.txt" }, { cursorSkills: cursorSkillsFor(roots.skills), stateHandler: state });
+		const oursFirst = await oursRead(roots.skills, { path: "text.txt" }, session);
+		const oursSecond = await oursRead(roots.skills, { path: "text.txt" }, session);
+		if (!compare("skill reminder, first read in session", cursorFirst, oursFirst)) failed++;
+		if (!compare("skill reminder, repeat read in session", cursorSecond, oursSecond)) failed++;
 	}
 
 	// Captured call 027-S2: the missing-file result text.

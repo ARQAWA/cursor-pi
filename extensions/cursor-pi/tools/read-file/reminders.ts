@@ -1,7 +1,8 @@
 import { minimatch } from "minimatch";
 import type { CursorRule } from "../../rules.ts";
+import { IDE_SKILL_ENVIRONMENT, isEnvironmentEligible, skillMatchesReadPath, type DiscoveredSkill } from "../../skills.ts";
 
-// Cursor's read reminders: the rules whose globs, or whose nested folder, cover a file the model reads for the first
+// Cursor's read reminders: the rules and skills whose globs, or whose folder, cover a file the model reads for the first
 // time in a session. Matching follows Cursor's cursor-rule-matching behavior on POSIX-style paths.
 
 function normalizeToUnixPath(value: string): string {
@@ -141,7 +142,39 @@ export interface SkillReminder {
 	description: string | undefined;
 }
 
-// Cursor's renderSkillReminder. No skills are discovered yet, so callers pass an empty list.
+export interface RelatedSkillsInput {
+	skills: readonly DiscoveredSkill[];
+	readPath: string;
+	workspacePaths: readonly string[];
+	// Paths already seen in this session. Skills are marked here under their reminder key, beside the read paths and rules.
+	seen: Set<string>;
+}
+
+// Cursor's reminder key for a skill, kept in the same seen set as the read paths and the rule files.
+const SKILL_REMINDER_PREFIX = "__skill_reminder__:";
+
+// Cursor's skill matching for one read: the skills for this IDE that the model may invoke and that apply to the read path,
+// sorted by path as Cursor sorts them. Skills already reminded of in the session are skipped.
+export function relatedSkills({ skills, readPath, workspacePaths, seen }: RelatedSkillsInput): DiscoveredSkill[] {
+	const matches = new Map<string, DiscoveredSkill>();
+	for (const skill of skills) {
+		if (!isEnvironmentEligible(skill, IDE_SKILL_ENVIRONMENT)) continue;
+		if (skill.disableModelInvocation || skill.parseError) continue;
+		if (matches.has(skill.fullPath)) continue;
+		if (!skillMatchesReadPath(skill, readPath, workspacePaths)) continue;
+		matches.set(skill.fullPath, skill);
+	}
+	const related: DiscoveredSkill[] = [];
+	for (const [skillPath, skill] of [...matches.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+		const key = `${SKILL_REMINDER_PREFIX}${skillPath}`;
+		if (seen.has(key)) continue;
+		related.push(skill);
+		seen.add(key);
+	}
+	return related;
+}
+
+// Cursor's renderSkillReminder.
 export function renderSkillReminder(skills: readonly SkillReminder[]): string | undefined {
 	if (skills.length === 0) return undefined;
 	const blocks = skills.map((skill) => `- ${skill.fullPath}\n${skill.description || "(No description)"}`);

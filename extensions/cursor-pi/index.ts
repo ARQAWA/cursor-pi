@@ -1,8 +1,9 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { buildContextMessageText } from "./context-message.ts";
-import { discoverCursorRules, renderRulesSection } from "./rules.ts";
+import { resolveTimeZone, wrapUserTurn } from "./user-turn.ts";
 import { promptForModel, SUPPORTED_MODELS } from "./prompts.ts";
 import { registerAllTools, registerCapturedToolPayload } from "./tools/index.ts";
+import { register as registerTranscripts } from "./transcripts.ts";
 
 // Session entry holding the context text computed on the first run, so resumed sessions reuse it.
 const CONTEXT_ENTRY = "cursor-pi-context";
@@ -20,14 +21,14 @@ function storedContextText(ctx: ExtensionContext): string | undefined {
 }
 
 function registerContextMessage(pi: ExtensionAPI): void {
-	// Computes the rules once per session, on its first run.
+	// Builds the context message once per session, on its first run.
 	pi.on("before_agent_start", async (_event, ctx) => {
 		if (storedContextText(ctx) !== undefined) return undefined;
 		try {
-			const rules = await discoverCursorRules(ctx.cwd);
-			pi.appendEntry(CONTEXT_ENTRY, { text: buildContextMessageText({ rules: renderRulesSection(rules, [ctx.cwd]) }) });
+			const text = await buildContextMessageText({ cwd: ctx.cwd, sessionId: ctx.sessionManager.getSessionId() });
+			pi.appendEntry(CONTEXT_ENTRY, { text });
 		} catch (error) {
-			ctx.ui.notify(`Cursor Pi could not load rules: ${error instanceof Error ? error.message : String(error)}`, "error");
+			ctx.ui.notify(`Cursor Pi could not build the context message: ${error instanceof Error ? error.message : String(error)}`, "error");
 		}
 		return undefined;
 	});
@@ -44,14 +45,17 @@ export default function cursorPi(pi: ExtensionAPI): void {
 	registerAllTools(pi);
 	registerCapturedToolPayload(pi);
 	registerContextMessage(pi);
+	registerTranscripts(pi);
 	// A returned systemPrompt replaces the whole system prompt for the run.
 	pi.on("before_agent_start", (_event, ctx) => {
 		const prompt = ctx.model ? promptForModel(ctx.model.id) : undefined;
 		return prompt ? { systemPrompt: prompt.text } : undefined;
 	});
 
-	pi.on("input", (_event, ctx) => {
-		if (ctx.model && promptForModel(ctx.model.id)) return { action: "continue" };
+	pi.on("input", (event, ctx) => {
+		if (ctx.model && promptForModel(ctx.model.id)) {
+			return { action: "transform", text: wrapUserTurn(event.text, new Date(), resolveTimeZone()) };
+		}
 		ctx.ui.notify(
 			`Cursor Pi has no prompt for model ${ctx.model?.id ?? "none"}. Supported: ${SUPPORTED_MODELS.join(", ")}`,
 			"error",

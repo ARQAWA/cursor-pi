@@ -23,7 +23,7 @@ const NESTED_INCLUDE_GLOBS = [
 	"*/**/CLAUDE.md",
 	"*/**/CLAUDE.local.md",
 ];
-const DEFAULT_GLOB_IGNORE_DIRS = [
+export const DEFAULT_GLOB_IGNORE_DIRS = [
 	"**/node_modules/**",
 	"**/.git/**",
 	"**/.turbo/**",
@@ -67,7 +67,7 @@ const SKILL_PATH_REGEXPS = SKILL_GLOB_PATTERNS.map((pattern) => new RegExp(`^${g
 const UTF8_DECODER = new TextDecoder("utf-8", { fatal: true });
 const LATIN1_DECODER = new TextDecoder("latin1");
 
-type Frontmatter = Record<string, string | boolean | string[]>;
+export type Frontmatter = Record<string, string | boolean | string[]>;
 
 export type CursorRule =
 	| { fullPath: string; content: string; kind: "global" }
@@ -113,7 +113,7 @@ export async function discoverCursorRules(cwd: string): Promise<CursorRule[]> {
 	return [...byPath.values()].map(ruleFromFile);
 }
 
-async function findGitRoot(startPath: string): Promise<string | null> {
+export async function findGitRoot(startPath: string): Promise<string | null> {
 	try {
 		const { stdout } = await execFileAsync("git", ["rev-parse", "--show-toplevel"], { cwd: startPath });
 		return stdout.trim();
@@ -219,7 +219,7 @@ function classifyNestedPath(relativePath: string): "rules" | "markdown" | undefi
 }
 
 // Lists files under root with ripgrep, the walker Cursor uses. Hidden files are included and .gitignore is honored.
-async function ripwalk(
+export async function ripwalk(
 	root: string,
 	options: { includeGlobs?: string[]; excludeGlobs?: string[]; followSymlinks: boolean },
 ): Promise<string[]> {
@@ -314,7 +314,7 @@ function truncateMarkdownRule(content: string, name: string): string {
 
 // Frontmatter reader that follows Cursor's parseCursorRulesMdcContent: a leading "---" block, list items under a key,
 // and one level of nesting under "metadata". Files without frontmatter are not rules.
-function parseMdc(content: string): { frontmatter: Frontmatter; body: string } | undefined {
+export function parseMdc(content: string): { frontmatter: Frontmatter; body: string } | undefined {
 	const trimmed = content.trimStart();
 	if (!trimmed.startsWith("---")) return undefined;
 	const parts = trimmed.split("---").filter(Boolean);
@@ -380,7 +380,7 @@ function isQuoted(value: string): boolean {
 	return (value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"));
 }
 
-function parseGlobs(value: unknown): string[] | undefined {
+export function parseGlobs(value: unknown): string[] | undefined {
 	let globs: string[];
 	if (typeof value === "string") {
 		globs = splitCommaSeparatedGlobs(value);
@@ -501,13 +501,19 @@ function isPathWithinDir(pathValue: string, dir: string): boolean {
 	return pathValue === normalizedDir || pathValue.startsWith(`${normalizedDir}/`);
 }
 
-// Renders the rules section exactly as Cursor's buildRulesPromptSection does for these rules, or returns undefined
-// when there is nothing to show.
-export function renderRulesSection(rules: readonly CursorRule[], workspacePaths: readonly string[]): string | undefined {
+// The rules section as an element, for the user info block; undefined when there is nothing to show.
+export function rulesSectionElement(rules: readonly CursorRule[], workspacePaths: readonly string[]): PromptElement | undefined {
 	const { global, agentRequestable } = categorizeRules(rules, workspacePaths);
 	const requestable = agentRequestable.filter((rule) => !isFileScopedCursorRule(rule, workspacePaths));
 	if (global.length === 0 && requestable.length === 0) return undefined;
-	return renderContent(rulesElement(global, requestable));
+	return rulesElement(global, requestable);
+}
+
+// Renders the rules section exactly as Cursor's buildRulesPromptSection does for these rules, or returns undefined
+// when there is nothing to show.
+export function renderRulesSection(rules: readonly CursorRule[], workspacePaths: readonly string[]): string | undefined {
+	const element = rulesSectionElement(rules, workspacePaths);
+	return element === undefined ? undefined : renderContent(element);
 }
 
 // Once file-scoped rules are filtered out, only description-based rules reach this list.
@@ -539,7 +545,7 @@ function rulesElement(global: CursorRule[], agentRequestable: CursorRule[]): Pro
 
 // Small model of the prompt JSX that Cursor renders. Block elements (p, section, x) keep their own text; runs of text
 // and breaks form paragraphs; paragraphs are separated by a blank line unless the earlier one already ends in a newline.
-interface PromptElement {
+export interface PromptElement {
 	type: "p" | "br" | "section" | "x";
 	title?: string;
 	tag?: string;
@@ -547,23 +553,23 @@ interface PromptElement {
 	children?: PromptNode;
 }
 
-type PromptNode = string | false | undefined | PromptElement | readonly PromptNode[];
+export type PromptNode = string | false | undefined | PromptElement | readonly PromptNode[];
 
 const BLOCK_TYPES = new Set(["p", "section", "x"]);
 
-function paragraphOf(text: string): PromptElement {
+export function paragraphOf(text: string): PromptElement {
 	return { type: "p", children: text };
 }
 
-function lineBreakOf(): PromptElement {
+export function lineBreakOf(): PromptElement {
 	return { type: "br" };
 }
 
-function sectionOf(title: string, attrs: Record<string, string>, children: PromptNode): PromptElement {
+export function sectionOf(title: string, attrs: Record<string, string>, children: PromptNode): PromptElement {
 	return { type: "section", title, attrs, children };
 }
 
-function tagOf(tag: string, attrs: Record<string, string>, children: PromptNode): PromptElement {
+export function tagOf(tag: string, attrs: Record<string, string>, children: PromptNode): PromptElement {
 	return { type: "x", tag, attrs, children };
 }
 
@@ -572,7 +578,7 @@ function childNodes(children: PromptNode): readonly PromptNode[] {
 	return Array.isArray(children) ? (children as readonly PromptNode[]) : [children];
 }
 
-function renderContent(node: PromptNode): string {
+export function renderContent(node: PromptNode): string {
 	if (node === undefined || node === false) return "";
 	if (typeof node === "string") return node;
 	if (Array.isArray(node)) return renderParagraphs(node as readonly PromptNode[]);
@@ -662,7 +668,7 @@ function normalizeWhitespace(text: string): string {
 }
 
 // Cursor's git-status and skill paths use a darwin-only rule: a folder that holds a protected home folder is skipped.
-function hasProtectedFolderUnder(root: string, home: string): boolean {
+export function hasProtectedFolderUnder(root: string, home: string): boolean {
 	if (process.platform !== "darwin") return false;
 	const comparableRoot = normalizeSlashes(root).toLowerCase();
 	const normalizedHome = normalizeSlashes(home);

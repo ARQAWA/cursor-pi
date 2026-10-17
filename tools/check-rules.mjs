@@ -10,7 +10,6 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
-import { buildContextMessageText } from "../extensions/cursor-pi/context-message.ts";
 import { discoverCursorRules, renderRulesSection } from "../extensions/cursor-pi/rules.ts";
 import { initModule, loadCursor } from "./cursor-oracle.mjs";
 
@@ -219,11 +218,11 @@ async function checkRequests(fixture, expected) {
 		const problems = [];
 		const first = items[0];
 		if (first?.role !== "user") problems.push(`first item role is ${first?.role}`);
-		if (textOf(first?.content) !== expected) {
-			problems.push(`first user item is not the rules message (starts ${JSON.stringify(textOf(first?.content).slice(0, 80))})`);
+		if (!textOf(first?.content).includes(expected)) {
+			problems.push(`first user item does not contain the rules section (starts ${JSON.stringify(textOf(first?.content).slice(0, 80))})`);
 		}
 		const next = items.slice(1).find((item) => item?.role === "user");
-		if (textOf(next?.content) !== "hello") problems.push(`next user item text is ${JSON.stringify(textOf(next?.content))}`);
+		if (!/^<timestamp>[^\n]*<\/timestamp>\n<user_query>\nhello\n<\/user_query>$/.test(textOf(next?.content))) problems.push(`next user item text is ${JSON.stringify(textOf(next?.content))}`);
 		if (problems.length === 0) {
 			console.log(`ok ${model}`);
 		} else {
@@ -250,6 +249,7 @@ for (const fixture of fixtures) {
 	}
 }
 const full = fixtures[0];
-const expected = buildContextMessageText({ rules: renderRulesSection(await discoverCursorRules(full.cwd), [full.cwd]) });
+// The context message carries the rules section unchanged, so its bytes must appear inside the message.
+const expected = renderRulesSection(await discoverCursorRules(full.cwd), [full.cwd]) ?? "";
 failed += await checkRequests(full, expected);
 process.exit(failed === 0 ? 0 : 1);
