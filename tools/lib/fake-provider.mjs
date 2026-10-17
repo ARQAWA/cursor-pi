@@ -61,6 +61,26 @@ function validateTurns(turns, provider) {
   }
 }
 
+// A scripted call may hold {{match:PATTERN}} in its string arguments: the text becomes the first group of PATTERN in the request
+// that the turn answers, so a call can use an id an earlier tool result gave (for example "Shell ID: (\d+)").
+function resolveTurn(turn, body) {
+  if (!Array.isArray(turn.calls)) return turn;
+  const text = JSON.stringify(body);
+  const fill = (value) => {
+    if (typeof value === "string") {
+      return value.replace(/\{\{match:(.+?)\}\}/g, (_whole, source) => {
+        const found = new RegExp(source).exec(text);
+        if (found === null || found[1] === undefined) throw new Error(`no match for /${source}/ in the request`);
+        return found[1];
+      });
+    }
+    if (Array.isArray(value)) return value.map(fill);
+    if (value !== null && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, fill(item)]));
+    return value;
+  };
+  return { ...turn, calls: turn.calls.map((call) => ({ ...call, arguments: fill(call.arguments) })) };
+}
+
 // Codex Responses SSE: every event carries its type in the data JSON, as the Codex backend sends it.
 function codexSse(turn, index, model) {
   const events = [];
@@ -231,7 +251,15 @@ export async function startFakeProvider({ provider, turns }) {
       }
       const index = requests.length - 1;
       if (index >= turns.length) errors.push(new Error(`request ${requests.length} has no scripted turn`));
-      const turn = turns[index] ?? { text: UNSCRIPTED_TEXT };
+      let turn;
+      try {
+        turn = resolveTurn(turns[index] ?? { text: UNSCRIPTED_TEXT }, record.body);
+      } catch (error) {
+        errors.push(error);
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: { message: error.message } }));
+        return;
+      }
       const model = typeof record.body?.model === "string" ? record.body.model : "unknown";
       const body = provider === "openai-codex" ? codexSse(turn, index, model) : anthropicSse(turn, index, model);
       res.writeHead(200, { "content-type": "text/event-stream" });

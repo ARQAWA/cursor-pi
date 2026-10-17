@@ -16,6 +16,8 @@ export interface ShellJobInfo {
 	endedAt: number | undefined;
 	exitCode: number | null | undefined;
 	outputPath: string;
+	signal: string | undefined;
+	toolCallId: string | undefined;
 }
 
 export interface RegisterShellJobOptions {
@@ -23,6 +25,7 @@ export interface RegisterShellJobOptions {
 	command: string;
 	cwd: string;
 	description?: string;
+	toolCallId?: string;
 	terminalsFolder: string;
 	// Output a foreground run has already collected; the job keeps appending to the same object.
 	output?: ShellOutput;
@@ -52,6 +55,7 @@ class ShellJob {
 	readonly done: Promise<ShellJobInfo>;
 	status: ShellJobStatus = "running";
 	exitCode: number | null | undefined;
+	signal: string | undefined;
 	endedAt: number | undefined;
 	private readonly startedAt = Date.now();
 	private readonly output: ShellOutput;
@@ -67,6 +71,7 @@ class ShellJob {
 		readonly command: string,
 		readonly cwd: string,
 		readonly description: string | undefined,
+		readonly toolCallId: string | undefined,
 		readonly outputPath: string,
 		private readonly run: ShellRun,
 		output: ShellOutput,
@@ -97,6 +102,8 @@ class ShellJob {
 			endedAt: this.endedAt,
 			exitCode: this.exitCode,
 			outputPath: this.outputPath,
+			signal: this.signal,
+			toolCallId: this.toolCallId,
 		};
 	}
 
@@ -130,6 +137,7 @@ class ShellJob {
 		clearTimeout(this.hardTimer);
 		this.status = exit.aborted ? "aborted" : exit.code === 0 ? "succeeded" : "failed";
 		this.exitCode = exit.code;
+		this.signal = exit.signal ?? undefined;
 		this.endedAt = Date.now();
 		this.chain = this.chain.then(() => writeFile(this.outputPath, this.render())).catch(() => {});
 		void this.chain.then(() => {
@@ -177,6 +185,7 @@ export function registerShellJob(options: RegisterShellJobOptions): { id: number
 		options.command,
 		options.cwd,
 		options.description,
+		options.toolCallId,
 		outputPath,
 		options.run,
 		options.output ?? new ShellOutput(),

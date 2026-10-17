@@ -36,6 +36,8 @@ export interface UserInfoProps {
 	stores: AgentStoreMount[];
 	rules: CursorRule[];
 	skills: DiscoveredSkill[];
+	// The <dynamic_tool_catalog> section; absent when no dynamic namespace is available.
+	dynamicCatalog?: PromptElement;
 }
 
 // Cursor's getFriendlyDateForTimeZone, for example "Friday Oct 16, 2026".
@@ -52,6 +54,7 @@ export function renderUserInfo(props: UserInfoProps): string {
 		agentTranscriptsSection(props.agentTranscriptsFolder),
 		rulesSectionElement(props.rules, [props.workspacePath]),
 		buildAgentSkillsSection(props.skills, [props.workspacePath], CURSOR_FEATURE_FLAGS.aliasSkillCatalogPathPrefixes),
+		props.dynamicCatalog,
 	]);
 }
 

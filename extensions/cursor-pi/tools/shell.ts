@@ -13,7 +13,7 @@ export function register(pi: ExtensionAPI): void {
 		label: SHELL.name,
 		description: SHELL.description,
 		parameters: PASSTHROUGH_PARAMETERS,
-		execute: (_toolCallId, params, signal, _onUpdate, ctx) => executeShell(params, signal, ctx),
+		execute: (toolCallId, params, signal, _onUpdate, ctx) => executeShell(params, signal, ctx, toolCallId),
 	});
 }
 
@@ -21,6 +21,7 @@ export async function executeShell(
 	params: unknown,
 	signal: AbortSignal | undefined,
 	ctx: ExtensionToolContext,
+	toolCallId?: string,
 ): Promise<{ content: { type: "text"; text: string }[]; details: ShellRenderInput; isError?: true }> {
 	const parsed = parseShellArgs(params);
 	if ("error" in parsed) {
@@ -28,6 +29,6 @@ export async function executeShell(
 		const failure: ShellRenderInput = { result: { case: "spawnError", value: { command: "", error: parsed.error } }, isBackground: false, terminalsFolder: "" };
 		return { content: [{ type: "text", text: renderShellResult(failure) }], details: failure, isError: true };
 	}
-	const details = await runShell(parsed.args, signal, shellSessionFor(ctx.cwd));
+	const details = await runShell(parsed.args, signal, shellSessionFor(ctx.cwd), toolCallId);
 	return { content: [{ type: "text", text: renderShellResult(details) }], details };
 }

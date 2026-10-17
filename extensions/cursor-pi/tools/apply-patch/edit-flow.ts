@@ -4,6 +4,7 @@
 // error.message and no modelVisibleError, so the longer "There was an error applying the patch" texts never reach it.
 
 import { EOF_MARKER, PATCH_PREFIX, PATCH_SUFFIX, PatchParser } from "./codex-parser.ts";
+import { withFileLock } from "../file-locks.ts";
 
 // A read result with the cases of Cursor's ReadResult. "content" carries the decoded text.
 export type PatchRead =
@@ -38,9 +39,6 @@ class PatchToolError extends Error {}
 
 // The target does not exist, so the patch is applied to empty text and creates the file.
 class FileMissing extends Error {}
-
-// Cursor queues ApplyPatch calls per target path, so two patches to one file run one after the other.
-const fileQueues = new Map<string, Promise<void>>();
 
 export async function runApplyPatch(rawInput: string, io: PatchIO, signal?: AbortSignal): Promise<PatchToolResult> {
 	try {
@@ -165,25 +163,6 @@ async function callIo<T>(call: () => Promise<T>): Promise<T> {
 		return await call();
 	} catch (error) {
 		throw new PatchToolError(messageOf(error));
-	}
-}
-
-async function withFileLock<T>(path: string, signal: AbortSignal | undefined, run: () => Promise<T>): Promise<T> {
-	if (signal?.aborted) throw new PatchToolError("Aborted");
-	const previous = fileQueues.get(path) ?? Promise.resolve();
-	let release = (): void => undefined;
-	const current = new Promise<void>((resolve) => {
-		release = () => resolve();
-	});
-	const tail = previous.then(() => current);
-	fileQueues.set(path, tail);
-	await previous;
-	try {
-		if (signal?.aborted) throw new PatchToolError("Aborted");
-		return await run();
-	} finally {
-		release();
-		if (fileQueues.get(path) === tail) fileQueues.delete(path);
 	}
 }
 

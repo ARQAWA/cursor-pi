@@ -125,15 +125,13 @@ function textDiff(expected, actual) {
 }
 
 async function main() {
-	// Pi's child inherits HOME, and the transcript goes under it, so ~/.cursor-pi is never touched. Bun's os.homedir() keeps
-	// the HOME it started with, so the project folder is built from home below.
+	// The child's HOME is this temp folder, so its ~/.cursor-pi writes stay out of the real home and the check reads them here.
 	const home = await realpath(await mkdtemp(path.join(os.tmpdir(), "cursor-pi-transcripts-home-")));
-	process.env.HOME = home;
 	const ws = await realpath(await mkdtemp(path.join(os.tmpdir(), "cursor-pi-transcripts-ws-")));
 	try {
 		await mkdir(path.join(ws, "src"), { recursive: true });
 		await writeFile(path.join(ws, "src", "app.ts"), "export function main() {\n  return 1;\n}\n");
-		const run = await runScriptedSession({ model: MODEL, cwd: ws, prompt: PROMPTS, turns: TURNS });
+		const run = await runScriptedSession({ model: MODEL, cwd: ws, prompt: PROMPTS, turns: TURNS, homeDir: home });
 		report(
 			run.code === 0 && run.errors.length === 0,
 			"Pi exits 0 for both prompts without extension or provider errors",

@@ -13,9 +13,11 @@
     "@jimp/js-png": "1.6.0",
     "@jimp/js-tiff": "1.6.0",
     "@jimp/plugin-resize": "1.6.0",
+    "@modelcontextprotocol/sdk": "1.25.1",
     "iconv-lite": "0.7.0",
     "ignore": "7.0.5",
     "jschardet": "3.1.4",
+    "jsonc-parser": "3.3.1",
     "minimatch": "10.2.5",
     "pdf-parse": "2.4.5"
   }

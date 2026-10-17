@@ -19,10 +19,11 @@ interface ShellRequest {
 	workingDirectory: string | undefined;
 	backgroundAfterMs: number;
 	description: string | undefined;
+	toolCallId?: string;
 }
 
-export async function runShell(params: unknown, signal: AbortSignal | undefined, session: ShellSession): Promise<ShellRenderInput> {
-	const request = parseRequest(params);
+export async function runShell(params: unknown, signal: AbortSignal | undefined, session: ShellSession, toolCallId?: string): Promise<ShellRenderInput> {
+	const request = { ...parseRequest(params), toolCallId };
 	const terminalsFolder = terminalsDirFor(session.projectDir);
 	try {
 		return await execute(request, session, signal, terminalsFolder);
@@ -79,7 +80,7 @@ function missingSessionDirectory(request: ShellRequest, session: ShellSession, c
 
 async function startInBackground(request: ShellRequest, session: ShellSession, cwd: string, terminalsFolder: string, startedAt: number): Promise<ShellRenderInput> {
 	const run = await session.spawnCommand({ command: request.command, cwd, pipeStdin: false });
-	const job = registerShellJob({ run, command: request.command, cwd, description: request.description, terminalsFolder });
+	const job = registerShellJob({ run, command: request.command, cwd, description: request.description, terminalsFolder, toolCallId: request.toolCallId });
 	const value: ShellRunValue = {
 		command: request.command,
 		shellId: job.id,
@@ -146,6 +147,7 @@ async function runInForeground(
 				description: request.description,
 				terminalsFolder,
 				output,
+				toolCallId: request.toolCallId,
 				hardTimeoutMs: ADOPTED_HARD_TIMEOUT_MS,
 			});
 			const value: ShellRunValue = {

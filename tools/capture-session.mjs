@@ -36,11 +36,11 @@ export function providerOf(model) {
   return provider;
 }
 
-function runCursorPi(args, { cwd, agentDir, timeoutMs }) {
+function runCursorPi(args, { cwd, agentDir, homeDir, timeoutMs }) {
   return new Promise((resolveRun) => {
     const child = spawn(CURSOR_PI, args, {
       cwd,
-      env: { ...process.env, PI_CODING_AGENT_DIR: agentDir },
+      env: { ...process.env, HOME: homeDir, PI_CODING_AGENT_DIR: agentDir },
       stdio: ["ignore", "pipe", "pipe"],
     });
     let stdout = "";
@@ -66,11 +66,14 @@ function runCursorPi(args, { cwd, agentDir, timeoutMs }) {
 
 // Runs one prompt, or several in order as one session (Pi's print mode runs each message as a turn), through Cursor Pi
 // with the scripted turns, and returns the requests Pi sent in order.
-export async function runScriptedSession({ model, cwd, prompt, turns, timeoutMs = RUN_TIMEOUT_MS }) {
+export async function runScriptedSession({ model, cwd, prompt, turns, homeDir, timeoutMs = RUN_TIMEOUT_MS }) {
   const provider = providerOf(model);
   const fake = await startFakeProvider({ provider, turns });
   try {
     const agentDir = await mkdtemp(join(tmpdir(), "cursor-pi-agent-"));
+    // The child runs with its own HOME, so its ~/.cursor-pi writes stay out of the real home. A caller that reads those
+    // writes passes its own homeDir.
+    const home = homeDir ?? (await mkdtemp(join(tmpdir(), "cursor-pi-home-")));
     // transport "sse" replaces the deprecated websockets setting, so Codex posts to the fake provider over HTTP.
     const settings = { compaction: { enabled: false }, retry: { enabled: false }, transport: "sse" };
     const models = {
@@ -84,7 +87,7 @@ export async function runScriptedSession({ model, cwd, prompt, turns, timeoutMs 
     const args = ["-p", "--no-session", "--model", model];
     if (provider === "anthropic") args.push("--api-key", "sk-ant-api03-capture");
     args.push(...[prompt].flat());
-    const run = await runCursorPi(args, { cwd, agentDir, timeoutMs });
+    const run = await runCursorPi(args, { cwd, agentDir, homeDir: home, timeoutMs });
     return { ...run, requests: fake.requests, errors: fake.errors.map((error) => error.message) };
   } finally {
     fake.close();

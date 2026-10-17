@@ -46,6 +46,8 @@ async function main() {
   const out = resolve(values.out ?? join(tmpdir(), "cursor-pi-capture", `${provider}-${id}.json`));
   const cwd = values.cwd ? resolve(values.cwd) : await mkdtemp(join(tmpdir(), "cursor-pi-cwd-"));
   const agentDir = await mkdtemp(join(tmpdir(), "cursor-pi-agent-"));
+  // The child runs with its own HOME, so its ~/.cursor-pi writes stay out of the real home.
+  const homeDir = await mkdtemp(join(tmpdir(), "cursor-pi-home-"));
 
   let captured;
   let captureError;
@@ -78,7 +80,7 @@ async function main() {
   args.push(values.prompt);
   const child = spawn(CURSOR_PI, args, {
     cwd,
-    env: { ...process.env, PI_CODING_AGENT_DIR: agentDir },
+    env: { ...process.env, HOME: homeDir, PI_CODING_AGENT_DIR: agentDir },
     stdio: ["ignore", "pipe", "pipe"],
   });
   let stderr = "";

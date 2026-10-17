@@ -4,6 +4,8 @@ import { resolveTimeZone, wrapUserTurn } from "./user-turn.ts";
 import { promptForModel, SUPPORTED_MODELS } from "./prompts.ts";
 import { registerAllTools, registerCapturedToolPayload } from "./tools/index.ts";
 import { register as registerTranscripts } from "./transcripts.ts";
+import { registerGoalContinuation } from "./goals/continuation.ts";
+import { setMcpApprovalPrompt, type McpApprovalRequest } from "./mcp/index.ts";
 
 // Session entry holding the context text computed on the first run, so resumed sessions reuse it.
 const CONTEXT_ENTRY = "cursor-pi-context";
@@ -18,6 +20,22 @@ function storedContextText(ctx: ExtensionContext): string | undefined {
 		}
 	}
 	return undefined;
+}
+
+// An MCP server that is not approved yet is asked about in the Pi dialog. Without a UI, it is skipped.
+function registerMcpApprovals(pi: ExtensionAPI): void {
+	pi.on("before_agent_start", (_event, ctx) => {
+		setMcpApprovalPrompt(
+			ctx.hasUI
+				? (request: McpApprovalRequest) =>
+						ctx.ui.confirm(
+							"Allow MCP server?",
+							`${request.name} (${request.configPath})\n${"command" in request.server ? [request.server.command, ...(request.server.args ?? [])].join(" ") : request.server.url}`,
+						)
+				: undefined,
+		);
+		return undefined;
+	});
 }
 
 function registerContextMessage(pi: ExtensionAPI): void {
@@ -46,6 +64,8 @@ export default function cursorPi(pi: ExtensionAPI): void {
 	registerCapturedToolPayload(pi);
 	registerContextMessage(pi);
 	registerTranscripts(pi);
+	registerGoalContinuation(pi);
+	registerMcpApprovals(pi);
 	// A returned systemPrompt replaces the whole system prompt for the run.
 	pi.on("before_agent_start", (_event, ctx) => {
 		const prompt = ctx.model ? promptForModel(ctx.model.id) : undefined;

@@ -377,3 +377,9 @@ export async function blockForWrite(filePath: string, workspace: string): Promis
 	if (await isHardcodedWriteProtected(real, protectionRoot)) return { type: "needsApproval", reason: `Protected config file: ${basename(real).toLowerCase()}` };
 	return undefined;
 }
+
+// Cursor's Delete asks before each delete that the write policy does not block: the IDE's interactive provider decides, and a
+// headless run denies. Pi asks with this title and message through the UI.
+export function deleteApprovalPrompt(resolvedPath: string): { title: string; message: string } {
+	return { title: "Approve delete", message: `Delete file: ${resolvedPath}` };
+}

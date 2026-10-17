@@ -131,7 +131,7 @@ export function lenientArray(value: unknown, field: string): unknown {
 type JsonToken = { kind: "string"; raw: string; index: number } | { kind: "punctuation"; char: string; index: number };
 
 // Cursor's jsonTokens: the string literals and structural characters from start on, skipping everything else.
-function* jsonTokens(text: string, start: number): Generator<JsonToken> {
+export function* jsonTokens(text: string, start: number): Generator<JsonToken> {
 	for (let index = start; index < text.length; index++) {
 		const char = text[index];
 		if (char === '"') {
@@ -162,7 +162,7 @@ function decodeStringLiteral(raw: string): string {
 }
 
 // Cursor's namesAKeyTwice: true when an object in the JSON text names a key twice.
-function namesAKeyTwice(text: string): boolean {
+export function namesAKeyTwice(text: string): boolean {
 	const containers: ("object" | "array")[] = [];
 	const keysPerObject: Set<string>[] = [];
 	let pendingString: string | undefined;
