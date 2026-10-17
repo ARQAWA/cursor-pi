@@ -2,6 +2,7 @@
 
 | Document | Purpose |
 |---|---|
+| [status.md](status.md) | Build plan, current state and remaining work |
 | [project.md](project.md) | Goal, reference versions, scope and boundaries of Cursor Pi |
 | [decisions.md](decisions.md) | Owner decisions with verbatim quotes from the session logs |
 | [pi-map.md](pi-map.md) | Every in-scope Cursor mechanism mapped to a public Pi API at the pinned commit, or a named blocker |
