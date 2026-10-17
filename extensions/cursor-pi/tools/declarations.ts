@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { TSchema } from "typebox";
 
 // One captured tool entry, with the key order Cursor Desktop sent.
 export interface CapturedTool {
@@ -33,3 +34,8 @@ export function declaration(name: string): CapturedTool {
 
 // Cursor's main agent tools, in the order of the captured toolset.
 export const MAIN_TOOL_ORDER = ["Shell", "Glob", "rg", "ReadFile", "ApplyPatch", "AskQuestion", "GetDynamicTools", "CallDynamicTool"] as const;
+
+// Pi checks a tool's arguments against the schema registered with the tool before execute runs, and Cursor checks its own
+// arguments inside each tool. Tools register this schema, which accepts any object unchanged; the captured schema reaches the
+// provider on the wire instead (index.ts).
+export const PASSTHROUGH_PARAMETERS = { type: "object", additionalProperties: true } as unknown as TSchema;

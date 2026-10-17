@@ -1,5 +1,7 @@
-// Cursor's zod parse of AskQuestion arguments. Pi checks the declared schema before execute runs, so this reproduces
-// what Cursor reports for the same arguments: the same issues, in zod's order, with zod's messages.
+// Cursor's zod parse of AskQuestion arguments. Pi does not check arguments, so this reproduces what Cursor reports for the
+// same arguments: the same issues, in zod's order, with zod's messages.
+
+import { lenientArray } from "../cursor-args.ts";
 
 export interface AskQuestionOption {
 	id: string;
@@ -62,17 +64,23 @@ function checkQuestion(question: unknown, path: Path, issues: string[]): void {
 	if (fields.allow_multiple !== undefined) expectType(fields.allow_multiple, "boolean", [...path, "allow_multiple"], issues);
 }
 
-// The error text Cursor renders for arguments its schema rejects, or undefined when they pass.
-export function askQuestionArgsError(input: unknown): string | undefined {
+// The arguments after Cursor's AskQuestion schema. questions is read the way Cursor's lenientArray reads it, so a JSON array
+// string is accepted as the array it holds.
+export function parseAskQuestionArgs(input: unknown): { args: AskQuestionArgs } | { error: string } {
 	const issues: string[] = [];
+	let title: string | undefined;
+	let questions: AskQuestionItem[] = [];
 	if (expectType(input, "object", [], issues)) {
-		const args = input as Record<string, unknown>;
-		if (args.title !== undefined) expectType(args.title, "string", ["title"], issues);
-		if (expectType(args.questions, "array", ["questions"], issues)) {
-			const questions = args.questions as unknown[];
-			if (questions.length < 1) fail(["questions"], "Array must contain at least 1 element(s)", issues);
-			questions.forEach((question, index) => checkQuestion(question, ["questions", index], issues));
+		const fields = input as Record<string, unknown>;
+		if (fields.title !== undefined && expectType(fields.title, "string", ["title"], issues)) title = fields.title as string;
+		const list = lenientArray(fields.questions, "questions");
+		if (expectType(list, "array", ["questions"], issues)) {
+			const items = list as unknown[];
+			if (items.length < 1) fail(["questions"], "Array must contain at least 1 element(s)", issues);
+			items.forEach((question, index) => checkQuestion(question, ["questions", index], issues));
+			questions = items as AskQuestionItem[];
 		}
 	}
-	return issues.length === 0 ? undefined : `Invalid arguments:\n${issues.join("\n")}`;
+	if (issues.length > 0) return { error: `Invalid arguments:\n${issues.join("\n")}` };
+	return { args: { title, questions } };
 }

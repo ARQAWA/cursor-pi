@@ -1,8 +1,7 @@
 import { readFile, stat } from "node:fs/promises";
 import type { AgentToolResult, ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
-import type { TSchema } from "typebox";
 import { discoverCursorRules, type CursorRule } from "../rules.ts";
-import { declaration } from "./declarations.ts";
+import { declaration, PASSTHROUGH_PARAMETERS } from "./declarations.ts";
 import { parseReadFileArgs, type ReadFileArgs } from "./read-file/args.ts";
 import { decodeTextFile, FORMAT_HEADER_BYTES, formatForHeader, rememberEncoding } from "./read-file/encoding.ts";
 import { ReadToolError } from "./read-file/errors.ts";
@@ -28,7 +27,7 @@ export function register(pi: ExtensionAPI): void {
 		name: READ_FILE.name,
 		label: READ_FILE.name,
 		description: READ_FILE.description,
-		parameters: READ_FILE.parameters as unknown as TSchema,
+		parameters: PASSTHROUGH_PARAMETERS,
 		execute: (_toolCallId, params, signal, _onUpdate, ctx) => executeReadFile(params, signal, ctx),
 	});
 }

@@ -1,8 +1,7 @@
 import type { ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
-import type { TSchema } from "typebox";
-import { askQuestionArgsError, type AskQuestionArgs, type AskQuestionItem } from "./ask-question/args.ts";
+import { parseAskQuestionArgs, type AskQuestionItem } from "./ask-question/args.ts";
 import { type AskQuestionAnswer, formatAnswers, NO_CLIENT_TEXT, SKIPPED_TEXT } from "./ask-question/result.ts";
-import { declaration } from "./declarations.ts";
+import { declaration, PASSTHROUGH_PARAMETERS } from "./declarations.ts";
 
 const ASK_QUESTION = declaration("AskQuestion");
 // The row that lets the user type an answer; Cursor's form offers it on every question.
@@ -15,12 +14,12 @@ export function register(pi: ExtensionAPI): void {
 		name: ASK_QUESTION.name,
 		label: ASK_QUESTION.name,
 		description: ASK_QUESTION.description,
-		parameters: ASK_QUESTION.parameters as unknown as TSchema,
+		parameters: PASSTHROUGH_PARAMETERS,
 		execute: (_toolCallId, params, signal, _onUpdate, ctx) => executeAskQuestion(params, signal, ctx),
 	});
 }
 
-type TextResult = { content: { type: "text"; text: string }[]; details: undefined };
+type TextResult = { content: { type: "text"; text: string }[]; details: undefined; isError?: true };
 
 function textResult(text: string): TextResult {
 	return { content: [{ type: "text", text }], details: undefined };
@@ -28,10 +27,10 @@ function textResult(text: string): TextResult {
 
 // Asks the questions one after another. Escape on any dialog skips the whole call, which the model sees as a rejection.
 export async function executeAskQuestion(params: unknown, signal: AbortSignal | undefined, ctx: ExtensionToolContext): Promise<TextResult> {
-	const error = askQuestionArgsError(params);
-	if (error !== undefined) return textResult(`Error: ${error}`);
+	const parsed = parseAskQuestionArgs(params);
+	if ("error" in parsed) return { ...textResult(`Error: ${parsed.error}`), isError: true };
 	if (!ctx.hasUI) return textResult(NO_CLIENT_TEXT);
-	const { title, questions } = params as AskQuestionArgs;
+	const { title, questions } = parsed.args;
 	const answers: AskQuestionAnswer[] = [];
 	for (const question of questions) {
 		const heading = title === undefined ? question.prompt : `${title}\n\n${question.prompt}`;

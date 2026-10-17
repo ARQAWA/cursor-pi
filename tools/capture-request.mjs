@@ -9,13 +9,12 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
-import zlib from "node:zlib";
+import { fakeCodexKey, recordRequest } from "./lib/fake-provider.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CURSOR_PI = join(ROOT, "bin", "cursor-pi");
 const PROVIDERS = new Set(["openai-codex", "anthropic"]);
 const RUN_TIMEOUT_MS = 60_000;
-const REDACTED_HEADERS = new Set(["authorization", "x-api-key"]);
 
 function fail(message) {
   console.error(`capture-request: ${message}`);
@@ -26,43 +25,6 @@ function usage(message) {
   console.error(`capture-request: ${message}`);
   console.error("usage: bun tools/capture-request.mjs --model <provider/id> [--cwd <dir>] [--prompt <text>] [--out <file>]");
   process.exit(2);
-}
-
-// Codex reads the JWT payload with atob, so the segments use standard base64.
-function fakeCodexKey() {
-  const segment = (value) => Buffer.from(JSON.stringify(value)).toString("base64");
-  const claims = { "https://api.openai.com/auth": { chatgpt_account_id: "capture" } };
-  return `${segment({ alg: "none", typ: "JWT" })}.${segment(claims)}.`;
-}
-
-function decodeBody(raw, encoding) {
-  switch (encoding) {
-    case undefined:
-    case "identity":
-      return raw;
-    case "zstd":
-      return Buffer.from(Bun.zstdDecompressSync(raw));
-    case "gzip":
-      return zlib.gunzipSync(raw);
-    case "deflate":
-      return zlib.inflateSync(raw);
-    default:
-      throw new Error(`unsupported content-encoding: ${encoding}`);
-  }
-}
-
-function recordRequest(req, raw) {
-  const text = decodeBody(raw, req.headers["content-encoding"]).toString("utf8");
-  let body;
-  try {
-    body = JSON.parse(text);
-  } catch {
-    body = text;
-  }
-  const headers = Object.fromEntries(
-    Object.entries(req.headers).map(([name, value]) => [name, REDACTED_HEADERS.has(name) ? "[REDACTED]" : value]),
-  );
-  return { method: req.method, path: req.url, headers, body };
 }
 
 async function main() {

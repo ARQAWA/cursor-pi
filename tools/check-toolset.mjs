@@ -90,6 +90,22 @@ try {
     failed++;
     console.log(`FAIL ${ANTHROPIC}: description differs from the captured one for ${mismatched.join(", ") || "(no tools sent)"}`);
   }
+  const schemaMismatch = sent
+    .filter((tool) => {
+      const entry = captured.find((candidate) => candidate.name === tool?.name);
+      return entry?.parameters !== undefined && JSON.stringify(tool.input_schema) !== JSON.stringify(entry.parameters);
+    })
+    .map((tool) => tool?.name);
+  const withoutCapturedSchema = sent
+    .filter((tool) => captured.find((candidate) => candidate.name === tool?.name)?.parameters === undefined)
+    .map((tool) => tool?.name);
+  if (sent.length > 0 && schemaMismatch.length === 0) {
+    const note = withoutCapturedSchema.length > 0 ? `; ${withoutCapturedSchema.join(", ")} has no captured parameters and keeps Pi's schema` : "";
+    console.log(`ok ${ANTHROPIC}: every input_schema equals the captured parameters${note}`);
+  } else {
+    failed++;
+    console.log(`FAIL ${ANTHROPIC}: input_schema differs from the captured parameters for ${schemaMismatch.join(", ") || "(no tools sent)"}`);
+  }
 } catch (error) {
   failed++;
   console.log(`FAIL ${ANTHROPIC}: ${error.message}`);

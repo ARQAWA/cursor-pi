@@ -34,17 +34,30 @@ export function registerAllTools(pi: ExtensionAPI): void {
 const PI_PLACEHOLDER = "__pi_deferred_placeholder__";
 const INLINE_TOOLS_BETA = "inline-tools-2026-09-15";
 
+interface AnthropicTool {
+	name: string;
+	defer_loading?: boolean;
+	input_schema?: unknown;
+}
+
 interface AnthropicBody {
 	betas?: string[];
 	messages?: { content?: string | { type: string }[] }[];
-	tools?: { name: string; defer_loading?: boolean }[];
+	tools?: AnthropicTool[];
+}
+
+// Anthropic receives each tool's captured parameters as its input_schema, byte for byte. ApplyPatch has no captured parameters
+// and keeps the grammar carrier that Pi registered for it.
+function withCapturedInputSchema(tool: AnthropicTool): AnthropicTool {
+	const { parameters } = declaration(tool.name);
+	return parameters === undefined ? tool : { ...tool, input_schema: parameters };
 }
 
 // Throws when a deferred tool or a tool change would reach the wire, because Cursor Pi sends neither.
 function withoutNativeToolChanges(payload: AnthropicBody): AnthropicBody {
 	const next: AnthropicBody = { ...payload };
 	if (Array.isArray(payload.tools)) {
-		next.tools = payload.tools.filter((tool) => tool.name !== PI_PLACEHOLDER);
+		next.tools = payload.tools.filter((tool) => tool.name !== PI_PLACEHOLDER).map(withCapturedInputSchema);
 		if (next.tools.some((tool) => tool.defer_loading === true)) {
 			throw new Error("Anthropic request declares a deferred tool; Cursor Pi sends none");
 		}
@@ -61,6 +74,33 @@ function withoutNativeToolChanges(payload: AnthropicBody): AnthropicBody {
 		else delete next.betas;
 	}
 	return next;
+}
+
+// The Responses input items Pi sends, with only the fields that the captured-shape rewrite reads.
+interface ResponsesInputItem {
+	type?: string;
+	role?: string;
+	output?: unknown;
+}
+
+interface ResponsesPayload {
+	input?: ResponsesInputItem[];
+	tools?: { name: string }[];
+}
+
+// Cursor's requests carry a tool output as a list of input_text parts, and their messages carry type "message". Pi sends a
+// text-only output as a plain string and leaves the type off messages, so both are rewritten to Cursor's form here.
+function withCapturedInputShapes(payload: ResponsesPayload): ResponsesPayload {
+	if (!Array.isArray(payload.input)) return payload;
+	return { ...payload, input: payload.input.map(capturedInputItem) };
+}
+
+function capturedInputItem(item: ResponsesInputItem): ResponsesInputItem {
+	if ((item.type === "function_call_output" || item.type === "custom_tool_call_output") && typeof item.output === "string") {
+		return { ...item, output: [{ text: item.output, type: "input_text" }] };
+	}
+	if (item.type === undefined && typeof item.role === "string") return { type: "message", ...item };
+	return item;
 }
 
 export function registerCapturedToolPayload(pi: ExtensionAPI): void {
@@ -80,8 +120,9 @@ export function registerCapturedToolPayload(pi: ExtensionAPI): void {
 		const api = ctx.model?.api;
 		if (api === "anthropic-messages") return withoutNativeToolChanges(event.payload as AnthropicBody);
 		if (api !== "openai-codex-responses" && api !== "openai-responses") return undefined;
-		const payload = event.payload as { tools?: { name: string }[] };
-		if (!Array.isArray(payload.tools)) return undefined;
-		return { ...payload, tools: payload.tools.map((tool) => declaration(tool.name)) };
+		const payload = event.payload as ResponsesPayload;
+		const shaped = withCapturedInputShapes(payload);
+		if (!Array.isArray(payload.tools)) return shaped === payload ? undefined : shaped;
+		return { ...shaped, tools: payload.tools.map((tool) => declaration(tool.name)) };
 	});
 }

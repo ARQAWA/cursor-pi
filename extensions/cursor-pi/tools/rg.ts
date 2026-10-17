@@ -1,27 +1,12 @@
 import type { ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
-import type { TSchema } from "typebox";
-import { declaration } from "./declarations.ts";
-import { applyPagination, formatSearchError, formatSearchResult, SearchResultCache, toolText, type OutputMode, type ToolText } from "./rg/format.ts";
+import { declaration, PASSTHROUGH_PARAMETERS } from "./declarations.ts";
+import { applyPagination, formatSearchError, formatSearchResult, SearchResultCache, toolText, type ToolText } from "./rg/format.ts";
+import { parseRgArgs } from "./rg/args.ts";
 import { classifyRipgrepMessage, searchWorkspace, type SearchRequest } from "./rg/search.ts";
 
 const RG = declaration("rg");
 const MAX_INT32 = 2_147_483_647;
 const searchCache = new SearchResultCache();
-
-interface RgParams {
-	pattern: string;
-	path?: string;
-	glob?: string;
-	output_mode?: OutputMode;
-	"-B"?: number;
-	"-A"?: number;
-	"-C"?: number;
-	"-i"?: boolean;
-	type?: string;
-	head_limit?: number;
-	offset?: number;
-	multiline?: boolean;
-}
 
 // Cursor's toGrepInt32: rounds the number and clamps it to 0..int32 max.
 function toInt32(value: number | undefined, round: (n: number) => number): number | undefined {
@@ -34,13 +19,16 @@ export function register(pi: ExtensionAPI): void {
 		name: RG.name,
 		label: RG.name,
 		description: RG.description,
-		parameters: RG.parameters as unknown as TSchema,
+		parameters: PASSTHROUGH_PARAMETERS,
 		execute: (_toolCallId, params, signal, _onUpdate, ctx) => executeRg(params, signal, ctx),
 	});
 }
 
 export async function executeRg(params: unknown, signal: AbortSignal | undefined, ctx: ExtensionToolContext): Promise<ToolText> {
-	const args = params as RgParams;
+	const parsed = parseRgArgs(params);
+	// Cursor's rg reports an argument failure as its error text, without classifying it.
+	if ("error" in parsed) return toolText(formatSearchError(parsed.error), true);
+	const args = parsed.args;
 	try {
 		if (args.pattern === "") throw new Error('pattern is empty. Pass "." to match every line.');
 		for (const flag of ["-A", "-B", "-C"] as const) {
