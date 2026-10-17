@@ -33,9 +33,14 @@ for (const file of [MAIN_TOOLSET, SUBAGENT_TOOLSET, SUBAGENT_WEB_TOOLSET, EDIT_T
 // No capture holds a direct WebFetch declaration; the cursor namespace's WebFetch declaration stands in for it.
 if (!DECLARATIONS.has("WebFetch")) DECLARATIONS.set("WebFetch", capturedNamespaceDeclaration("WebFetch"));
 
+// The captured entry for a tool name, exactly as Cursor Desktop sent it, or undefined when Cursor sent none for it.
+export function capturedDeclaration(name: string): CapturedTool | undefined {
+	return DECLARATIONS.get(name);
+}
+
 // The captured entry for a tool name, exactly as Cursor Desktop sent it.
 export function declaration(name: string): CapturedTool {
-	const entry = DECLARATIONS.get(name);
+	const entry = capturedDeclaration(name);
 	if (entry === undefined) throw new Error(`no captured declaration for tool ${name}`);
 	return entry;
 }

@@ -350,6 +350,24 @@ report("ci-investigator: the child has the full tool set, with StrReplace and Wr
 	`  exit ${ci.code}; errors: ${ci.errors.join(" | ")}\n${ci.stderr.slice(-800)}\n  tools: ${JSON.stringify(toolNames(ciChild))}`);
 report("ci-investigator: the child's reminder is Cursor's captured ci-investigator text", userTexts(ciChild).some((text) => text.includes("You are a CI failure investigator.")));
 
+// browser-use, on the Anthropic model: the cursor-ide-browser tools as direct tools with the local context tools, the browser namespace
+// in the child's catalog, and Cursor's captured browser-use reminder as the child's own message.
+const browserUse = await run(MODELS[1], [
+	{ calls: [{ name: "CallDynamicTool", arguments: { namespace: "cursor", toolName: "Subagent", arguments: { description: "Browse", subagent_type: "browser-use", prompt: "Open the page." } } }] },
+	{ text: "The page is open." },
+	{ text: "The browser task finished." },
+], "Check the page.", cwd);
+const browserChild = browserUse.requests[1]?.body;
+const browserUsers = userTexts(browserChild);
+const browserToolNames = JSON.parse(readFileSync(path.join(ROOT, "extensions", "cursor-pi", "tools", "generated", "browser-tools.json"), "utf8")).tools.map((tool) => tool.name);
+report("browser-use: the child has the browser tools with Glob, rg, ReadFile and UpdateCurrentStep",
+	browserUse.code === 0 && browserUse.errors.length === 0 &&
+		sortedEqual(toolNames(browserChild), [...browserToolNames, "Glob", "rg", "ReadFile", "UpdateCurrentStep"]),
+	`  exit ${browserUse.code}; errors: ${browserUse.errors.join(" | ")}\n${browserUse.stderr.slice(-800)}\n  tools: ${JSON.stringify(toolNames(browserChild))}`);
+report("browser-use: the child's catalog carries the cursor-ide-browser namespace", browserUsers[0]?.includes('name="cursor-ide-browser"') === true);
+report("browser-use: the child's reminder is Cursor's captured browser-use text, as its own message",
+	browserUsers.includes(`<system_reminder>\n${DEFAULT_SUBAGENT_REMINDER}\n\n${capturedReminder("runs-2026-10-16/sol/roles/browser-use.md")}\n</system_reminder>`));
+
 // Self-fork: the child starts from the parent's messages, and its answer comes back to the parent.
 const SELF_MARKER = "Remember the marker ZETA-7.";
 const selfFork = await run(MODELS[0], [
@@ -387,6 +405,36 @@ const missing = await run(MODELS[0], [
 const missingBody = JSON.stringify(missing.requests[1]?.body ?? null);
 report("an unknown resume id: the parent gets Cursor's Error: text, with no agent id",
 	missingBody.includes("Error: Subagent session not found: missing-agent") && !missingBody.includes("Agent ID: missing-agent"));
+
+// best-of-n-runner: its own git worktree under the home, the child's workspace is that worktree, and its query starts with the worktree command.
+const WORKTREE_COMMAND = "Work only inside your worktree.";
+const BEST_OF_N_PROMPT = "Try the fix.";
+const BEST_OF_N_TURNS = [
+	{ calls: [{ name: "CallDynamicTool", arguments: { namespace: "cursor", toolName: "Subagent", arguments: { description: "Best of n", subagent_type: "best-of-n-runner", prompt: BEST_OF_N_PROMPT } } }] },
+	{ text: "Attempt done." },
+	{ text: "The runner finished." },
+];
+const bestRepo = await realpath(await mkdtemp(path.join(os.tmpdir(), "cursor-pi-subagent-repo-")));
+execFileSync("git", ["init", "-q"], { cwd: bestRepo });
+execFileSync("git", ["-c", "user.name=check", "-c", "user.email=check@example.com", "commit", "-q", "--allow-empty", "-m", "init"], { cwd: bestRepo });
+const bestHome = await realpath(await mkdtemp(path.join(os.tmpdir(), "cursor-pi-subagent-home-")));
+await mkdir(path.join(bestHome, ".cursor-pi", "commands"), { recursive: true });
+await writeFile(path.join(bestHome, ".cursor-pi", "commands", "worktree.md"), WORKTREE_COMMAND);
+const bestOfN = await runScriptedSession({ model: MODELS[0], cwd: bestRepo, prompt: "Run a best-of-n attempt.", turns: BEST_OF_N_TURNS, homeDir: bestHome });
+report(`${MODELS[0]}: best-of-n-runner: Cursor Pi exits 0 without errors`, bestOfN.code === 0 && bestOfN.errors.length === 0,
+	`  exit ${bestOfN.code}; errors: ${bestOfN.errors.join(" | ")}\n${bestOfN.stderr.slice(-800)}`);
+const worktrees = execFileSync("git", ["worktree", "list", "--porcelain"], { cwd: bestRepo }).toString().split("\n")
+	.filter((line) => line.startsWith("worktree ")).map((line) => line.slice("worktree ".length))
+	.filter((dir) => dir.startsWith(path.join(bestHome, ".cursor-pi", "worktrees") + path.sep));
+report("best-of-n-runner: one git worktree is created under ~/.cursor-pi/worktrees", worktrees.length === 1, `  worktrees: ${worktrees.join(", ")}`);
+const bestWorktree = worktrees[0] ?? "";
+const bestBranch = bestWorktree === "" ? "" : execFileSync("git", ["rev-parse", "--abbrev-ref", "HEAD"], { cwd: bestWorktree }).toString().trim();
+report("best-of-n-runner: the worktree is on a cursor/ branch", bestBranch.startsWith("cursor/"), `  branch: ${bestBranch}`);
+const bestUsers = userTexts(bestOfN.requests[1]?.body);
+report("best-of-n-runner: the child's workspace is the worktree", bestUsers[0]?.includes(bestWorktree) === true && bestWorktree !== "");
+const BEST_QUERY = `<user_query>\n<cursor_commands>\n--- Cursor Command: worktree ---\n${WORKTREE_COMMAND}\n--- End Command ---\n</cursor_commands>\n\n${BEST_OF_N_PROMPT}\n</user_query>`;
+report("best-of-n-runner: the query starts with Cursor's worktree command, then the prompt", (bestUsers.at(-1) ?? "").endsWith(BEST_QUERY),
+	`  query: ${JSON.stringify(bestUsers.at(-1))}`);
 
 console.log(`\n${passed} passed, ${failed.length} failed`);
 process.exit(failed.length === 0 ? 0 : 1);

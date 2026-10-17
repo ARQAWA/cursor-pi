@@ -45,6 +45,8 @@ export interface SubagentConfig {
 	reminderParts: () => string[];
 	// Explore's reminder shares the query's user message; the other types send the reminder as a message of its own.
 	reminderWithQuery: boolean;
+	// Cursor's best-of-n-runner flow: the child runs in a git worktree of its own, and its query starts with the worktree command.
+	worktree?: boolean;
 }
 
 function read(path: string): string {
@@ -71,6 +73,8 @@ const CHILD_TOOLS = ["Glob", "rg", "ReadFile"];
 const CHILD_TOOLS_WITH_PROGRESS = [...CHILD_TOOLS, "UpdateCurrentStep"];
 // Cursor's toolsOverride for the edit tool: child.ts gives each model its own, StrReplace and Write for Anthropic models and ApplyPatch for the rest.
 export const EDIT_TOOL_SET = "EditTools";
+// Cursor's browserUse toolsOverride: the cursor-ide-browser tools, which child.ts gives the child directly with its own view id.
+export const BROWSER_TOOL_SET = "BrowserTools";
 // The full caller tool set of Cursor's configs without an override, which the parent's tools stand for in a child.
 const FULL_TOOL_SET = ["Shell", "Glob", "rg", "ReadFile", EDIT_TOOL_SET, "GetDynamicTools", "CallDynamicTool"];
 
@@ -94,6 +98,15 @@ export const SUBAGENT_CONFIGS: Partial<Record<SubagentTypeName, SubagentConfig>>
 			return [prompt, progress];
 		},
 		reminderWithQuery: true,
+	},
+	// Cursor's browser-use config: not readonly, since browser MCP access needs agent mode. Its tools are the local context tools,
+	// UpdateCurrentStep (the captured reminder's progress block) and the cursor-ide-browser tools, which child.ts gives directly.
+	"browser-use": {
+		readonly: false,
+		forceDefaultModel: false,
+		tools: [...CHILD_TOOLS, "UpdateCurrentStep", BROWSER_TOOL_SET],
+		reminderParts: () => [capturedReminderBody(join(REVERSE, "runs-2026-10-16", "sol", "roles", "browser-use.md"))],
+		reminderWithQuery: false,
 	},
 	bugbot: {
 		readonly: true,
@@ -127,14 +140,15 @@ export const SUBAGENT_CONFIGS: Partial<Record<SubagentTypeName, SubagentConfig>>
 		reminderParts: () => [capturedReminderBody(CI_INVESTIGATOR_ROLE)],
 		reminderWithQuery: false,
 	},
-	// Cursor's best-of-n-runner config: the caller's full tool set and only the default reminder. Cursor's worktree command is
-	// prepended to the prompt by the Cursor client, not by this config.
+	// Cursor's best-of-n-runner config: the caller's full tool set and only the default reminder. The child runs in its own git
+	// worktree, and its query starts with the worktree command (getRequiredGlobalCommands).
 	"best-of-n-runner": {
 		readonly: false,
 		forceDefaultModel: false,
 		tools: FULL_TOOL_SET,
 		reminderParts: () => [],
 		reminderWithQuery: false,
+		worktree: true,
 	},
 };
 

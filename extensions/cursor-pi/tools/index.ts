@@ -2,7 +2,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { register as registerApplyPatch } from "./apply-patch.ts";
 import { register as registerAskQuestion } from "./ask-question.ts";
 import { register as registerCallDynamicTool } from "./call-dynamic-tool.ts";
-import { declaration, MAIN_TOOL_ORDER } from "./declarations.ts";
+import { capturedDeclaration, MAIN_TOOL_ORDER } from "./declarations.ts";
 import { register as registerGetDynamicTools } from "./get-dynamic-tools.ts";
 import { register as registerGlob } from "./glob.ts";
 import { registerCursorNamespace } from "./namespace/index.ts";
@@ -67,7 +67,7 @@ function registerEditToolSync(pi: ExtensionAPI): void {
 }
 
 // Pi serializes Responses tools its own way (strict null, grammar keys in another order). The request carries Cursor's
-// captured entry for each active tool instead, in active order.
+// captured entry for each active tool instead, in active order. A tool Cursor sent no entry for keeps Pi's entry.
 // Cursor changes no tool mid-conversation and sends no deferred tool, so Anthropic requests drop Pi's reserved placeholder
 // and the inline-tools beta that enables native tool changes.
 const PI_PLACEHOLDER = "__pi_deferred_placeholder__";
@@ -86,9 +86,10 @@ interface AnthropicBody {
 }
 
 // Anthropic receives each tool's captured parameters as its input_schema, byte for byte. ApplyPatch has no captured parameters
-// and keeps the grammar carrier that Pi registered for it.
+// and keeps the grammar carrier that Pi registered for it. A tool Cursor sent no declaration for, such as a browser-use child's
+// browser tools, keeps the schema it registered.
 function withCapturedInputSchema(tool: AnthropicTool): AnthropicTool {
-	const { parameters } = declaration(tool.name);
+	const parameters = capturedDeclaration(tool.name)?.parameters;
 	return parameters === undefined ? tool : { ...tool, input_schema: parameters };
 }
 
@@ -162,7 +163,7 @@ export function rewriteProviderPayload(api: string | undefined, payload: unknown
 	const responses = payload as ResponsesPayload;
 	const shaped = withCapturedInputShapes(responses);
 	if (!Array.isArray(responses.tools)) return shaped;
-	return { ...shaped, tools: responses.tools.map((tool) => declaration(tool.name)) };
+	return { ...shaped, tools: responses.tools.map((tool) => capturedDeclaration(tool.name) ?? tool) };
 }
 
 export function registerCapturedToolPayload(pi: ExtensionAPI): void {

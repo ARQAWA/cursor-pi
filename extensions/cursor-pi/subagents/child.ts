@@ -1,8 +1,11 @@
 // A Subagent child: a Pi session of its own, in this process, that runs one subagent type. Its context is Cursor's child
 // user_info and reminders, its tools are the type's tool set, and its transcript goes to <parent>/subagents/<child>.jsonl.
+import { execFile } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { homedir, platform, release } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
+import { promisify } from "node:util";
 import {
 	createAgentSession,
 	DefaultResourceLoader,
@@ -22,6 +25,7 @@ import { discoverCursorRules } from "../rules.ts";
 import { discoverAgentSkills } from "../skills.ts";
 import { dynamicToolCatalogSection } from "../dynamic/catalog.ts";
 import { dynamicNamespaces } from "../dynamic/namespaces.ts";
+import { listOwnedMcpNamespaces, type McpSource } from "../dynamic/mcp-source.ts";
 import { gitRepoPath } from "../git-status.ts";
 import { register as registerGlob } from "../tools/glob.ts";
 import { register as registerRead } from "../tools/read-file.ts";
@@ -40,7 +44,7 @@ import { register as registerUpdateCurrentStep } from "../tools/update-current-s
 import { transcriptLine } from "../transcripts.ts";
 import { friendlyDate, renderUserInfo } from "../user-info.ts";
 import { resolveTimeZone, wrapUserTurn } from "../user-turn.ts";
-import { askModeReminder, DEFAULT_SUBAGENT_REMINDER, EDIT_TOOL_SET, type SubagentConfig, type SubagentTypeName } from "./config.ts";
+import { askModeReminder, BROWSER_TOOL_SET, DEFAULT_SUBAGENT_REMINDER, EDIT_TOOL_SET, type SubagentConfig, type SubagentTypeName } from "./config.ts";
 
 const REGISTER: Record<string, (pi: ExtensionAPI) => void> = {
 	Glob: registerGlob,
@@ -92,9 +96,45 @@ function textMessage(text: string) {
 
 // The tool names a child gets. EditTools is the edit tool the model gets: StrReplace and Write for Anthropic models, ApplyPatch for
 // the rest, as the parent's edit-tool sync chooses them.
-function toolNamesFor(config: SubagentConfig, model: Model<any>): string[] {
+function toolNamesFor(config: SubagentConfig, model: Model<any>, browserNames: string[]): string[] {
 	const edit = model.provider === "anthropic" ? ["StrReplace", "Write"] : ["ApplyPatch"];
-	return config.tools.flatMap((name) => (name === EDIT_TOOL_SET ? edit : [name]));
+	return config.tools.flatMap((name) => {
+		if (name === EDIT_TOOL_SET) return edit;
+		if (name === BROWSER_TOOL_SET) return browserNames;
+		return [name];
+	});
+}
+
+// The cursor-ide-browser tools, from the browser McpSource (registered by get-dynamic-tools), which a browser-use child gets directly.
+interface BrowserUseTool {
+	name: string;
+	description: string | undefined;
+	inputSchema: unknown;
+	namespace: string;
+	source: McpSource;
+}
+
+async function browserUseTools(cwd: string): Promise<BrowserUseTool[]> {
+	const owned = await listOwnedMcpNamespaces(cwd);
+	return owned.flatMap(({ source, namespace }) =>
+		source.id === "browser" ? namespace.tools.map((tool) => ({ ...tool, namespace: namespace.name, source })) : [],
+	);
+}
+
+// Cursor's createWrappedBrowserTool: each call carries the child's own view id, a screenshot after the action, and headless mode.
+function registerBrowserUseTool(pi: ExtensionAPI, tool: BrowserUseTool, viewId: string): void {
+	pi.registerTool({
+		name: tool.name,
+		label: tool.name,
+		description: tool.description ?? "",
+		parameters: tool.inputSchema as Parameters<ExtensionAPI["registerTool"]>[0]["parameters"],
+		execute: async (_toolCallId, params, signal) => {
+			const args = { ...(params as Record<string, unknown>), viewId, take_screenshot_afterwards: true, headless: true };
+			const result = await tool.source.callMcpTool(tool.namespace, tool.name, args, signal);
+			if (result.isError) throw new Error(result.text);
+			return { content: result.content, details: undefined };
+		},
+	});
 }
 
 // The tools a child's catalog leaves out. A child cannot start another subagent, and Cursor adds CreateGoal, UpdateGoal and
@@ -141,6 +181,30 @@ export function parentModelRuntime(registry: ExtensionToolContext["modelRegistry
 	return (registry as unknown as { runtime: ModelRuntime }).runtime;
 }
 
+const execFileAsync = promisify(execFile);
+
+// Cursor's best-of-n-runner worktree: a new branch at HEAD, checked out under <home>/.cursor-pi/worktrees/<workspace>/<id>. Cursor
+// names the branch cursor/<date>-<id>-<hash>; the hash here is the start of the agent id.
+async function createWorktree(repo: string, agentId: string): Promise<string> {
+	const now = new Date();
+	const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+	const id = Math.random().toString(36).substring(2, 6);
+	const path = join(homedir(), ".cursor-pi", "worktrees", basename(repo).replace(/[^a-zA-Z0-9._-]/g, "_"), id);
+	await mkdir(dirname(path), { recursive: true });
+	await execFileAsync("git", ["worktree", "add", "-b", `cursor/${date}-${id}-${agentId.slice(0, 5)}`, path, "HEAD"], { cwd: repo });
+	return path;
+}
+
+// Cursor's _prependRequiredGlobalCommandPrompt: the worktree command comes before the query, in a <cursor_commands> block. Cursor
+// reads the command from the user's global commands; here it is ~/.cursor-pi/commands/worktree.md, and the prompt is unchanged when
+// that file is missing or empty.
+function withWorktreeCommand(prompt: string): string {
+	const file = join(homedir(), ".cursor-pi", "commands", "worktree.md");
+	const content = existsSync(file) ? readFileSync(file, "utf8") : "";
+	if (content === "") return prompt;
+	return `<cursor_commands>\n--- Cursor Command: worktree ---\n${content}\n--- End Command ---\n</cursor_commands>\n\n${prompt}`;
+}
+
 export async function createChild(args: {
 	agentId: string;
 	parentId: string;
@@ -152,7 +216,11 @@ export async function createChild(args: {
 	// The messages the child starts from: a self-fork's copy of the parent's, or none.
 	history: SessionMessageEntry["message"][];
 }): Promise<ChildAgent> {
-	const { agentId, parentId, cwd, config, model } = args;
+	const { agentId, parentId, config, model } = args;
+	// The child's workspace: its own worktree for best-of-n-runner, otherwise the parent's directory.
+	const cwd = config.worktree ? await createWorktree(args.cwd, agentId) : args.cwd;
+	const browserTools = config.tools.includes(BROWSER_TOOL_SET) ? await browserUseTools(cwd) : [];
+	const toolNames = toolNamesFor(config, model, browserTools.map((tool) => tool.name));
 	const contextTexts = [await childUserInfo(cwd, parentId, config, model, new Date())];
 	if (config.readonly) contextTexts.push(askModeReminder());
 	if (!config.reminderWithQuery) contextTexts.push(reminderBlock(config.reminderParts()));
@@ -162,7 +230,8 @@ export async function createChild(args: {
 		pi.on("context", (event) => ({ messages: [...contextTexts.map(textMessage), ...event.messages] }));
 		// The same request rewrite as the parent: captured tool shapes, and no Pi placeholder or inline-tools beta on the wire.
 		registerCapturedToolPayload(pi);
-		for (const name of toolNamesFor(config, model)) REGISTER[name]?.(pi);
+		for (const name of toolNames) REGISTER[name]?.(pi);
+		for (const tool of browserTools) registerBrowserUseTool(pi, tool, agentId);
 	};
 	// noExtensions keeps cursor-pi from loading itself a second time; the child gets only the extension above.
 	const loader = new DefaultResourceLoader({
@@ -182,7 +251,7 @@ export async function createChild(args: {
 		modelRuntime: args.modelRuntime,
 		resourceLoader: loader,
 		sessionManager,
-		tools: toolNamesFor(config, model),
+		tools: toolNames,
 	});
 	const agent: ChildAgent = {
 		agentId,
@@ -191,7 +260,7 @@ export async function createChild(args: {
 		config,
 		modelId: model.id,
 		session,
-		transcriptPath: join(transcriptsDirFor(projectDirFor(resolve(cwd))), parentId, "subagents", `${agentId}.jsonl`),
+		transcriptPath: join(transcriptsDirFor(projectDirFor(resolve(args.cwd))), parentId, "subagents", `${agentId}.jsonl`),
 		running: false,
 		fresh: true,
 		contextTexts,
@@ -226,7 +295,8 @@ async function writeTranscript(agent: ChildAgent, outcome: ChildOutcome): Promis
 // in the same message as the query, as Cursor's child does.
 export async function runChild(agent: ChildAgent, prompt: string, signal: AbortSignal | undefined): Promise<ChildOutcome> {
 	const reminder = agent.fresh && agent.config.reminderWithQuery ? `${reminderBlock(agent.config.reminderParts())}\n` : "";
-	const text = `${reminder}${wrapUserTurn(prompt, new Date(), resolveTimeZone())}`;
+	const query = agent.config.worktree ? withWorktreeCommand(prompt) : prompt;
+	const text = `${reminder}${wrapUserTurn(query, new Date(), resolveTimeZone())}`;
 	agent.fresh = false;
 	agent.running = true;
 	const abort = () => void agent.session.abort();
