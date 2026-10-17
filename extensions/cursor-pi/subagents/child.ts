@@ -20,6 +20,9 @@ import { ensureAgentStores } from "../agent-stores.ts";
 import { promptForModel } from "../prompts.ts";
 import { discoverCursorRules } from "../rules.ts";
 import { discoverAgentSkills } from "../skills.ts";
+import { dynamicToolCatalogSection } from "../dynamic/catalog.ts";
+import { dynamicNamespaces } from "../dynamic/namespaces.ts";
+import { gitRepoPath } from "../git-status.ts";
 import { register as registerGlob } from "../tools/glob.ts";
 import { register as registerRead } from "../tools/read-file.ts";
 import { register as registerRg } from "../tools/rg.ts";
@@ -94,14 +97,22 @@ function toolNamesFor(config: SubagentConfig, model: Model<any>): string[] {
 	return config.tools.flatMap((name) => (name === EDIT_TOOL_SET ? edit : [name]));
 }
 
-// Cursor's child user_info: the workspace's rules and skills, with no git status and no catalogs.
-async function childUserInfo(cwd: string, sessionId: string, now: Date): Promise<string> {
+// The tools a child's catalog leaves out. A child cannot start another subagent, and Cursor adds CreateGoal, UpdateGoal and
+// SearchConversations only when the run has no subagentConfig (tool-config.js), so a child never has them.
+const SUBAGENT_TOOL = "Subagent";
+const CHILD_OMITTED_TOOLS = [SUBAGENT_TOOL, "CreateGoal", "UpdateGoal", "SearchConversations"];
+
+// Cursor's child user_info: the workspace's rules, skills and git repo line, with no git status. A readonly child runs in ask
+// mode, which hides the dynamic catalog. The skill preamble follows the child's model: GPT-5.6 gets the names-a-skill wording.
+async function childUserInfo(cwd: string, sessionId: string, config: SubagentConfig, model: Model<any>, now: Date): Promise<string> {
 	const workspacePath = resolve(cwd);
 	const projectDir = projectDirFor(workspacePath);
-	const [rules, skills, stores] = await Promise.all([
+	const [rules, skills, repoPath, stores, namespaces] = await Promise.all([
 		discoverCursorRules(workspacePath),
 		discoverAgentSkills(workspacePath, homedir()),
+		gitRepoPath(workspacePath),
 		ensureAgentStores(sessionId),
+		dynamicNamespaces(workspacePath, undefined, { omitFirstPartyTools: CHILD_OMITTED_TOOLS }),
 	]);
 	return renderUserInfo({
 		osVersion: `${platform()} ${release()}`,
@@ -109,7 +120,7 @@ async function childUserInfo(cwd: string, sessionId: string, now: Date): Promise
 		shell: (process.env.SHELL ?? "").includes("zsh") ? "zsh" : "bash",
 		workspacePath,
 		isWorkingDirHomeDir: workspacePath === resolve(homedir()),
-		gitRepos: [],
+		gitRepos: repoPath === undefined ? [] : [{ path: repoPath }],
 		todaysDate: friendlyDate(now, resolveTimeZone()),
 		terminalsFolder: terminalsDirFor(projectDir),
 		agentTranscriptsFolder: transcriptsDirFor(projectDir),
@@ -119,6 +130,8 @@ async function childUserInfo(cwd: string, sessionId: string, now: Date): Promise
 		],
 		rules,
 		skills,
+		skillPreamble: model.id.startsWith("gpt-5.6") ? "gpt-5.6" : "default",
+		dynamicCatalog: config.readonly ? undefined : dynamicToolCatalogSection(namespaces),
 	});
 }
 
@@ -140,7 +153,7 @@ export async function createChild(args: {
 	history: SessionMessageEntry["message"][];
 }): Promise<ChildAgent> {
 	const { agentId, parentId, cwd, config, model } = args;
-	const contextTexts = [await childUserInfo(cwd, parentId, new Date())];
+	const contextTexts = [await childUserInfo(cwd, parentId, config, model, new Date())];
 	if (config.readonly) contextTexts.push(askModeReminder());
 	if (!config.reminderWithQuery) contextTexts.push(reminderBlock(config.reminderParts()));
 	const systemPrompt = config.rolePrompt?.() ?? promptForModel(model.id)?.text;

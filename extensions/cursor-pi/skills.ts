@@ -253,9 +253,12 @@ function isGrokBundledSkill(skillPath: string): boolean {
 	return segments.some((_segment, i) => [".grok", "bundled", "skills"].every((segment, offset) => segments[i + offset] === segment));
 }
 
+// Cursor's two agent_skills preambles: GPT-5.6 models get the names-a-skill wording, the others the default.
+export type SkillPreamble = "default" | "gpt-5.6";
+
 // Cursor's BudgetedAgentSkillsSection for the catalog: the skills this IDE lists, which are not disabled for model
 // invocation and do not apply to some files only. Undefined when none are left.
-export function buildAgentSkillsSection(skills: readonly DiscoveredSkill[], workspacePaths: readonly string[], aliasPathPrefixes: boolean): PromptElement | undefined {
+export function buildAgentSkillsSection(skills: readonly DiscoveredSkill[], workspacePaths: readonly string[], aliasPathPrefixes: boolean, preamble: SkillPreamble = "default"): PromptElement | undefined {
 	const listed = skills.filter(
 		(skill) => isEnvironmentEligible(skill, IDE_SKILL_ENVIRONMENT) && !skill.disableModelInvocation && !isFileScopedSkill(skill, workspacePaths),
 	);
@@ -263,11 +266,11 @@ export function buildAgentSkillsSection(skills: readonly DiscoveredSkill[], work
 	const items: SkillCatalogItem[] = listed.map((skill) => ({ fullPath: skill.fullPath, description: skill.description || undefined }));
 	return applySkillCatalogBudget(items, (listed, omittedNotice) => {
 		const aliased = aliasPathPrefixes ? aliasSkillCatalogPathRoots(listed) : undefined;
-		return agentSkillsSection(aliased?.skills ?? listed, omittedNotice, aliased?.roots ?? []);
+		return agentSkillsSection(aliased?.skills ?? listed, omittedNotice, aliased?.roots ?? [], preamble);
 	});
 }
 
-function agentSkillsSection(items: readonly SkillCatalogItem[], omittedNotice: PromptElement | undefined, pathRoots: readonly string[]): PromptElement {
+function agentSkillsSection(items: readonly SkillCatalogItem[], omittedNotice: PromptElement | undefined, pathRoots: readonly string[], preamble: SkillPreamble): PromptElement {
 	const hasOmitted = omittedNotice !== undefined;
 	const hasListed = items.length > 0;
 	const description = `Skills the agent can use. Use the ${READ_TOOL} tool with the provided absolute path to fetch full contents.${pathRoots.length > 0 ? ` ${SKILL_CATALOG_PATH_ALIAS_NOTE}` : ""}`;
@@ -279,6 +282,41 @@ function agentSkillsSection(items: readonly SkillCatalogItem[], omittedNotice: P
 			? "Use the skills listed below. If a later task specifically requires discovering more skills, additional skills may exist in the directories shown in the skills section."
 			: "Only use skills listed below.";
 	return sectionOf("agent_skills", {}, [
+		...preambleNodes(preamble, listingNote),
+		lineBreakOf(),
+		sectionOf("available_skills", { description }, [
+			pathRootList,
+			items.map((item) => tagOf("agent_skill", { fullPath: item.fullPath }, item.description)),
+			omittedNotice,
+		]),
+		lineBreakOf(),
+	]);
+}
+
+// The agent_skills preamble: GPT-5.6 models get Cursor's wording for skills the user names, the other models the default.
+function preambleNodes(preamble: SkillPreamble, listingNote: string): PromptElement[] {
+	if (preamble === "gpt-5.6") {
+		return [
+			{
+				type: "p",
+				children: [
+					"When the user names a skill, use it faithfully as part of the current task.",
+					` Read the skill file using the ${READ_TOOL} tool before following its instructions.`,
+					" ",
+					"The user's instructions take precedence over skill guidance, and an invoked skill takes precedence over autonomous judgment where they do not conflict.",
+				],
+			},
+			{
+				type: "p",
+				children: [
+					"Tell the user in `commentary` when a skill causes a material action or pause. Before using a skill the user did not name, briefly explain why it is relevant and keep its use within the task's scope. Mention material effects in the final response, but do not cite skills you merely inspected.",
+					" ",
+					listingNote,
+				],
+			},
+		];
+	}
+	return [
 		{
 			type: "p",
 			children: [
@@ -290,14 +328,7 @@ function agentSkillsSection(items: readonly SkillCatalogItem[], omittedNotice: P
 				listingNote,
 			],
 		},
-		lineBreakOf(),
-		sectionOf("available_skills", { description }, [
-			pathRootList,
-			items.map((item) => tagOf("agent_skill", { fullPath: item.fullPath }, item.description)),
-			omittedNotice,
-		]),
-		lineBreakOf(),
-	]);
+	];
 }
 
 // Cursor's applySkillCatalogBudget: the section as written when it fits in 2% of the agent's token limit, otherwise

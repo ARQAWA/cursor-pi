@@ -5,8 +5,9 @@
 // first request with the catalogs; the result text the parent receives; the child's transcript. Argument errors are checked too.
 // Exits non-zero on any FAIL. Usage: BUN_RUNTIME_TRANSPILER_CACHE_PATH=0 bun tools/check-subagent.mjs
 
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { mkdtemp, readdir, readFile, realpath } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, realpath, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,6 +17,9 @@ import { promptForModel, SUPPORTED_MODELS } from "../extensions/cursor-pi/prompt
 import { DEFAULT_SUBAGENT_REMINDER, renderAvailableSubagentModels, renderAvailableSubagentTypes, SUBAGENT_CONFIGS } from "../extensions/cursor-pi/subagents/config.ts";
 import { subagentFinishedNotice } from "../extensions/cursor-pi/background/subagent-notice.ts";
 import { registerSubagent } from "../extensions/cursor-pi/subagents/tool.ts";
+import { executeGlob } from "../extensions/cursor-pi/tools/glob.ts";
+import { executeReadFile } from "../extensions/cursor-pi/tools/read-file.ts";
+import { executeRg } from "../extensions/cursor-pi/tools/rg.ts";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REVERSE = path.join(ROOT, "research", "cursor", "reverse");
@@ -58,6 +62,34 @@ function userTexts(body) {
 const toolNames = (body) => (body?.tools ?? []).map((tool) => tool.name ?? tool.function?.name).sort();
 const sortedEqual = (ours, expected) => JSON.stringify(ours) === JSON.stringify([...expected].sort());
 
+// A user_info with its environment values normalized: paths, the date, the git repo line, the store and skill lists, the rules
+// and git status bodies, and the MCP namespaces, which are the user's own servers. Everything else must match.
+function normalizeUserInfo(text) {
+	return text
+		.trimEnd()
+		.replace(/<rules>[\s\S]*?<\/rules>/g, "<rules/>")
+		.replace(/<git_status>[\s\S]*?<\/git_status>/g, "<git_status/>")
+		.replace(/<available_skills[^>]*>[\s\S]*?<\/available_skills>/g, "<available_skills/>")
+		.replace(/<namespace name="(?:(?!<namespace )[\s\S])*?source="mcp" \/>/g, "")
+		.replace(/Is directory a git repo: [^\n]*/g, "Is directory a git repo: <GIT>")
+		.replace(/Today's date: [^\n]*/g, "Today's date: <DATE>")
+		.replace(/(Current agent's store|User's personal store): \/[^\n]*/g, "$1: <STORE>")
+		.replace(/use \/[^\n]*?\. Only use/g, "use <STORE>. Only use")
+		.replace(/(?<!<)\/[^\s"<>()\[\]`]+/g, "<PATH>")
+		.split("\n")
+		.filter((line) => line.trim() !== "")
+		.join("\n");
+}
+
+// The first line where two texts differ, for a failure message.
+function firstDifference(expected, actual) {
+	const a = expected.split("\n");
+	const b = actual.split("\n");
+	let i = 0;
+	while (i < a.length && a[i] === b[i]) i++;
+	return i === a.length && i === b.length ? "" : `  first difference at line ${i + 1}\n  capture: ${JSON.stringify(a[i])}\n  ours:    ${JSON.stringify(b[i])}`;
+}
+
 // Catalog and declaration.
 const types = renderAvailableSubagentTypes();
 report("types catalog is Cursor's captured <available_subagent_types> section", types === capturedSection(PARENT_CAPTURE, "available_subagent_types"));
@@ -91,6 +123,11 @@ async function transcriptFiles(dir) {
 }
 
 const cwd = await realpath(await mkdtemp(path.join(os.tmpdir(), "cursor-pi-subagent-cwd-")));
+// The captured workspace was a git repository with a skill, so the workspace here is one too. The captures were taken with zsh.
+execFileSync("git", ["init", "-q"], { cwd });
+await mkdir(path.join(cwd, ".cursor", "skills", "check-skill"), { recursive: true });
+await writeFile(path.join(cwd, ".cursor", "skills", "check-skill", "SKILL.md"), "---\ndescription: Check skill.\n---\nCheck body.\n");
+process.env.SHELL = "/bin/zsh";
 const EXPLORE_QUERY = "Find the README file.";
 const EXPLORE_TURNS = [
 	{ calls: [{ name: "CallDynamicTool", arguments: { namespace: "cursor", toolName: "Subagent", arguments: { description: "Find README", subagent_type: "explore", prompt: EXPLORE_QUERY } } }] },
@@ -120,6 +157,21 @@ for (const model of MODELS) {
 	report(`${model}: explore: the child's system prompt is the model's prompt`, systemOf(child) === promptForModel(modelId)?.text);
 	const childUsers = userTexts(child);
 	report(`${model}: explore: the child's user_info has no git status`, childUsers[0]?.includes("<user_info>") && !childUsers[0].includes("<git_status>"));
+	if (model === MODELS[0]) {
+		// The captured explore child ran on gpt-5.6-sol, so its user_info carries the names-a-skill preamble.
+		const NOT_PORTED = ["ConnectScm", "SetActiveBranch", "SwitchMode"];
+		// The capture's cursor namespace lists ConnectScm, SetActiveBranch and SwitchMode, which we do not port (they need Cursor's
+		// servers, and Plan mode is excluded): they are taken out of the capture before the comparison, a recorded difference.
+		const expectedInfo = normalizeUserInfo(capturedText("prompts/items/context-b315a735c81c.md").replace(
+			/<namespace name="cursor" tools="([^"]*)"/,
+			(_match, names) => `<namespace name="cursor" tools="${names.split(", ").filter((name) => !NOT_PORTED.includes(name)).join(", ")}"`,
+		).replace(new RegExp(`^- (${NOT_PORTED.join("|")}): .*\n`, "gm"), ""));
+		const oursInfo = normalizeUserInfo(childUsers[0] ?? "");
+		report(`${model}: explore: the child's user_info is Cursor's captured explore user_info, normalized`, oursInfo === expectedInfo, firstDifference(expectedInfo, oursInfo));
+	} else {
+		report(`${model}: explore: the child's user_info has the default skill preamble`,
+			childUsers[0]?.includes("When users ask you to perform tasks") === true && !childUsers[0].includes("When the user names a skill"));
+	}
 	const last = childUsers[childUsers.length - 1] ?? "";
 	report(`${model}: explore: the reminder shares the query message, before the timestamp`,
 		last.startsWith("<system_reminder>\nYou are running as a subagent") && last.includes("You are a file search specialist") &&
@@ -150,6 +202,82 @@ for (const model of MODELS) {
 			bugUsers[2] === `<system_reminder>\n${"You are running as a subagent under a parent agent. Do not spawn additional subagents unless requested by the user or by your instructions. Do not create Cursor Canvas files unless requested by the user or by your instructions."}\n</system_reminder>` &&
 			bugUsers[3].endsWith(`<user_query>\n${BUGBOT_PROMPT}\n</user_query>`),
 		`  messages: ${bugUsers.map((text) => text.slice(0, 60)).join(" | ")}`);
+	report(`${model}: bugbot: the child's user_info has no dynamic_tool_catalog`, bugUsers[0]?.includes("<user_info>") === true && !bugUsers[0].includes("dynamic_tool_catalog"));
+}
+
+// generalPurpose and explore's tool calls, end to end. The explore child's tool results must be what the tools return when run
+// directly in the same fixture workspace.
+const GENERAL_TEXT = "The project is a Pi extension.";
+const GENERAL_TURNS = [
+	{ calls: [{ name: "CallDynamicTool", arguments: { namespace: "cursor", toolName: "Subagent", arguments: { description: "Summarize", subagent_type: "generalPurpose", prompt: "Summarize the project." } } }] },
+	{ text: GENERAL_TEXT },
+	{ text: "Parent finished." },
+];
+const FIXTURE_FINAL = "greet is defined in src/app.ts.";
+const GLOB_ARGS = { glob_pattern: "src/*.ts" };
+const RG_ARGS = { pattern: "greet", output_mode: "content" };
+const READ_ARGS = { path: "src/app.ts" };
+const TOOLS_TURNS = [
+	{ calls: [{ name: "CallDynamicTool", arguments: { namespace: "cursor", toolName: "Subagent", arguments: { description: "Find greet", subagent_type: "explore", prompt: "Find where greet is defined." } } }] },
+	{ calls: [{ name: "Glob", arguments: GLOB_ARGS }] },
+	{ calls: [{ name: "rg", arguments: RG_ARGS }] },
+	{ calls: [{ name: "ReadFile", arguments: READ_ARGS }] },
+	{ text: FIXTURE_FINAL },
+	{ text: "The subagent found it." },
+];
+const fixture = await realpath(await mkdtemp(path.join(os.tmpdir(), "cursor-pi-subagent-fixture-")));
+await mkdir(path.join(fixture, "src"), { recursive: true });
+await writeFile(path.join(fixture, "README.md"), "# Fixture\n");
+await writeFile(path.join(fixture, "src", "app.ts"), 'export function greet(name: string): string {\n\treturn "hello " + name;\n}\n');
+await writeFile(path.join(fixture, "src", "util.ts"), 'export const VERSION = "1.0.0";\n');
+
+// The text of each tool result a request carries, in order, for either provider's body shape.
+function toolOutputs(body) {
+	const textOf = (content) => (typeof content === "string" ? content : (content ?? []).map((part) => part.text ?? "").join(""));
+	if (Array.isArray(body?.input)) return body.input.filter((item) => item.type === "function_call_output").map((item) => textOf(item.output));
+	return (body?.messages ?? []).flatMap((message) => (Array.isArray(message.content) ? message.content : []).filter((part) => part.type === "tool_result").map((part) => textOf(part.content)));
+}
+
+// The three tools run directly in the fixture. ReadFile's reminders depend on the HOME the child ran with, so HOME is set to it.
+async function directToolTexts(root, home) {
+	const saved = process.env.HOME;
+	process.env.HOME = home;
+	try {
+		const ctx = { cwd: root, sessionManager: {} };
+		const glob = await executeGlob(GLOB_ARGS, undefined, ctx);
+		const rg = await executeRg(RG_ARGS, undefined, ctx);
+		const read = await executeReadFile(READ_ARGS, undefined, ctx);
+		return [glob, rg, read].map((result) => result.content[0].text);
+	} finally {
+		if (saved === undefined) delete process.env.HOME;
+		else process.env.HOME = saved;
+	}
+}
+
+for (const model of MODELS) {
+	const general = await run(model, GENERAL_TURNS, "Summarize the project.", cwd);
+	report(`${model}: generalPurpose: Cursor Pi exits 0 without errors`, general.code === 0 && general.errors.length === 0,
+		`  exit ${general.code}; errors: ${general.errors.join(" | ")}\n${general.stderr.slice(-800)}`);
+	report(`${model}: generalPurpose: three requests (parent, child, parent)`, general.requests.length === 3, `  requests: ${general.requests.length}`);
+	report(`${model}: generalPurpose: the child's first request carries tools`, toolNames(general.requests[1]?.body).length > 0,
+		`  tools: ${JSON.stringify(toolNames(general.requests[1]?.body))}`);
+	const generalParent = JSON.stringify(general.requests[2]?.body ?? null);
+	report(`${model}: generalPurpose: the parent receives the result text with its agent id`,
+		generalParent.includes("This is the output of the subagent:") && generalParent.includes(GENERAL_TEXT) && generalParent.includes("Agent ID: "));
+
+	const tools = await run(model, TOOLS_TURNS, "Find greet in the fixture.", fixture);
+	report(`${model}: explore tools: Cursor Pi exits 0 without errors`, tools.code === 0 && tools.errors.length === 0,
+		`  exit ${tools.code}; errors: ${tools.errors.join(" | ")}\n${tools.stderr.slice(-800)}`);
+	report(`${model}: explore tools: six requests (parent, four child, parent)`, tools.requests.length === 6, `  requests: ${tools.requests.length}`);
+	const direct = await directToolTexts(fixture, tools.home);
+	// The last child request carries every tool result so far, in the order the child made the calls.
+	const childResults = toolOutputs(tools.requests[4]?.body);
+	report(`${model}: explore tools: each tool result the child sees is the direct execute output`,
+		JSON.stringify(childResults) === JSON.stringify(direct),
+		`  child: ${JSON.stringify(childResults)}\n  direct: ${JSON.stringify(direct)}`);
+	const toolsParent = toolOutputs(tools.requests[5]?.body);
+	report(`${model}: explore tools: the parent receives the child's final text in Cursor's result text`,
+		toolsParent.some((text) => text.includes(`This is the output of the subagent:\n\nresponse:\n<response>\n${FIXTURE_FINAL}\n</response>\n\nAgent ID: `)));
 }
 
 // Argument errors: nothing reaches the child, and the parent's next request carries the error.

@@ -3,7 +3,7 @@
 import { CURSOR_FEATURE_FLAGS } from "./feature-flags.ts";
 import { truncateGitStatus } from "./git-status.ts";
 import { lineBreakOf, paragraphOf, renderContent, rulesSectionElement, sectionOf, type CursorRule, type PromptElement, type PromptNode } from "./rules.ts";
-import { buildAgentSkillsSection, type DiscoveredSkill } from "./skills.ts";
+import { buildAgentSkillsSection, type DiscoveredSkill, type SkillPreamble } from "./skills.ts";
 
 const GIT_STATUS_NOTE =
 	"This is the git status at the start of the conversation. Note that this status is a snapshot in time, and will not update during the conversation.";
@@ -36,6 +36,8 @@ export interface UserInfoProps {
 	stores: AgentStoreMount[];
 	rules: CursorRule[];
 	skills: DiscoveredSkill[];
+	// The agent_skills preamble variant; the parent's user_info keeps the default.
+	skillPreamble?: SkillPreamble;
 	// The <dynamic_tool_catalog> section; absent when no dynamic namespace is available.
 	dynamicCatalog?: PromptElement;
 	// The <available_subagent_types> and <available_subagent_models> sections; the parent's user_info carries them, a child's not.
@@ -56,7 +58,7 @@ export function renderUserInfo(props: UserInfoProps): string {
 		agentTranscriptsSection(props.agentTranscriptsFolder),
 		rulesSectionElement(props.rules, [props.workspacePath]),
 		props.subagentCatalog,
-		buildAgentSkillsSection(props.skills, [props.workspacePath], CURSOR_FEATURE_FLAGS.aliasSkillCatalogPathPrefixes),
+		buildAgentSkillsSection(props.skills, [props.workspacePath], CURSOR_FEATURE_FLAGS.aliasSkillCatalogPathPrefixes, props.skillPreamble),
 		props.dynamicCatalog,
 	]);
 }

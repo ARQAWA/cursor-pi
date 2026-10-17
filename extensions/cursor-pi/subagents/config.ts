@@ -76,11 +76,13 @@ const FULL_TOOL_SET = ["Shell", "Glob", "rg", "ReadFile", EDIT_TOOL_SET, "GetDyn
 
 // The types Cursor Pi runs. A type missing here is listed in the catalog and answers with an error when called.
 export const SUBAGENT_CONFIGS: Partial<Record<SubagentTypeName, SubagentConfig>> = {
+	// Cursor's generalPurpose config (getDefaultSubagentConfig in shell-subagent.js): no override, so the caller's full tool set, and
+	// only the default reminder, which shares the query's message.
 	generalPurpose: {
 		readonly: false,
 		forceDefaultModel: false,
-		tools: CHILD_TOOLS_WITH_PROGRESS,
-		reminderParts: () => [PROGRESS()],
+		tools: FULL_TOOL_SET,
+		reminderParts: () => [],
 		reminderWithQuery: true,
 	},
 	explore: {

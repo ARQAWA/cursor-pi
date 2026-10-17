@@ -19,9 +19,10 @@ export interface NamespaceSource {
 }
 
 // The external (MCP) namespaces sorted by name, then the first-party namespace last, as Cursor's catalog lists them.
-export async function dynamicNamespaces(cwd: string, signal?: AbortSignal, options: { includeExternal?: boolean } = {}): Promise<NamespaceSource[]> {
+// omitFirstPartyTools leaves named tools out of the first-party namespace, as a subagent's catalog leaves out Subagent.
+export async function dynamicNamespaces(cwd: string, signal?: AbortSignal, options: { includeExternal?: boolean; omitFirstPartyTools?: readonly string[] } = {}): Promise<NamespaceSource[]> {
 	const external = options.includeExternal === false ? [] : await externalNamespaces(cwd, signal);
-	const firstParty = firstPartyNamespace();
+	const firstParty = firstPartyNamespace(options.omitFirstPartyTools ?? []);
 	return firstParty === undefined ? external : [...external, firstParty];
 }
 
@@ -41,8 +42,8 @@ function fromMcp(namespace: McpNamespace): NamespaceSource {
 	};
 }
 
-function firstPartyNamespace(): NamespaceSource | undefined {
-	const entries = listDynamicTools(FIRST_PARTY_NAMESPACE);
+function firstPartyNamespace(omitTools: readonly string[]): NamespaceSource | undefined {
+	const entries = listDynamicTools(FIRST_PARTY_NAMESPACE).filter((entry) => !omitTools.includes(entry.declaration.name));
 	if (entries.length === 0) return undefined;
 	const header = getDynamicNamespaceUseInstructions(FIRST_PARTY_NAMESPACE) ?? capturedCursorUseInstructions();
 	return {
