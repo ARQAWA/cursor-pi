@@ -3,6 +3,7 @@ import { EventEmitter } from "node:events";
 import { delimiter, dirname } from "node:path";
 import type { Stream, Writable } from "node:stream";
 import { projectDirFor, ripgrepPath, transcriptsDirFor } from "./paths.ts";
+import { OutputSuppressionController, SHELL_OUTPUT_SUPPRESSED_NOTICE } from "./output-suppression.ts";
 
 export interface ShellExit {
 	code: number | null;
@@ -137,12 +138,51 @@ function collectChunks(stream: Stream | null | undefined, chunks: Buffer[]): voi
 	stream?.on("data", (chunk: Buffer) => chunks.push(chunk));
 }
 
-// The merged stdout and stderr as the model sees it. A newline separates the two streams when one stops mid-line.
+// Cursor's MAX_BUFFER_SIZE: each stream keeps this many bytes. A chunk that would pass it is dropped, with the rest of that stream.
+export const STREAM_LIMIT_BYTES = 1048576;
+
+// Observes a run's output as it is kept, for notify_on_output.
+export interface OutputObserver {
+	observe(data: string): void;
+	finish(): void;
+}
+
+// The merged stdout and stderr as the model sees it. A newline separates the two streams when one stops mid-line. Each chunk
+// goes through the suppression gate first, then the observer, then the per-stream cap, as in Cursor's pipeline.
 export class ShellOutput {
 	text = "";
 	private last: "stdout" | "stderr" | undefined;
+	private readonly suppression = new OutputSuppressionController();
+	private readonly streamBytes = { stdout: 0, stderr: 0 };
+	private readonly streamTrimmed = { stdout: false, stderr: false };
+	private observer: OutputObserver | undefined;
 
 	add(stream: "stdout" | "stderr", data: string): void {
+		const bytes = Buffer.byteLength(data);
+		const gate = this.suppression.record(bytes);
+		if (gate.noticeJustTriggered) this.append("stdout", SHELL_OUTPUT_SUPPRESSED_NOTICE);
+		if (!gate.shouldForward) return;
+		this.observer?.observe(data);
+		if (this.streamTrimmed[stream]) return;
+		if (this.streamBytes[stream] + bytes > STREAM_LIMIT_BYTES) {
+			this.streamTrimmed[stream] = true;
+			return;
+		}
+		this.streamBytes[stream] += bytes;
+		this.append(stream, data);
+	}
+
+	// Starts observing. The output collected so far is observed first, as Cursor's adopt does.
+	observeWith(observer: OutputObserver): void {
+		this.observer = observer;
+		observer.observe(this.text);
+	}
+
+	finishObserving(): void {
+		this.observer?.finish();
+	}
+
+	private append(stream: "stdout" | "stderr", data: string): void {
 		const separator = this.last !== undefined && this.last !== stream && this.text.length > 0 && !this.text.endsWith("\n") ? "\n" : "";
 		this.text += separator + data;
 		this.last = stream;

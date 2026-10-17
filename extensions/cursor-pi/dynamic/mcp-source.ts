@@ -28,17 +28,28 @@ export interface McpCallResult {
 }
 
 export interface McpSource {
+	// Names the source that registered it: "mcp" for the MCP client, "browser" for the browser.
+	id: string;
 	listMcpNamespaces(cwd: string, signal?: AbortSignal): Promise<McpNamespace[]>;
 	callMcpTool(namespace: string, toolName: string, args: unknown, signal?: AbortSignal): Promise<McpCallResult>;
 	readMcpResource(server: string, uri: string, signal?: AbortSignal): Promise<McpCallResult>;
 }
 
-let source: McpSource | undefined;
+let sources: McpSource[] = [];
 
+// Adds a source; the MCP client and the browser each register one, and their namespace listings are merged.
 export function registerMcpSource(next: McpSource): void {
-	source = next;
+	sources = [...sources, next];
 }
 
-export function mcpSource(): McpSource | undefined {
-	return source;
+// Every registered source's namespaces in registration order, each paired with the source that lists it.
+export async function listOwnedMcpNamespaces(cwd: string, signal?: AbortSignal): Promise<{ source: McpSource; namespace: McpNamespace }[]> {
+	const lists = await Promise.all(
+		sources.map(async (source) => (await source.listMcpNamespaces(cwd, signal)).map((namespace) => ({ source, namespace }))),
+	);
+	return lists.flat();
+}
+
+export async function listMcpNamespaces(cwd: string, signal?: AbortSignal): Promise<McpNamespace[]> {
+	return (await listOwnedMcpNamespaces(cwd, signal)).map((owned) => owned.namespace);
 }

@@ -1,5 +1,5 @@
 import { capturedCursorUseInstructions } from "./captured-instructions.ts";
-import { mcpSource, type McpNamespace, type McpServerStatus } from "./mcp-source.ts";
+import { listMcpNamespaces, type McpNamespace, type McpServerStatus } from "./mcp-source.ts";
 import { FIRST_PARTY_NAMESPACE, getDynamicNamespaceUseInstructions, listDynamicTools, type DynamicToolEntry } from "./registry.ts";
 
 export interface NamespaceTool {
@@ -26,9 +26,7 @@ export async function dynamicNamespaces(cwd: string, signal?: AbortSignal, optio
 }
 
 async function externalNamespaces(cwd: string, signal: AbortSignal | undefined): Promise<NamespaceSource[]> {
-	const source = mcpSource();
-	if (source === undefined) return [];
-	const namespaces = await source.listMcpNamespaces(cwd, signal);
+	const namespaces = await listMcpNamespaces(cwd, signal);
 	return namespaces.map(fromMcp).sort((a, b) => a.name.localeCompare(b.name));
 }
 

@@ -4,7 +4,9 @@ import { resolveTimeZone, wrapUserTurn } from "./user-turn.ts";
 import { promptForModel, SUPPORTED_MODELS } from "./prompts.ts";
 import { registerAllTools, registerCapturedToolPayload } from "./tools/index.ts";
 import { register as registerTranscripts } from "./transcripts.ts";
+import { registerCompaction } from "./compaction/index.ts";
 import { registerGoalContinuation } from "./goals/continuation.ts";
+import { registerBackgroundNotices } from "./background/notices.ts";
 import { setMcpApprovalPrompt, type McpApprovalRequest } from "./mcp/index.ts";
 
 // Session entry holding the context text computed on the first run, so resumed sessions reuse it.
@@ -61,9 +63,11 @@ function registerContextMessage(pi: ExtensionAPI): void {
 
 export default function cursorPi(pi: ExtensionAPI): void {
 	registerAllTools(pi);
+	registerBackgroundNotices(pi);
 	registerCapturedToolPayload(pi);
 	registerContextMessage(pi);
 	registerTranscripts(pi);
+	registerCompaction(pi, storedContextText);
 	registerGoalContinuation(pi);
 	registerMcpApprovals(pi);
 	// A returned systemPrompt replaces the whole system prompt for the run.

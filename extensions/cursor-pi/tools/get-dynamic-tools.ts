@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 import type { ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
 import { registerFetchMcpResource } from "../dynamic/fetch-mcp-resource.ts";
 import { registerMcpSource } from "../dynamic/mcp-source.ts";
+import { registerBrowserSource } from "../browser/source.ts";
 import { dynamicNamespaces, type NamespaceSource } from "../dynamic/namespaces.ts";
 import { catalogResult, namespaceModel, searchMatches, searchResult, serverPayload, type ToolPayload } from "../dynamic/payloads.ts";
 import { errorResult, textResult, type DynamicToolReturn } from "../dynamic/results.ts";
@@ -20,7 +21,8 @@ const MAX_OUTPUT_FILE_SIZE = 50 * 1024 * 1024 - 1024 * 1024;
 const MAX_REGEX_PATTERN_LENGTH = 256;
 
 export function register(pi: ExtensionAPI): void {
-	registerMcpSource({ listMcpNamespaces, callMcpTool, readMcpResource });
+	registerMcpSource({ id: "mcp", listMcpNamespaces, callMcpTool, readMcpResource });
+	registerBrowserSource();
 	registerFetchMcpResource();
 	pi.registerTool({
 		name: GET_DYNAMIC_TOOLS.name,

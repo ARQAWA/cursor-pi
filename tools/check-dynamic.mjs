@@ -117,6 +117,7 @@ async function fixtureNamespace(client) {
 
 function fixtureSource(client, namespace) {
 	return {
+		id: "mcp",
 		async listMcpNamespaces() {
 			return [namespace];
 		},

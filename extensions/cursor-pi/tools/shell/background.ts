@@ -1,6 +1,7 @@
 import { randomInt } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { createOutputNotifier, type OutputNotice, type OutputNotificationConfig } from "./output-notification.ts";
 import { ShellOutput, type ShellExit, type ShellRun } from "./session.ts";
 
 export type ShellJobStatus = "running" | "succeeded" | "failed" | "aborted";
@@ -31,6 +32,8 @@ export interface RegisterShellJobOptions {
 	output?: ShellOutput;
 	// Adopted foreground runs stop after this long; direct background runs have no limit.
 	hardTimeoutMs?: number;
+	// notify_on_output: a pattern in the output raises progress notices through emit.
+	outputNotification?: { config: OutputNotificationConfig; emit: (notice: OutputNotice) => void };
 }
 
 const HEADER_REFRESH_MS = 5000;
@@ -133,6 +136,7 @@ class ShellJob {
 	}
 
 	private finish(exit: ShellExit): void {
+		this.output.finishObserving();
 		clearInterval(this.refreshTimer);
 		clearTimeout(this.hardTimer);
 		this.status = exit.aborted ? "aborted" : exit.code === 0 ? "succeeded" : "failed";
@@ -179,6 +183,11 @@ export function registerShellJob(options: RegisterShellJobOptions): { id: number
 	options.run.releaseState();
 	const id = nextShellId();
 	const outputPath = join(options.terminalsFolder, `${id}.txt`);
+	const output = options.output ?? new ShellOutput();
+	if (options.outputNotification !== undefined) {
+		const notifier = createOutputNotifier({ shellId: id, outputPath, toolCallId: options.toolCallId, config: options.outputNotification.config, emit: options.outputNotification.emit });
+		if (notifier !== undefined) output.observeWith(notifier);
+	}
 	const job = new ShellJob(
 		id,
 		options.run.pid,
@@ -188,7 +197,7 @@ export function registerShellJob(options: RegisterShellJobOptions): { id: number
 		options.toolCallId,
 		outputPath,
 		options.run,
-		options.output ?? new ShellOutput(),
+		output,
 		options.hardTimeoutMs,
 	);
 	jobs.set(id, job);

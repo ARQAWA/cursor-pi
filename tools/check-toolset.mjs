@@ -7,11 +7,12 @@ import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MAIN_TOOL_ORDER } from "../extensions/cursor-pi/tools/declarations.ts";
+import { ANTHROPIC_TOOL_ORDER } from "../extensions/cursor-pi/tools/declarations.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CAPTURE = join(ROOT, "tools", "capture-request.mjs");
 const CAPTURED_MAIN_TOOLS = join(ROOT, "research", "cursor", "reverse", "runs-2026-10-16-T4", "tools", "tools-1-4b2bc1b7.json");
+const EDIT_DECLARATIONS = join(ROOT, "extensions", "cursor-pi", "tools", "generated", "anthropic-edit-tools.json");
 const CODEX = "openai-codex/gpt-5.6-sol";
 const ANTHROPIC = "anthropic/claude-opus-5-5";
 const INLINE_TOOLS_BETA = "inline-tools-2026-09-15";
@@ -40,6 +41,8 @@ async function captureRecord(model) {
 }
 
 const captured = JSON.parse(await readFile(CAPTURED_MAIN_TOOLS, "utf8"));
+// The Anthropic request also carries StrReplace and Write, which Cursor's code builds and which have no capture.
+const anthropicReference = [...captured, ...JSON.parse(await readFile(EDIT_DECLARATIONS, "utf8"))];
 let failed = 0;
 
 try {
@@ -64,11 +67,11 @@ try {
   const sent = Array.isArray(body.tools) ? body.tools : [];
   const names = sent.map((tool) => tool?.name);
   console.log(`${ANTHROPIC} tools: ${names.join(", ")}`);
-  if (JSON.stringify(names) === JSON.stringify(MAIN_TOOL_ORDER)) {
-    console.log(`ok ${ANTHROPIC}: tool names equal MAIN_TOOL_ORDER`);
+  if (JSON.stringify(names) === JSON.stringify(ANTHROPIC_TOOL_ORDER)) {
+    console.log(`ok ${ANTHROPIC}: tool names equal ANTHROPIC_TOOL_ORDER`);
   } else {
     failed++;
-    console.log(`FAIL ${ANTHROPIC}: tool names ${JSON.stringify(names)} differ from MAIN_TOOL_ORDER ${JSON.stringify(MAIN_TOOL_ORDER)}`);
+    console.log(`FAIL ${ANTHROPIC}: tool names ${JSON.stringify(names)} differ from ANTHROPIC_TOOL_ORDER ${JSON.stringify(ANTHROPIC_TOOL_ORDER)}`);
   }
   const beta = headers["anthropic-beta"];
   console.log(`${ANTHROPIC} anthropic-beta: ${beta ?? "(absent)"}`);
@@ -80,7 +83,7 @@ try {
   }
   const mismatched = sent
     .filter((tool) => {
-      const entry = captured.find((candidate) => candidate.name === tool?.name);
+      const entry = anthropicReference.find((candidate) => candidate.name === tool?.name);
       return entry === undefined || entry.description !== tool.description;
     })
     .map((tool) => tool?.name);
@@ -92,12 +95,12 @@ try {
   }
   const schemaMismatch = sent
     .filter((tool) => {
-      const entry = captured.find((candidate) => candidate.name === tool?.name);
+      const entry = anthropicReference.find((candidate) => candidate.name === tool?.name);
       return entry?.parameters !== undefined && JSON.stringify(tool.input_schema) !== JSON.stringify(entry.parameters);
     })
     .map((tool) => tool?.name);
   const withoutCapturedSchema = sent
-    .filter((tool) => captured.find((candidate) => candidate.name === tool?.name)?.parameters === undefined)
+    .filter((tool) => anthropicReference.find((candidate) => candidate.name === tool?.name)?.parameters === undefined)
     .map((tool) => tool?.name);
   if (sent.length > 0 && schemaMismatch.length === 0) {
     const note = withoutCapturedSchema.length > 0 ? `; ${withoutCapturedSchema.join(", ")} has no captured parameters and keeps Pi's schema` : "";

@@ -8,7 +8,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promptForModel } from "../extensions/cursor-pi/prompts.ts";
-import { MAIN_TOOL_ORDER } from "../extensions/cursor-pi/tools/declarations.ts";
+import { ANTHROPIC_TOOL_ORDER } from "../extensions/cursor-pi/tools/declarations.ts";
 
 const CAPTURE = join(dirname(fileURLToPath(import.meta.url)), "capture-request.mjs");
 // Pi's reserved deferred tool for Anthropic native tool changes; it is not a Cursor tool.
@@ -80,7 +80,7 @@ function checkBody(provider, body, expectedText) {
     if (JSON.stringify(body.tools) !== JSON.stringify(CAPTURED_TOOLS)) failures.push("tools differ from the captured main array");
   } else {
     const names = (Array.isArray(body.tools) ? body.tools.map((tool) => tool?.name) : []).filter((name) => name !== PI_PLACEHOLDER);
-    if (JSON.stringify(names) !== JSON.stringify(MAIN_TOOL_ORDER)) failures.push("tool names differ from MAIN_TOOL_ORDER");
+    if (JSON.stringify(names) !== JSON.stringify(ANTHROPIC_TOOL_ORDER)) failures.push("tool names differ from ANTHROPIC_TOOL_ORDER");
   }
   return failures;
 }

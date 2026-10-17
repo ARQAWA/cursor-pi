@@ -9,7 +9,9 @@ import { registerCursorNamespace } from "./namespace/index.ts";
 import { register as registerReadFile } from "./read-file.ts";
 import { register as registerRg } from "./rg.ts";
 import { register as registerShell } from "./shell.ts";
-import { registerShellNotices } from "./shell/notices.ts";
+import { register as registerStrReplace } from "./str-replace.ts";
+import { register as registerWrite } from "./write.ts";
+import { registerShellNotices } from "../background/shell-notice.ts";
 import { register as registerUpdateCurrentStep } from "./update-current-step.ts";
 
 const REGISTER_MAIN: Record<(typeof MAIN_TOOL_ORDER)[number], (pi: ExtensionAPI) => void> = {
@@ -25,10 +27,43 @@ const REGISTER_MAIN: Record<(typeof MAIN_TOOL_ORDER)[number], (pi: ExtensionAPI)
 
 // Registers the eight main tools in Cursor's order; they are active on registration. UpdateCurrentStep is registered inactive.
 export function registerAllTools(pi: ExtensionAPI): void {
-	for (const name of MAIN_TOOL_ORDER) REGISTER_MAIN[name](pi);
+	for (const name of MAIN_TOOL_ORDER) {
+		// StrReplace and Write take ApplyPatch's place for Anthropic models; syncEditTools decides which pair is active.
+		if (name === "ApplyPatch") {
+			registerStrReplace(pi);
+			registerWrite(pi);
+		}
+		REGISTER_MAIN[name](pi);
+	}
+	registerEditToolSync(pi);
 	registerUpdateCurrentStep(pi);
 	registerCursorNamespace(pi);
 	registerShellNotices(pi);
+}
+
+// The file-editing tools that are active for each model: Anthropic models get StrReplace and Write, and every other model gets
+// ApplyPatch, in the slot where the first of them sits in the active list.
+const EDIT_TOOLS = ["ApplyPatch", "StrReplace", "Write"];
+
+function syncEditTools(pi: ExtensionAPI, model: { provider: string }): void {
+	const editSet = model.provider === "anthropic" ? ["StrReplace", "Write"] : ["ApplyPatch"];
+	const current = pi.getActiveTools();
+	const slot = current.findIndex((name) => EDIT_TOOLS.includes(name));
+	const others = current.filter((name) => !EDIT_TOOLS.includes(name));
+	const at = slot === -1 ? others.length : current.slice(0, slot).filter((name) => !EDIT_TOOLS.includes(name)).length;
+	const next = [...others.slice(0, at), ...editSet, ...others.slice(at)];
+	if (next.join("\n") !== current.join("\n")) pi.setActiveTools(next);
+}
+
+// Applies the edit-tool set when the model changes and before each run.
+function registerEditToolSync(pi: ExtensionAPI): void {
+	pi.on("model_select", (event) => {
+		syncEditTools(pi, event.model);
+	});
+	pi.on("before_agent_start", (_event, ctx) => {
+		if (ctx.model) syncEditTools(pi, ctx.model);
+		return undefined;
+	});
 }
 
 // Pi serializes Responses tools its own way (strict null, grammar keys in another order). The request carries Cursor's
@@ -107,26 +142,33 @@ function capturedInputItem(item: ResponsesInputItem): ResponsesInputItem {
 	return item;
 }
 
+// Removes the inline-tools token from an anthropic-beta header in place; a header left empty is deleted.
+export function stripInlineToolsBeta(headers: Record<string, string | null>): void {
+	for (const name of Object.keys(headers)) {
+		const value = headers[name];
+		if (name.toLowerCase() !== "anthropic-beta" || typeof value !== "string" || !value.includes(INLINE_TOOLS_BETA)) continue;
+		const betas = value
+			.split(",")
+			.map((beta) => beta.trim())
+			.filter((beta) => beta.length > 0 && beta !== INLINE_TOOLS_BETA);
+		headers[name] = betas.length > 0 ? betas.join(",") : null;
+	}
+}
+
+// The rewrite of a provider request payload that Cursor Pi applies to every request. Requests that Cursor Pi sends itself use it too.
+export function rewriteProviderPayload(api: string | undefined, payload: unknown): unknown {
+	if (api === "anthropic-messages") return withoutNativeToolChanges(payload as AnthropicBody);
+	if (api !== "openai-codex-responses" && api !== "openai-responses") return payload;
+	const responses = payload as ResponsesPayload;
+	const shaped = withCapturedInputShapes(responses);
+	if (!Array.isArray(responses.tools)) return shaped;
+	return { ...shaped, tools: responses.tools.map((tool) => declaration(tool.name)) };
+}
+
 export function registerCapturedToolPayload(pi: ExtensionAPI): void {
-	// Removes the inline-tools token from an anthropic-beta header; a header left empty is deleted.
-	pi.on("before_provider_headers", (event) => {
-		for (const name of Object.keys(event.headers)) {
-			const value = event.headers[name];
-			if (name.toLowerCase() !== "anthropic-beta" || typeof value !== "string" || !value.includes(INLINE_TOOLS_BETA)) continue;
-			const betas = value
-				.split(",")
-				.map((beta) => beta.trim())
-				.filter((beta) => beta.length > 0 && beta !== INLINE_TOOLS_BETA);
-			event.headers[name] = betas.length > 0 ? betas.join(",") : null;
-		}
-	});
+	pi.on("before_provider_headers", (event) => stripInlineToolsBeta(event.headers));
 	pi.on("before_provider_request", (event, ctx) => {
-		const api = ctx.model?.api;
-		if (api === "anthropic-messages") return withoutNativeToolChanges(event.payload as AnthropicBody);
-		if (api !== "openai-codex-responses" && api !== "openai-responses") return undefined;
-		const payload = event.payload as ResponsesPayload;
-		const shaped = withCapturedInputShapes(payload);
-		if (!Array.isArray(payload.tools)) return shaped === payload ? undefined : shaped;
-		return { ...shaped, tools: payload.tools.map((tool) => declaration(tool.name)) };
+		const next = rewriteProviderPayload(ctx.model?.api, event.payload);
+		return next === event.payload ? undefined : next;
 	});
 }

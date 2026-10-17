@@ -68,7 +68,7 @@ function messageLine(role: "user" | "assistant", text: string, toolUses: { name:
 }
 
 // One line per message. Tool results write nothing. Cursor also drops a leading user_info message; Pi keeps none.
-function transcriptLine(message: AgentMessage): string | undefined {
+export function transcriptLine(message: AgentMessage): string | undefined {
 	if (message.role === "user") {
 		const parts = typeof message.content === "string" ? [{ type: "text" as const, text: message.content }] : message.content;
 		const texts: string[] = [];
@@ -151,6 +151,12 @@ function writeSafely(ctx: ExtensionContext, turnEnded?: TurnEnded): Promise<void
 		}
 	});
 	return queue;
+}
+
+// The file that holds the session's transcript, as writeTranscript names it.
+export function transcriptPathOf(ctx: ExtensionContext): string {
+	const name = conversationFileName(ctx.sessionManager.getSessionId());
+	return join(transcriptsDirFor(projectDirFor(ctx.cwd)), name, `${name}.jsonl`);
 }
 
 // Cursor checkpoints its transcript after each step, and Pi's turn_end comes once a step's messages are in the session.

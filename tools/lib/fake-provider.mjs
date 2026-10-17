@@ -1,6 +1,7 @@
 // Fake provider for the capture tools. It answers Codex Responses requests (openai-codex) and Anthropic Messages requests
 // (anthropic) with SSE built from a script of turns, and records every request body that Pi sends.
-// A turn is { calls: [{ name, arguments }], reasoning? } for tool calls or { text } for the final answer. `reasoning` adds a
+// A turn is { calls: [{ name, arguments }], reasoning? } for tool calls, { text } for the final answer or { compaction } for the
+// Codex remote compaction item. `reasoning` adds a
 // reasoning item before the calls and is Codex-only. Codex sends ApplyPatch as a custom tool call whose raw input is
 // arguments.input; Anthropic sends every call as a tool_use block whose input is the arguments object.
 import { createServer } from "node:http";
@@ -51,7 +52,11 @@ function validateTurns(turns, provider) {
   for (const [index, turn] of turns.entries()) {
     const hasCalls = Array.isArray(turn.calls) && turn.calls.length > 0;
     const hasText = typeof turn.text === "string";
-    if (hasCalls === hasText) throw new Error(`turn ${index} needs exactly one of calls or text`);
+    const hasCompaction = turn.compaction !== undefined;
+    if ([hasCalls, hasText, hasCompaction].filter(Boolean).length !== 1) {
+      throw new Error(`turn ${index} needs exactly one of calls, text or compaction`);
+    }
+    if (hasCompaction && provider !== "openai-codex") throw new Error(`turn ${index}: compaction is Codex-only`);
     if (turn.reasoning !== undefined && provider !== "openai-codex") throw new Error(`turn ${index}: reasoning is Codex-only`);
     for (const call of turn.calls ?? []) {
       if (call.name === "ApplyPatch" && typeof call.arguments?.input !== "string") {
@@ -115,6 +120,20 @@ function codexSse(turn, index, model) {
     outputIndex += 1;
   }
 
+  if (turn.compaction !== undefined) {
+    // The remote compaction item: the only output of a compaction request, reported as the Codex stream reports it.
+    const id = turn.compaction.id ?? `cmp_turn${index}`;
+    const item = {
+      type: "compaction",
+      id,
+      encrypted_content: turn.compaction.encrypted_content ?? `fake-encrypted-compaction-turn${index}`,
+    };
+    emit({ type: "response.output_item.added", output_index: outputIndex, item: { type: "compaction", id, encrypted_content: "" } });
+    emit({ type: "response.output_item.done", output_index: outputIndex, item });
+    output.push(item);
+    outputIndex += 1;
+  }
+
   for (const [callIndex, call] of (turn.calls ?? []).entries()) {
     const callId = `call_turn${index}_${callIndex}`;
     if (call.name === "ApplyPatch") {
@@ -165,11 +184,11 @@ function codexSse(turn, index, model) {
   }
 
   const usage = {
-    input_tokens: 1,
+    input_tokens: turn.usage?.input_tokens ?? 1,
     input_tokens_details: { cached_tokens: 0 },
     output_tokens: 1,
     output_tokens_details: { reasoning_tokens: 0 },
-    total_tokens: 2,
+    total_tokens: (turn.usage?.input_tokens ?? 1) + 1,
   };
   emit({ type: "response.completed", response: responseFor("completed", { output, usage }) });
   return events
@@ -191,7 +210,7 @@ function anthropicSse(turn, index, model) {
       content: [],
       stop_reason: null,
       stop_sequence: null,
-      usage: { input_tokens: 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
+      usage: { input_tokens: turn.usage?.input_tokens ?? 1, output_tokens: 1, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
     },
   });
   let blockIndex = 0;

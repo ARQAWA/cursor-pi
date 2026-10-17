@@ -1,0 +1,578 @@
+{
+	"instructions": "The cursor-ide-browser MCP server provides a Cursor-owned browser tab plus a raw Chrome DevTools Protocol command tool.\n\nCORE WORKFLOW:\n1. Start by understanding the user's goal and what success looks like on the page.\n2. Use browser_tabs with action \"list\" to inspect open tabs and URLs before acting.\n3. Use browser_navigate to create or navigate the target tab. Omit the position parameter for background automation so focus is preserved.\n4. Use browser_lock before longer automation on an existing tab, then browser_lock with action \"unlock\" when finished.\n5. Use browser_snapshot for accessibility context and browser_take_screenshot for visual verification.\n6. Use browser_click, browser_type, browser_fill, browser_select_option, browser_press_key, browser_scroll, and browser_drag for page interactions.\n7. Use browser_highlight and browser_get_bounding_box for visual grounding and coordinate diagnostics.\n8. Use browser_cdp for page inspection, profiling, runtime evaluation, DOM/CSS queries, and performance data.\n\nAVOID RABBIT HOLES:\n1. Do not repeat the same failing action more than once without new evidence such as a fresh snapshot, a different ref, a changed page state, or a clear new hypothesis.\n2. IMPORTANT: If four attempts fail or progress stalls, stop acting and report what you observed, what blocked progress, and the most likely next step.\n3. Prefer gathering evidence over brute force. If the page is confusing, use browser_snapshot, browser_take_screenshot, or CDP inspection before trying more actions.\n4. If you encounter a blocker such as login, passkey/manual user interaction, permissions, captchas, destructive confirmations, missing data, or an unexpected state, stop and report it instead of improvising repeated actions.\n5. Do not get stuck in wait-action-wait loops. Every retry should be justified by something newly observed.\n\nCRITICAL - Lock/unlock workflow:\n1. browser_lock requires an existing browser tab - you CANNOT call browser_lock with action: \"lock\" before browser_navigate\n2. Correct order: browser_navigate -> browser_lock({ action: \"lock\" }) -> (interactions) -> browser_lock({ action: \"unlock\" })\n3. If a browser tab already exists (check with browser_tabs list), call browser_lock with action: \"lock\" FIRST before any interactions\n4. Only call browser_lock with action: \"unlock\" when completely done with ALL browser operations for this turn\n\nIMPORTANT - Waiting strategy:\nWhen waiting for page changes, prefer short CDP polling loops with Runtime.evaluate, DOM queries, Page lifecycle signals, or browser_snapshot checks rather than a single long wait.\n\nCDP USAGE:\n- Use browser_cdp with a DevTools Protocol method and params object, for example Runtime.evaluate, DOM.getDocument, CSS.getComputedStyleForNode, Profiler.start/stop, Performance.getMetrics, Log.enable, and Network.enable.\n- Do not use browser_cdp with CDP Input.* methods. They are denied because they are focus-sensitive in Electron webviews and can route input to Cursor UI instead of the browser page.\n- Use browser_click, browser_type, browser_fill, browser_select_option, browser_press_key, browser_scroll, and browser_drag for clicks, typing, filling inputs, selecting options, keyboard actions, scrolling, and drag-and-drop.\n- Use Runtime.evaluate for advanced DOM-scoped interactions that the dedicated browser tools do not cover.\n- For profiling, call Profiler.enable, Profiler.start, reproduce the behavior, then Profiler.stop. The profile is saved to a file and returned as a log_file; read that file only when you need to inspect details.\n- For JavaScript evaluation, prefer Runtime.evaluate with returnByValue when possible.\n- Device emulation you set with Emulation.setDeviceMetricsOverride, Emulation.setTouchEmulationEnabled, or Emulation.setUserAgentOverride (for example for a phone-sized screenshot) lasts only for the current turn: it is cleared when your turn ends, and the user can reset it from the browser tab at any time. Send Emulation.clearDeviceMetricsOverride yourself once you are done with it within a turn.\n- Some browser-wide or sensitive CDP methods are denied, especially cookie, storage, permission, download, target-management, filesystem-backed file-input commands, system-level commands, and CDP navigation/history navigation commands.\n- Large CDP responses are saved to files instead of being inlined. Prefer using the returned file path over immediately stuffing large payloads into context; read focused sections only when needed.\n\nVISION:\n- browser_take_screenshot attaches an image result that the model can inspect. CDP Page.captureScreenshot returns data inside JSON and should not replace browser_take_screenshot when visual verification is needed.\n\nNOTES:\n- browser_snapshot returns snapshot YAML and is the main source of truth for page structure.\n- Refs are opaque handles tied to the latest browser_snapshot for that tab.\n- Iframe content is not accessible - only elements outside iframes can be interacted with.\n- When you stop to report a blocker, include the current page, the target you were trying to reach, the blocker you observed, and the best next action. If the blocker requires manual user interaction, ask the user to take over at that point rather than assuming it in advance.\n",
+	"tools": [
+		{
+			"name": "browser_navigate",
+			"description": "Navigate to a URL. By default reuses an existing tab; set newTab: true to open in a new tab.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"url": {
+						"type": "string",
+						"description": "The URL to navigate to"
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"position": {
+						"type": "string",
+						"enum": [
+							"active",
+							"side"
+						],
+						"description": "Only set when the user explicitly asks to reveal, show, focus, or open the browser visibly. Set to \"active\" for visible/revealed browser UI, or \"side\" if the user mentions \"side\", \"beside\", \"side panel\", or \"side by side\". Omit this parameter for background automation so focus is preserved."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after navigation completes. Defaults to false."
+					},
+					"newTab": {
+						"type": "boolean",
+						"description": "When true, creates a new tab before navigating instead of reusing an existing tab. Defaults to false."
+					}
+				},
+				"required": [
+					"url"
+				]
+			}
+		},
+		{
+			"name": "browser_snapshot",
+			"description": "Capture accessibility snapshot of the current page, this is better than screenshot",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"interactive": {
+						"type": "boolean",
+						"description": "When true, only include interactive elements in the snapshot. Defaults to false."
+					},
+					"maxDepth": {
+						"type": "number",
+						"description": "Maximum depth for snapshot output. Defaults to 20."
+					},
+					"compact": {
+						"type": "boolean",
+						"description": "When true, outputs a more compact snapshot format. Defaults to false."
+					},
+					"selector": {
+						"type": "string",
+						"description": "Optional CSS selector to scope the snapshot to a subtree."
+					},
+					"includeDiff": {
+						"type": "boolean",
+						"description": "When true, include a diff vs the previous snapshot for this tab. Defaults to false."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after snapshot completes. Defaults to false."
+					}
+				},
+				"required": []
+			}
+		},
+		{
+			"name": "browser_click",
+			"description": "Click an element by ref from browser_snapshot. Use this instead of CDP Input.* methods.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ref": {
+						"type": "string",
+						"description": "Element ref from browser_snapshot."
+					},
+					"element": {
+						"type": "string",
+						"description": "Human-readable description of the element."
+					},
+					"offsetX": {
+						"type": "number",
+						"description": "Optional x offset from the element center."
+					},
+					"offsetY": {
+						"type": "number",
+						"description": "Optional y offset from the element center."
+					},
+					"doubleClick": {
+						"type": "boolean",
+						"description": "When true, double-click the element."
+					},
+					"button": {
+						"type": "string",
+						"enum": [
+							"left",
+							"right",
+							"middle"
+						],
+						"description": "Mouse button. Defaults to left."
+					},
+					"modifiers": {
+						"type": "array",
+						"items": {
+							"type": "string",
+							"enum": [
+								"Control",
+								"Shift",
+								"Alt",
+								"Meta",
+								"ControlOrMeta"
+							]
+						},
+						"description": "Optional modifier keys."
+					},
+					"holdDurationMs": {
+						"type": "number",
+						"description": "Optional mouse hold duration before release."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after the click completes. Defaults to false."
+					}
+				},
+				"required": [
+					"ref"
+				]
+			}
+		},
+		{
+			"name": "browser_mouse_click_xy",
+			"description": "Click at viewport coordinates. Prefer browser_click with refs when possible.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"x": {
+						"type": "number",
+						"description": "Viewport x coordinate."
+					},
+					"y": {
+						"type": "number",
+						"description": "Viewport y coordinate."
+					},
+					"button": {
+						"type": "string",
+						"enum": [
+							"left",
+							"right",
+							"middle"
+						],
+						"description": "Mouse button. Defaults to left."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after the click completes. Defaults to false."
+					}
+				},
+				"required": [
+					"x",
+					"y"
+				]
+			}
+		},
+		{
+			"name": "browser_type",
+			"description": "Type text into an input, textarea, or contenteditable element by ref.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ref": {
+						"type": "string",
+						"description": "Element ref from browser_snapshot."
+					},
+					"text": {
+						"type": "string",
+						"description": "Text to type."
+					},
+					"element": {
+						"type": "string",
+						"description": "Human-readable description of the element."
+					},
+					"clear": {
+						"type": "boolean",
+						"description": "When true, clear existing text first."
+					},
+					"submit": {
+						"type": "boolean",
+						"description": "When true, press Enter after typing."
+					},
+					"slowly": {
+						"type": "boolean",
+						"description": "When true, type character by character."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after typing completes. Defaults to false."
+					}
+				},
+				"required": [
+					"ref",
+					"text"
+				]
+			}
+		},
+		{
+			"name": "browser_fill",
+			"description": "Set the value of an input, textarea, or contenteditable element by ref.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ref": {
+						"type": "string",
+						"description": "Element ref from browser_snapshot."
+					},
+					"value": {
+						"type": "string",
+						"description": "Value to set."
+					},
+					"element": {
+						"type": "string",
+						"description": "Human-readable description of the element."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after filling completes. Defaults to false."
+					}
+				},
+				"required": [
+					"ref",
+					"value"
+				]
+			}
+		},
+		{
+			"name": "browser_select_option",
+			"description": "Select one or more options in a select element by ref.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ref": {
+						"type": "string",
+						"description": "Element ref from browser_snapshot."
+					},
+					"values": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Option values or labels to select."
+					},
+					"element": {
+						"type": "string",
+						"description": "Human-readable description of the element."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after selection completes. Defaults to false."
+					}
+				},
+				"required": [
+					"ref",
+					"values"
+				]
+			}
+		},
+		{
+			"name": "browser_press_key",
+			"description": "Press a key in the browser page using DOM keyboard events.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"key": {
+						"type": "string",
+						"description": "Key to press, for example Enter, Escape, Tab, ArrowDown, or a single character."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after the key press completes. Defaults to false."
+					}
+				},
+				"required": [
+					"key"
+				]
+			}
+		},
+		{
+			"name": "browser_scroll",
+			"description": "Scroll the page, a scrollable container, or an element into view. Use this instead of CDP Input.* wheel events.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ref": {
+						"type": "string",
+						"description": "Optional element ref from browser_snapshot."
+					},
+					"direction": {
+						"type": "string",
+						"enum": [
+							"up",
+							"down",
+							"left",
+							"right"
+						],
+						"description": "Scroll direction."
+					},
+					"amount": {
+						"type": "number",
+						"description": "Scroll amount in pixels. Defaults to 300."
+					},
+					"deltaX": {
+						"type": "number",
+						"description": "Explicit horizontal scroll delta."
+					},
+					"deltaY": {
+						"type": "number",
+						"description": "Explicit vertical scroll delta."
+					},
+					"scrollIntoView": {
+						"type": "boolean",
+						"description": "When true, scroll the ref into view."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after scrolling completes. Defaults to false."
+					}
+				},
+				"required": []
+			}
+		},
+		{
+			"name": "browser_drag",
+			"description": "Drag an element by ref to another ref or viewport coordinates.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"sourceRef": {
+						"type": "string",
+						"description": "Source element ref from browser_snapshot."
+					},
+					"targetRef": {
+						"type": "string",
+						"description": "Optional target element ref from browser_snapshot."
+					},
+					"targetX": {
+						"type": "number",
+						"description": "Optional target viewport x coordinate."
+					},
+					"targetY": {
+						"type": "number",
+						"description": "Optional target viewport y coordinate."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after drag completes. Defaults to false."
+					}
+				},
+				"required": [
+					"sourceRef"
+				]
+			}
+		},
+		{
+			"name": "browser_get_bounding_box",
+			"description": "Get the viewport bounding box for an element ref.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ref": {
+						"type": "string",
+						"description": "Element ref from browser_snapshot."
+					},
+					"element": {
+						"type": "string",
+						"description": "Human-readable description of the element."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					}
+				},
+				"required": [
+					"ref"
+				]
+			}
+		},
+		{
+			"name": "browser_highlight",
+			"description": "Highlight an element by ref in the browser page for visual grounding.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"ref": {
+						"type": "string",
+						"description": "Element ref from browser_snapshot."
+					},
+					"element": {
+						"type": "string",
+						"description": "Human-readable description of the element."
+					},
+					"durationMs": {
+						"type": "number",
+						"description": "Highlight duration in milliseconds. Defaults to 2000."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					}
+				},
+				"required": [
+					"ref"
+				]
+			}
+		},
+		{
+			"name": "browser_tabs",
+			"description": "List, create, close, or select a browser tab",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"action": {
+						"type": "string",
+						"enum": [
+							"list",
+							"new",
+							"close",
+							"select"
+						],
+						"description": "Operation to perform"
+					},
+					"index": {
+						"type": "number",
+						"description": "Tab index. Required for \"select\". Optional for \"close\" (defaults to current tab)."
+					},
+					"position": {
+						"type": "string",
+						"enum": [
+							"active",
+							"side"
+						],
+						"description": "Only set for action \"new\" when the user explicitly asks to reveal, show, focus, or open the browser visibly. Set to \"active\" for visible/revealed browser UI, or \"side\" if the user mentions \"side\", \"beside\", \"side panel\", or \"side by side\". Omit this parameter for background automation so focus is preserved."
+					}
+				},
+				"required": [
+					"action"
+				]
+			}
+		},
+		{
+			"name": "browser_cdp",
+			"description": "Send a Chrome DevTools Protocol command to the target browser tab. Do not use CDP Input.* methods; use dedicated browser tools for clicks, text input, key presses, scrolling, and drag-and-drop. Browser-wide, storage, cookie, permission, download, target-management, and system-level commands are denied.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"method": {
+						"type": "string",
+						"description": "CDP method name, for example Runtime.evaluate, DOM.getDocument, Profiler.start, or Performance.getMetrics."
+					},
+					"params": {
+						"type": "object",
+						"description": "CDP params object. Omit or pass {} when the command takes no params."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					},
+					"take_screenshot_afterwards": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot after the CDP command completes. Defaults to false."
+					}
+				},
+				"required": [
+					"method"
+				]
+			}
+		},
+		{
+			"name": "browser_take_screenshot",
+			"description": "Take a screenshot of the current page. You can't perform actions based on the screenshot, use browser_snapshot for actions.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"type": {
+						"type": "string",
+						"description": "Image format for the screenshot. Default is png."
+					},
+					"filename": {
+						"type": "string",
+						"description": "File name to save the screenshot to. Defaults to page-{timestamp}.{png|jpeg} if not specified."
+					},
+					"element": {
+						"type": "string",
+						"description": "Description of the element, if taking a screenshot of an element"
+					},
+					"ref": {
+						"type": "string",
+						"description": "CSS selector for the element, if taking a screenshot of an element"
+					},
+					"fullPage": {
+						"type": "boolean",
+						"description": "When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Cannot be used with element screenshots."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					}
+				},
+				"required": []
+			}
+		},
+		{
+			"name": "browser_lock",
+			"description": "Lock or unlock the browser to control whether the user can interact while you work. Set action to \"lock\" or \"unlock\". When locked, the user can still click \"Take Control\" to unlock if needed.",
+			"parameters": {
+				"type": "object",
+				"properties": {
+					"action": {
+						"type": "string",
+						"enum": [
+							"lock",
+							"unlock"
+						],
+						"description": "Whether to lock or unlock the browser for user interaction."
+					},
+					"viewId": {
+						"type": "string",
+						"description": "Target browser tab ID. If omitted, uses the last interacted tab."
+					}
+				},
+				"required": [
+					"action"
+				]
+			}
+		}
+	]
+}

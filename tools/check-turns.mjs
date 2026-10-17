@@ -16,6 +16,7 @@ import { executeRg } from "../extensions/cursor-pi/tools/rg.ts";
 import { executeReadFile } from "../extensions/cursor-pi/tools/read-file.ts";
 import { executeShell } from "../extensions/cursor-pi/tools/shell.ts";
 import { projectDirFor } from "../extensions/cursor-pi/tools/shell/paths.ts";
+import { executeWrite } from "../extensions/cursor-pi/tools/write.ts";
 
 const CODEX = "openai-codex/gpt-5.6-sol";
 const ANTHROPIC = "anthropic/claude-opus-5-5";
@@ -29,7 +30,7 @@ const FILES = {
   "src/app.ts": "export function main() {\n  return 1;\n}\n",
   "src/util.ts": "export const add = (a: number, b: number) => a + b;\n",
 };
-const EXECUTORS = { Glob: executeGlob, rg: executeRg, ReadFile: executeReadFile, Shell: executeShell, ApplyPatch: executeApplyPatch };
+const EXECUTORS = { Glob: executeGlob, rg: executeRg, ReadFile: executeReadFile, Shell: executeShell, ApplyPatch: executeApplyPatch, Write: executeWrite };
 const REASONING_TEXT = "fake-encrypted-reasoning-turn0";
 
 // Field sets of Cursor's captured items: research/cursor/reverse/runs-2026-10-16-T4 items and calls, runs-2026-10-16-T3 call 009,
@@ -117,12 +118,17 @@ function scriptFor(ws, provider) {
       { name: "ReadFile", arguments: { path: path.join(ws, "README.md") } },
     ],
   };
+  // Anthropic models get Write in ApplyPatch's place; GPT keeps ApplyPatch.
+  const edit =
+    provider === "anthropic"
+      ? { name: "Write", arguments: { path: path.join(ws, NOTE), contents: `${NOTE_TEXT}\n` } }
+      : { name: "ApplyPatch", arguments: { input: patch } };
   // Codex sends a reasoning item with the calls; the Anthropic fake has no reasoning turns.
   if (provider === "openai-codex") round1.reasoning = REASONING;
   return [
     round1,
     { calls: [{ name: "Shell", arguments: { command: "echo hi" } }] },
-    { calls: [{ name: "ApplyPatch", arguments: { input: patch } }] },
+    { calls: [edit] },
     { text: "Scripted session finished." },
   ];
 }

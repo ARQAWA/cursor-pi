@@ -1,6 +1,6 @@
 import type { ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
 import { parseArgumentsLeniently } from "../dynamic/argument-repair.ts";
-import { mcpSource, type McpCallResult, type McpNamespace } from "../dynamic/mcp-source.ts";
+import { listOwnedMcpNamespaces, type McpCallResult } from "../dynamic/mcp-source.ts";
 import { errorResult, rawErrorResult, textResult, type DynamicContentBlock, type DynamicToolReturn } from "../dynamic/results.ts";
 import { FIRST_PARTY_NAMESPACE, getDynamicTool, listDynamicTools } from "../dynamic/registry.ts";
 import { checkType, invalidArguments, optionalString, type ArgIssue } from "./cursor-args.ts";
@@ -14,7 +14,7 @@ export function register(pi: ExtensionAPI): void {
 		label: CALL_DYNAMIC_TOOL.name,
 		description: CALL_DYNAMIC_TOOL.description,
 		parameters: PASSTHROUGH_PARAMETERS,
-		execute: (_toolCallId, params, signal, _onUpdate, ctx) => executeCallDynamicTool(params, signal, ctx),
+		execute: (toolCallId, params, signal, _onUpdate, ctx) => executeCallDynamicTool(params, signal, ctx, toolCallId),
 	});
 }
 
@@ -86,18 +86,28 @@ function parseCall(value: unknown, issues: ArgIssue[]): CallArgs | undefined {
 	return { namespace, toolName, arguments: args };
 }
 
-export async function executeCallDynamicTool(params: unknown, signal: AbortSignal | undefined, ctx: ExtensionToolContext): Promise<DynamicToolReturn> {
+export async function executeCallDynamicTool(
+	params: unknown,
+	signal: AbortSignal | undefined,
+	ctx: ExtensionToolContext,
+	toolCallId?: string,
+): Promise<DynamicToolReturn> {
 	try {
 		const issues: ArgIssue[] = [];
 		const call = parseCall(normalize(params), issues);
 		if (call === undefined) return errorResult(invalidArguments(issues));
-		return call.namespace === FIRST_PARTY_NAMESPACE ? await firstParty(call, signal, ctx) : await external(call, signal, ctx);
+		return call.namespace === FIRST_PARTY_NAMESPACE ? await firstParty(call, signal, ctx, toolCallId) : await external(call, signal, ctx);
 	} catch (error) {
 		return errorResult(error instanceof Error ? error.message : String(error));
 	}
 }
 
-async function firstParty(call: CallArgs, signal: AbortSignal | undefined, ctx: ExtensionToolContext): Promise<DynamicToolReturn> {
+async function firstParty(
+	call: CallArgs,
+	signal: AbortSignal | undefined,
+	ctx: ExtensionToolContext,
+	toolCallId: string | undefined,
+): Promise<DynamicToolReturn> {
 	const entry = getDynamicTool(FIRST_PARTY_NAMESPACE, call.toolName);
 	if (entry === undefined) {
 		const tools = listDynamicTools(FIRST_PARTY_NAMESPACE);
@@ -107,17 +117,16 @@ async function firstParty(call: CallArgs, signal: AbortSignal | undefined, ctx: 
 			`Built-in tool "${call.toolName}" not found in namespace "${FIRST_PARTY_NAMESPACE}". Available tools: ${names}. Use GetDynamicTools to discover their schemas.`,
 		);
 	}
-	const result = await entry.execute(call.arguments ?? {}, signal, ctx);
+	const result = await entry.execute(call.arguments ?? {}, signal, ctx, toolCallId);
 	return result.isError ? rawErrorResult(result.text || "Dynamic tool execution failed") : textResult(result.text);
 }
 
 async function external(call: CallArgs, signal: AbortSignal | undefined, ctx: ExtensionToolContext): Promise<DynamicToolReturn> {
-	const source = mcpSource();
-	const namespaces: McpNamespace[] = source === undefined ? [] : await source.listMcpNamespaces(ctx.cwd, signal);
-	const namespace = namespaces.find((candidate) => candidate.name === call.namespace);
-	if (source === undefined || namespace === undefined) {
+	const owned = (await listOwnedMcpNamespaces(ctx.cwd, signal)).find((candidate) => candidate.namespace.name === call.namespace);
+	if (owned === undefined) {
 		return errorResult(`MCP server does not exist: ${call.namespace}. Use GetDynamicTools to discover available namespaces.`);
 	}
+	const { source, namespace } = owned;
 	if (namespace.status !== "ready") return errorResult(namespace.error ?? `Namespace "${call.namespace}" is ${namespace.status}.`);
 	if (!namespace.tools.some((tool) => tool.name === call.toolName)) {
 		return errorResult(`Tool ${call.toolName} was not found. Use GetDynamicTools to discover available namespaces and their tools.`);

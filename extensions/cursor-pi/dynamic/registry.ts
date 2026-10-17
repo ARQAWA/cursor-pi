@@ -15,7 +15,8 @@ export interface DynamicToolEntry {
 	declaration: CapturedTool;
 	// The line Cursor lists for this tool under the namespace's use instructions; omitted when Cursor lists none.
 	conciseInstructions?: string;
-	execute(args: unknown, signal: AbortSignal | undefined, ctx: ExtensionToolContext): Promise<DynamicToolResult>;
+	// toolCallId is the id of the CallDynamicTool call that runs the tool, when one does.
+	execute(args: unknown, signal: AbortSignal | undefined, ctx: ExtensionToolContext, toolCallId?: string): Promise<DynamicToolResult>;
 }
 
 interface NamespaceState {

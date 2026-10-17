@@ -1,8 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { registerShellJob } from "./background.ts";
+import { type RegisterShellJobOptions, registerShellJob } from "./background.ts";
+import { emitShellProgress } from "../../background/shell-notice.ts";
 import type { OutputLocation, ShellRenderInput, ShellRunValue } from "./format.ts";
+import type { OutputNotificationConfig } from "./output-notification.ts";
 import { agentToolsDirFor, resolveWorkspacePath, terminalsDirFor } from "./paths.ts";
 import { ShellOutput, type ShellExit, type ShellRun, type ShellSession } from "./session.ts";
 
@@ -20,6 +22,7 @@ interface ShellRequest {
 	backgroundAfterMs: number;
 	description: string | undefined;
 	toolCallId?: string;
+	outputNotification: OutputNotificationConfig | undefined;
 }
 
 export async function runShell(params: unknown, signal: AbortSignal | undefined, session: ShellSession, toolCallId?: string): Promise<ShellRenderInput> {
@@ -39,6 +42,7 @@ function parseRequest(params: unknown): ShellRequest {
 		workingDirectory: typeof input.working_directory === "string" && input.working_directory !== "" ? input.working_directory : undefined,
 		backgroundAfterMs: normalizeWait(input.block_until_ms),
 		description: typeof input.description === "string" ? input.description : undefined,
+		outputNotification: parseOutputNotification(input.notify_on_output),
 	};
 }
 
@@ -46,6 +50,19 @@ function parseRequest(params: unknown): ShellRequest {
 function normalizeWait(value: unknown): number {
 	if (typeof value !== "number" || Number.isNaN(value) || value < 0) return DEFAULT_BLOCK_UNTIL_MS;
 	return Math.min(Math.ceil(value), MAX_BLOCK_UNTIL_MS);
+}
+
+// notify_on_output as parseShellArgs checked it: a pattern and a reason, and an optional debounce in milliseconds.
+function parseOutputNotification(value: unknown): OutputNotificationConfig | undefined {
+	if (typeof value !== "object" || value === null) return undefined;
+	const input = value as Record<string, unknown>;
+	if (typeof input.pattern !== "string" || typeof input.reason !== "string") return undefined;
+	return { pattern: input.pattern, reason: input.reason, debounce_ms: typeof input.debounce_ms === "number" ? input.debounce_ms : undefined };
+}
+
+// The observer settings for a background job. Its progress notices go through the shell notices.
+function notificationFor(request: ShellRequest): RegisterShellJobOptions["outputNotification"] {
+	return request.outputNotification === undefined ? undefined : { config: request.outputNotification, emit: emitShellProgress };
 }
 
 async function execute(request: ShellRequest, session: ShellSession, signal: AbortSignal | undefined, terminalsFolder: string): Promise<ShellRenderInput> {
@@ -80,7 +97,7 @@ function missingSessionDirectory(request: ShellRequest, session: ShellSession, c
 
 async function startInBackground(request: ShellRequest, session: ShellSession, cwd: string, terminalsFolder: string, startedAt: number): Promise<ShellRenderInput> {
 	const run = await session.spawnCommand({ command: request.command, cwd, pipeStdin: false });
-	const job = registerShellJob({ run, command: request.command, cwd, description: request.description, terminalsFolder, toolCallId: request.toolCallId });
+	const job = registerShellJob({ run, command: request.command, cwd, description: request.description, terminalsFolder, toolCallId: request.toolCallId, outputNotification: notificationFor(request) });
 	const value: ShellRunValue = {
 		command: request.command,
 		shellId: job.id,
@@ -149,6 +166,7 @@ async function runInForeground(
 				output,
 				toolCallId: request.toolCallId,
 				hardTimeoutMs: ADOPTED_HARD_TIMEOUT_MS,
+				outputNotification: notificationFor(request),
 			});
 			const value: ShellRunValue = {
 				command: request.command,

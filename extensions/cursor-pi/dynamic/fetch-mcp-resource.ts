@@ -4,7 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkType, invalidArguments, type ArgIssue } from "../tools/cursor-args.ts";
 import type { CapturedTool } from "../tools/declarations.ts";
-import { mcpSource } from "./mcp-source.ts";
+import { listOwnedMcpNamespaces } from "./mcp-source.ts";
 import { FIRST_PARTY_NAMESPACE, getDynamicTool, registerDynamicTool } from "./registry.ts";
 
 // The captured GetDynamicTools view of FetchMcpResource: its description and input schema, as Cursor lists them.
@@ -32,7 +32,7 @@ export function registerFetchMcpResource(): void {
 	registerDynamicTool({
 		namespace: FIRST_PARTY_NAMESPACE,
 		declaration: fetchMcpResourceDeclaration(),
-		async execute(args, signal) {
+		async execute(args, signal, ctx) {
 			const issues: ArgIssue[] = [];
 			if (!checkType(args, "object", [], issues)) return { text: invalidArguments(issues), isError: true };
 			const record = args as Record<string, unknown>;
@@ -43,11 +43,11 @@ export function registerFetchMcpResource(): void {
 			if (record.downloadPath !== undefined) {
 				return { text: "downloadPath is not supported by Cursor Pi yet; the resource can only be returned to the model.", isError: true };
 			}
-			const source = mcpSource();
-			if (source === undefined) {
+			const owned = (await listOwnedMcpNamespaces(ctx.cwd, signal)).find((candidate) => candidate.namespace.name === server);
+			if (owned === undefined) {
 				return { text: `MCP server does not exist: ${server}. Use GetDynamicTools to discover available namespaces.`, isError: true };
 			}
-			const result = await source.readMcpResource(server, uri, signal);
+			const result = await owned.source.readMcpResource(server, uri, signal);
 			return { text: result.text, isError: result.isError };
 		},
 	});

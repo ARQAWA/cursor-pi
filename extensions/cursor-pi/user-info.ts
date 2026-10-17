@@ -38,6 +38,8 @@ export interface UserInfoProps {
 	skills: DiscoveredSkill[];
 	// The <dynamic_tool_catalog> section; absent when no dynamic namespace is available.
 	dynamicCatalog?: PromptElement;
+	// The <available_subagent_types> and <available_subagent_models> sections; the parent's user_info carries them, a child's not.
+	subagentCatalog?: string;
 }
 
 // Cursor's getFriendlyDateForTimeZone, for example "Friday Oct 16, 2026".
@@ -53,6 +55,7 @@ export function renderUserInfo(props: UserInfoProps): string {
 		gitStatusSection(props.gitRepos),
 		agentTranscriptsSection(props.agentTranscriptsFolder),
 		rulesSectionElement(props.rules, [props.workspacePath]),
+		props.subagentCatalog,
 		buildAgentSkillsSection(props.skills, [props.workspacePath], CURSOR_FEATURE_FLAGS.aliasSkillCatalogPathPrefixes),
 		props.dynamicCatalog,
 	]);

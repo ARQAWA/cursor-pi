@@ -5,8 +5,11 @@ import { register as registerCreateGoal } from "./create-goal.ts";
 import { register as registerAwaitShell } from "./await-shell.ts";
 import { register as registerDelete } from "./delete.ts";
 import { register as registerEditNotebook } from "./edit-notebook.ts";
+import { register as registerSearchConversations } from "./search-conversations.ts";
 import { register as registerTodoWrite } from "./todo-write.ts";
 import { register as registerUpdateGoal } from "./update-goal.ts";
+import { register as registerWeb } from "./web.ts";
+import { registerSubagent } from "../../subagents/tool.ts";
 
 // Registers the cursor namespace's use-instructions header and each Cursor-run namespace tool built so far.
 export function registerCursorNamespace(pi: ExtensionAPI): void {
@@ -17,4 +20,7 @@ export function registerCursorNamespace(pi: ExtensionAPI): void {
 	registerEditNotebook(pi);
 	registerCreateGoal(pi);
 	registerUpdateGoal(pi);
+	registerWeb();
+	registerSearchConversations();
+	registerSubagent(pi);
 }

@@ -7,6 +7,7 @@ import { gitRepoPath, gitStatus } from "./git-status.ts";
 import { discoverCursorRules } from "./rules.ts";
 import { discoverAgentSkills } from "./skills.ts";
 import { dynamicToolCatalogSection } from "./dynamic/catalog.ts";
+import { renderSubagentCatalog } from "./subagents/config.ts";
 import { dynamicNamespaces } from "./dynamic/namespaces.ts";
 import { friendlyDate, renderUserInfo } from "./user-info.ts";
 import { resolveTimeZone } from "./user-turn.ts";
@@ -44,6 +45,7 @@ export async function buildContextMessageText(source: ContextSource, now: Date =
 		rules,
 		skills,
 		dynamicCatalog: dynamicToolCatalogSection(namespaces),
+		subagentCatalog: renderSubagentCatalog(),
 	});
 }
 

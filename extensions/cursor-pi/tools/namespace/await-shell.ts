@@ -4,7 +4,7 @@ import type { ExtensionToolContext } from "@earendil-works/pi-coding-agent";
 import { capturedConciseInstruction } from "../../dynamic/captured-instructions.ts";
 import { registerDynamicTool } from "../../dynamic/registry.ts";
 import { type ArgIssue, checkType, invalidArguments, optionalLenientNumber, optionalString } from "../cursor-args.ts";
-import { observeShellExit } from "../shell/notices.ts";
+import { observeBackgroundTaskExit } from "../../background/notices.ts";
 import { projectDirFor, terminalsDirFor } from "../shell/paths.ts";
 import { capturedNamespaceDeclaration } from "./captured.ts";
 import type { NamespaceToolResult } from "./todo-write.ts";
@@ -122,7 +122,7 @@ async function awaitShell(args: AwaitArgs, signal: AbortSignal | undefined, ctx:
 		const pattern: PatternResult = { requested, matched: requested && match.length > 0 ? truncateMiddle(match) : undefined };
 		if (footer.isComplete) {
 			const status = frontmatterValue(snapshot.content, "status");
-			if (status === "succeeded" || status === "failed" || status === "aborted") observeShellExit(args.taskId);
+			if (status === "succeeded" || status === "failed" || status === "aborted") observeBackgroundTaskExit(args.taskId);
 			return { kind: "complete", runtimeMs, outputPath, outputLength: snapshot.outputLength, exitCode: footer.exitCode, pattern };
 		}
 		if (match.length > 0) return { kind: "running", runtimeMs, outputPath, outputLength: snapshot.outputLength, released: false, pattern };

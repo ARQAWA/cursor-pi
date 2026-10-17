@@ -17,8 +17,11 @@ import { registerAllTools } from "../extensions/cursor-pi/tools/index.ts";
 import { executeReadFile } from "../extensions/cursor-pi/tools/read-file.ts";
 import { executeRg } from "../extensions/cursor-pi/tools/rg.ts";
 import { executeShell } from "../extensions/cursor-pi/tools/shell.ts";
+import { executeStrReplace } from "../extensions/cursor-pi/tools/str-replace.ts";
 import { executeUpdateCurrentStep } from "../extensions/cursor-pi/tools/update-current-step.ts";
+import { executeWrite } from "../extensions/cursor-pi/tools/write.ts";
 import { initModule, loadCursor } from "./cursor-oracle.mjs";
+import { FORMATTING_OPTIONS, MODEL, stateHandler as editStateHandler } from "./lib/cursor-edit-tools.mjs";
 
 // Cursor modules whose functions the tools' parse and render paths read.
 const ORACLE_MODULES = [
@@ -38,6 +41,11 @@ const ORACLE_MODULES = [
 	"../agent/dist/tools/core/ask-question/degenerate.js",
 	"../agent/dist/tools/core/ask-question/index.js",
 	"../agent/dist/tools/meta/update-current-step.js",
+	"../agent/dist/configs/tool-set-finalization.js",
+	"../agent/dist/tools/core/edit/str-replace.js",
+	"../agent/dist/tools/core/edit/write.js",
+	"../agent/dist/tools/core/edit/edit-notebook.js",
+	"../agent/dist/tools/core/edit/unified-diff-worker.js",
 ];
 
 const cursor = await loadCursor();
@@ -94,6 +102,9 @@ const cursorTools = {
 	AskQuestion: () =>
 		cursor.createAskQuestionTool({}, { name: "AskQuestion", useAntiAskQuestionDescription: false, autoRejectFirstAskQuestion: false, getDynamicTools: () => [] }),
 	UpdateCurrentStep: () => cursor.createCommunicateUpdateTool(stateHandler, { includeFinalSummary: true }),
+	StrReplace: () =>
+		cursor.createStrReplaceTool(resourceAccessor, FORMATTING_OPTIONS, new cursor.FileOperationLockManager(), editStateHandler(), undefined, MODEL, {}),
+	Write: () => cursor.createWriteTool(resourceAccessor, new cursor.FileOperationLockManager(), editStateHandler(), undefined, MODEL, {}),
 };
 
 const ours = {
@@ -103,6 +114,8 @@ const ours = {
 	Shell: (args) => executeShell(args, undefined, { cwd: root }),
 	AskQuestion: (args) => executeAskQuestion(args, undefined, { hasUI: true, cwd: root, ui: noDialog }),
 	UpdateCurrentStep: (args) => executeUpdateCurrentStep(args, undefined, { hasUI: true, cwd: root, ui: { setStatus() {} } }),
+	StrReplace: (args) => executeStrReplace(args, undefined, { hasUI: true, cwd: root, ui: noDialog }),
+	Write: (args) => executeWrite(args, undefined, { hasUI: true, cwd: root, ui: noDialog }),
 };
 
 function streamOf(args) {
@@ -201,6 +214,20 @@ const CASES = {
 		{ questions: [{ id: "a", prompt: "Pick a size", options: [{ id: "x", label: "X" }] }] },
 	],
 	UpdateCurrentStep: [null, [], {}, { current_step: null }, { current_step: 5, final_summary: "" }, { current_step: "   " }, "text"],
+	StrReplace: [
+		null,
+		[],
+		"text",
+		{},
+		{ path: null, old_string: "a", new_string: "b" },
+		{ path: "/w/a.txt", old_string: 5, new_string: "b" },
+		{ path: "/w/a.txt", old_string: "a" },
+		{ path: "/w/a.txt", old_string: "a", new_string: "b", replace_all: "yes" },
+		{ path: "/w/a.txt", old_string: "a", new_string: "b", replace_all: null },
+		{ path: "/w/a.txt", old_string: "a", new_string: "b", replace_all: 1 },
+		{ old_string: ["a"], new_string: {} },
+	],
+	Write: [null, [], "text", {}, { path: null, contents: "x" }, { path: "/w/new.txt" }, { path: "/w/new.txt", contents: 5 }, { path: 1, contents: ["x"] }, { contents: "x" }],
 };
 
 let failed = 0;
@@ -227,7 +254,8 @@ for (const [name, cases] of Object.entries(CASES)) {
 
 const registered = [];
 registerAllTools({ registerTool: (definition) => registered.push(definition), on() {} });
-const expectedNames = [...MAIN_TOOL_ORDER, "UpdateCurrentStep"];
+// Registration puts StrReplace and Write in ApplyPatch's slot, ahead of ApplyPatch, and UpdateCurrentStep last.
+const expectedNames = [...MAIN_TOOL_ORDER.flatMap((name) => (name === "ApplyPatch" ? ["StrReplace", "Write", name] : [name])), "UpdateCurrentStep"];
 checks++;
 if (JSON.stringify(registered.map((definition) => definition.name)) === JSON.stringify(expectedNames)) {
 	console.log(`ok registered tools ${JSON.stringify(expectedNames)}`);
