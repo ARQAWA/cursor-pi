@@ -1,6 +1,9 @@
 import type { ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
 import type { TSchema } from "typebox";
 import { declaration } from "./declarations.ts";
+import { renderShellResult, type ShellRenderInput } from "./shell/format.ts";
+import { runShell } from "./shell/run.ts";
+import { shellSessionFor } from "./shell/session.ts";
 
 const SHELL = declaration("Shell");
 
@@ -14,6 +17,11 @@ export function register(pi: ExtensionAPI): void {
 	});
 }
 
-export async function executeShell(_params: unknown, _signal: AbortSignal | undefined, _ctx: ExtensionToolContext): Promise<never> {
-	throw new Error("Shell not implemented yet");
+export async function executeShell(
+	params: unknown,
+	signal: AbortSignal | undefined,
+	ctx: ExtensionToolContext,
+): Promise<{ content: { type: "text"; text: string }[]; details: ShellRenderInput }> {
+	const details = await runShell(params, signal, shellSessionFor(ctx.cwd));
+	return { content: [{ type: "text", text: renderShellResult(details) }], details };
 }

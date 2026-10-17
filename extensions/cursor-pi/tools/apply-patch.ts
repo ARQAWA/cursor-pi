@@ -1,6 +1,8 @@
 import type { ExtensionAPI, ExtensionToolContext } from "@earendil-works/pi-coding-agent";
 import type { TSchema } from "typebox";
 import { declaration } from "./declarations.ts";
+import { runApplyPatch } from "./apply-patch/edit-flow.ts";
+import { createLocalPatchIO } from "./apply-patch/local-io.ts";
 
 const APPLY_PATCH = declaration("ApplyPatch");
 const LARK_GRAMMAR = APPLY_PATCH.format?.definition as string;
@@ -19,6 +21,12 @@ export function register(pi: ExtensionAPI): void {
 	});
 }
 
-export async function executeApplyPatch(_params: unknown, _signal: AbortSignal | undefined, _ctx: ExtensionToolContext): Promise<never> {
-	throw new Error("ApplyPatch not implemented yet");
+export async function executeApplyPatch(params: unknown, signal: AbortSignal | undefined, ctx: ExtensionToolContext) {
+	const input = (params as { input?: unknown } | undefined)?.input;
+	const io = createLocalPatchIO({
+		workspace: ctx.cwd,
+		approve: (title, message) => (ctx.hasUI ? ctx.ui.confirm(title, message) : Promise.resolve(false)),
+	});
+	const result = await runApplyPatch(typeof input === "string" ? input : "", io, signal);
+	return { content: [{ type: "text" as const, text: result.text }], details: undefined, isError: result.isError };
 }
